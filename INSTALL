@@ -1,0 +1,65 @@
+INSTALLATION OF LIBEIO PECL EXTENSION
+
+Currently Linux platforms supported only.
+
+Checkout the project or download it as archive. Then enter the librio directory
+and issue the following commands.
+
+1. INSTALL LIBEIO, IF IT IS NOT INSTALLED YET
+
+$ touch ~/.cvspass
+$ cvs -z3 -d :pserver:anonymous@cvs.schmorp.de/schmorpforge co libeio
+$ cd libeio
+$ ./autogen.sh
+$ ./configure
+$ make 
+# make install 
+
+Note, the last command should be initiated with root priveleges, e.g.
+$ sudo make install
+
+2. INSTALL LIBEIO PHP EXTENSION
+
+$ phpize 
+$ ./configure --with-eio --enable-eio-debug
+$ make 
+
+Optionally test the extension in CLI:
+$ make test
+
+Do install with root priveleges:
+# make install
+
+ADDITIONAL CONFIGURE OPTIONS
+
+--with-eio-shm-key	  
+eio shared memory segment key default /tmp/php-eio-shm 
+  
+--with-eio-shm-prm	  
+eio shared memory segment permissions default = 0600
+
+These are semaphore options. Sepaphores are currently used in internal event
+loop implementation. The only thing to note is to provide unique ID for the
+semaphore key and provide sufficient priveleges to that. If you are not sure
+what these settings mean, just leave their defaults.
+
+3. CONFIGURE PHP TO USE LIBEIO EXTENSION
+
+In php.ini, or some other configuration like
+/usr/local/etc/php/conf.d/eio.ini write:
+
+extension=eio.so
+
+NOTE 
+To disable debug mode don't use --enable-eio-debug configuration option.
+
+NOTE
+If you set a special path when configuring libeio itself(e.g. by means of
+--prefix option), you can point to that location by means of --with-eio
+option.
+
+4. FINALLY
+
+Restart the SAPI server(Apache, PHP-FPM etc.), if any.
+
+vim: tw=80:
