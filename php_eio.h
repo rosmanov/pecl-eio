@@ -248,20 +248,20 @@ PHP_FUNCTION(eio_npending);
 #endif
 
 #ifdef EIO_DEBUG
-#define EIO_CHECK_READABLE(path, file)							\
+#define EIO_CHECK_READABLE(path, file)								\
     /*
-	 *if (access(path, W_OK) != 0) {									\
-	 *    php_error_docref(NULL TSRMLS_CC, E_NOTICE, 					\
+	 *if (access(path, W_OK) != 0) {								\
+	 *    php_error_docref(NULL TSRMLS_CC, E_NOTICE, 				\
 	 *    #file " '%s' is not readable", path);						\
-	 *    errno = EACCES;												\
+	 *    errno = EACCES;											\
 	 *    RETURN_FALSE;												\
 	 *}																
      */
 #else			
-#define EIO_CHECK_READABLE(path, file)							\
+#define EIO_CHECK_READABLE(path, file)								\
     /*
-	 *if (access(path, W_OK) != 0) {									\
-	 *    errno = EACCES;												\
+	 *if (access(path, W_OK) != 0) {								\
+	 *    errno = EACCES;											\
 	 *    RETURN_FALSE;												\
 	 *}																
      */
@@ -269,11 +269,11 @@ PHP_FUNCTION(eio_npending);
 
 #define EIO_EVENT_LOOP()											\
 	int semid;														\
-	semid = php_eio_bin_semaphore_get(PHP_EIO_SHM_KEY, 0);	\
+	semid = php_eio_bin_semaphore_get(PHP_EIO_SHM_KEY, 0);			\
 	while (eio_nreqs ())											\
 	{																\
 		/* Is want_poll() needed then? */							\
-		php_eio_bin_semaphore_poll(semid);						\
+		php_eio_bin_semaphore_poll(semid);							\
 		eio_poll();													\
 	}
 
@@ -282,7 +282,7 @@ PHP_FUNCTION(eio_npending);
 	REGISTER_LONG_CONSTANT(#name, name, 							\
 			CONST_CS | CONST_PERSISTENT);
 
-#define EIO_REGISTER_LONG_CONSTANT(name, value)					\
+#define EIO_REGISTER_LONG_CONSTANT(name, value)						\
 	REGISTER_LONG_CONSTANT(#name, value, 							\
 			CONST_CS | CONST_PERSISTENT);
 

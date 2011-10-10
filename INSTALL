@@ -38,7 +38,7 @@ eio shared memory segment key default /tmp/php-eio-shm
 --with-eio-shm-prm	  
 eio shared memory segment permissions default = 0600
 
-These are semaphore options. Sepaphores are currently used in internal event
+These are semaphore options. Semaphores are currently used in internal event
 loop implementation. The only thing to note is to provide unique ID for the
 semaphore key and provide sufficient priveleges to that. If you are not sure
 what these settings mean, just leave their defaults.

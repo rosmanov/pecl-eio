@@ -25,6 +25,7 @@ eio_event_loop();
 <?php
 @unlink($temp_filename);
 error_reporting($er);
+?>
 --EXPECTF--
 Warning: eio_chown() expects at least 2 parameters, 1 given in %s on line %a
 Warning: eio_chown(): invalid uid and/or gid in %s on line %a

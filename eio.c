@@ -1,25 +1,25 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 5														 |
   +----------------------------------------------------------------------+
-  | Copyrght (C) 2011 Ruslan Osmanov <rrosmanov@gmail.com>               |
+  | Copyrght (C) 2011 Ruslan Osmanov <rrosmanov@gmail.com>				 |
   +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
+  | This source file is subject to version 3.01 of the PHP license,		 |
+  | that is bundled with this package in the file LICENSE, and is		 |
+  | available through the world-wide-web at the following url:			 |
+  | http://www.php.net/license/3_01.txt									 |
+  | If you did not receive a copy of the PHP license and are unable to	 |
+  | obtain it through the world-wide-web, please send a note to			 |
+  | license@php.net so we can mail you a copy immediately.				 |
   +----------------------------------------------------------------------+
-  | Author: Ruslan Osmanov <rrosmanov@gmail.com>                         |
+  | Author: Ruslan Osmanov <rrosmanov@gmail.com>						 |
   +----------------------------------------------------------------------+
-  | Notes                                                                |
-  |                                                                      |
-  | eio_mlock(), eio_mlockall(), eio_msync(), eio_mtouch() are not       |
-  | implemented in this                                                  |
-  | extension because of PHP's obvious limitations on user-sie memory    |
-  | management.                                                          |
+  | Notes																 |
+  |																		 |
+  | eio_mlock(), eio_mlockall(), eio_msync(), eio_mtouch() are not		 |
+  | implemented in this													 |
+  | extension because of PHP's obvious limitations on user-sie memory	 |
+  | management.															 |
   +----------------------------------------------------------------------+
 */
 
@@ -68,27 +68,27 @@ static int le_eio_req;
 # define EIO_ARGINFO static
 #endif
 
-#define EIO_ARGINFO_FUNC_0(name) 						\
-EIO_ARGINFO												\
-ZEND_BEGIN_ARG_INFO(arginfo_eio_##name, 0)				\
+#define EIO_ARGINFO_FUNC_0(name)							\
+EIO_ARGINFO													\
+ZEND_BEGIN_ARG_INFO(arginfo_eio_##name, 0)					\
 ZEND_END_ARG_INFO()
 
-#define EIO_ARGINFO_FUNC_1(name, arg)					\
-EIO_ARGINFO												\
-ZEND_BEGIN_ARG_INFO_EX(arginfo_eio_##name, 0, 0, 1) 		\
+#define EIO_ARGINFO_FUNC_1(name, arg)						\
+EIO_ARGINFO													\
+ZEND_BEGIN_ARG_INFO_EX(arginfo_eio_##name, 0, 0, 1)			\
 	ZEND_ARG_INFO(0, arg)									\
 ZEND_END_ARG_INFO()
 
-#define EIO_ARGINFO_PRI_CB_DATA							\
+#define EIO_ARGINFO_PRI_CB_DATA								\
 	ZEND_ARG_INFO(0, pri)									\
 	ZEND_ARG_INFO(0, callback)								\
 	ZEND_ARG_INFO(0, data)								
 
-#define EIO_ARGINFO_FUNC_1_N(name, arg, n)				\
-EIO_ARGINFO												\
-ZEND_BEGIN_ARG_INFO_EX(arginfo_eio_##name, 0, 0, n) 		\
+#define EIO_ARGINFO_FUNC_1_N(name, arg, n)					\
+EIO_ARGINFO													\
+ZEND_BEGIN_ARG_INFO_EX(arginfo_eio_##name, 0, 0, n)			\
 	ZEND_ARG_INFO(0, arg)									\
-	EIO_ARGINFO_PRI_CB_DATA								\
+	EIO_ARGINFO_PRI_CB_DATA									\
 ZEND_END_ARG_INFO()
 
 EIO_ARGINFO_FUNC_0(poll);
@@ -314,7 +314,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_eio_nop, 0, 0, 0)
 	EIO_ARGINFO_PRI_CB_DATA
 ZEND_END_ARG_INFO()
 
-EIO_ARGINFO_FUNC_1_N(cancel, req, 1)
+EIO_ARGINFO												
+ZEND_BEGIN_ARG_INFO_EX(arginfo_eio_cancel, 0, 0, 1)
+	ZEND_ARG_INFO(0, req)
+ZEND_END_ARG_INFO()
 
 /* {{{ GROUPING AND LIMITING */
 EIO_ARGINFO
@@ -463,7 +466,7 @@ ZEND_GET_MODULE(eio)
 
 #define EIO_CB_ALLOC(type) type *eio_cb = ecalloc(1, sizeof(type));
 
-#define EIO_CB_SET_FIELD(n, v) 	\
+#define EIO_CB_SET_FIELD(n, v)	\
 	if (v) {						\
 		zval_add_ref(&v);			\
 	} else {						\
@@ -472,12 +475,12 @@ ZEND_GET_MODULE(eio)
 	eio_cb->n= v;
 
 #define EIO_REQ_WARN_RESULT_ERROR()										\
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, 							\
-			"eio_req result: %ld, req->type: %d, errno: %d", 				\
+	php_error_docref(NULL TSRMLS_CC, E_WARNING,								\
+			"eio_req result: %ld, req->type: %d, errno: %d",				\
 			(long) EIO_RESULT(req), req->type, errno)
 
 #define EIO_REQ_WARN_INVALID_CB()										\
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, 							\
+	php_error_docref(NULL TSRMLS_CC, E_WARNING,								\
 			"'%s' is not a valid callback", func_name);
 
 #define EIO_REQ_CB_INIT(cb_type)											\
@@ -486,7 +489,7 @@ ZEND_GET_MODULE(eio)
 	zval retval;															\
 	char *func_name; 
 
-#define EIO_REQ_FREE_ARGS 			\
+#define EIO_REQ_FREE_ARGS			\
 		zval_ptr_dtor(&(args[0]));		\
 		zval_ptr_dtor(&(args[1]));
 
@@ -560,7 +563,6 @@ php_eio_bin_semaphore_poll(int semid)
 	/* Decrement by 1*/
 	operations[0].sem_op = -1;
 	/* Permit undo'ing */
-	/* Prevent blocking, since we poll in event loop */
 	operations[0].sem_flg = SEM_UNDO;
 
 	return semop(semid, operations, 1);
@@ -847,10 +849,10 @@ php_eio_res_cb(eio_req *req)
 	if (EIO_RESULT(req) < 0) {
 		EIO_REQ_WARN_RESULT_ERROR();
 
-        /*
+		/*
 		 *php_eio_free_eio_cb(eio_cb);
 		 *return 0;
-         */
+		 */
 	}
 
 	if (!eio_cb) {
@@ -870,7 +872,11 @@ php_eio_res_cb(eio_req *req)
 				 * (size_t) req->size = length parameter value passed to eio_read()
 				 * Since req is destroyed later, data stored in req should be
 				 * duplicated */
-				ZVAL_STRINGL(args[1], EIO_BUF(req), req->size, 1);
+				if (EIO_RESULT(req) != -1) {
+					ZVAL_STRINGL(args[1], EIO_BUF(req), req->size, 1);
+				} else {
+					ZVAL_NULL(args[1]);
+				}
 				break;
 
 			case EIO_READLINK: case EIO_REALPATH:
@@ -980,20 +986,20 @@ static void
 php_eio_want_poll_callback(void) 
 {
 /*
- *    char dummy;
+ *	  char dummy;
  *#ifdef EIO_DEBUG
- *    TSRMLS_FETCH();
+ *	  TSRMLS_FETCH();
  *#endif
  *
- *    if (!php_eio_respipe[1]) {
+ *	  if (!php_eio_respipe[1]) {
  *#ifdef EIO_DEBUG
- *        php_error_docref(NULL TSRMLS_CC, E_ERROR, 
- *                "write end descriptor invalid: '%d'", php_eio_respipe[1]);
+ *		  php_error_docref(NULL TSRMLS_CC, E_ERROR, 
+ *				  "write end descriptor invalid: '%d'", php_eio_respipe[1]);
  *#endif
- *        return;
- *    }
+ *		  return;
+ *	  }
  *
- *    write(php_eio_respipe[1], &dummy, 1);
+ *	  write(php_eio_respipe[1], &dummy, 1);
  */
 	int semid;
 
@@ -1009,20 +1015,20 @@ static void
 php_eio_done_poll_callback(void) 
 {
 /*
- *    char dummy;
+ *	  char dummy;
  *#ifdef EIO_DEBUG
- *    TSRMLS_FETCH();
+ *	  TSRMLS_FETCH();
  *#endif
  *
- *    if (!php_eio_respipe[0]) {
+ *	  if (!php_eio_respipe[0]) {
  *#ifdef EIO_DEBUG
- *        php_error_docref(NULL TSRMLS_CC, E_ERROR, 
- *                "read end descriptor invalid: '%d'", php_eio_respipe[0]);
+ *		  php_error_docref(NULL TSRMLS_CC, E_ERROR, 
+ *				  "read end descriptor invalid: '%d'", php_eio_respipe[0]);
  *#endif
- *        return;
- *    }
+ *		  return;
+ *	  }
  *
- *    read(php_eio_respipe[0], &dummy, 1);
+ *	  read(php_eio_respipe[0], &dummy, 1);
  */
 	int semid;
 
@@ -1039,27 +1045,27 @@ php_eio_done_poll_callback(void)
  *static void 
  *php_eio_init(TSRMLS_D)
  *{
- *    int semid;
+ *	  int semid;
  *
- *    if (php_eio_is_initialized) {
- *        return;
- *    }
- *    
- *    semid = php_eio_bin_semaphore_get(PHP_EIO_SHM_KEY, 
- *            PHP_EIO_SHM_PERM | IPC_CREAT | IPC_EXCL);
- *    if (semid == -1) {
- *        php_error_docref(NULL TSRMLS_CC, E_ERROR, 
- *                "Failed initializing eio, errno: '%d'", errno);
- *        return;
- *    }
+ *	  if (php_eio_is_initialized) {
+ *		  return;
+ *	  }
+ *	  
+ *	  semid = php_eio_bin_semaphore_get(PHP_EIO_SHM_KEY, 
+ *			  PHP_EIO_SHM_PERM | IPC_CREAT | IPC_EXCL);
+ *	  if (semid == -1) {
+ *		  php_error_docref(NULL TSRMLS_CC, E_ERROR, 
+ *				  "Failed initializing eio, errno: '%d'", errno);
+ *		  return;
+ *	  }
  *
- *    if (eio_init(php_eio_want_poll_callback, 
- *                php_eio_done_poll_callback)) {
- *        php_error_docref(NULL TSRMLS_CC, E_ERROR, 
- *                "Failed initializing eio, errno: '%d'", errno);
- *        return;
- *    }
- *    php_eio_is_initialized = 1;
+ *	  if (eio_init(php_eio_want_poll_callback, 
+ *				  php_eio_done_poll_callback)) {
+ *		  php_error_docref(NULL TSRMLS_CC, E_ERROR, 
+ *				  "Failed initializing eio, errno: '%d'", errno);
+ *		  return;
+ *	  }
+ *	  php_eio_is_initialized = 1;
  *}
  */
 /* }}} */
@@ -1067,17 +1073,17 @@ php_eio_done_poll_callback(void)
 void 
 php_eio_req_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-    /*
+	/*
 	 *eio_req *req = (eio_req *) rsrc->ptr;
 	 *if (!req) {
-	 *    return ;
+	 *	  return ;
 	 *}
 	 *if (req->type != EIO_CUSTOM) {
-	 *    php_eio_free_eio_cb(req->data);
+	 *	  php_eio_free_eio_cb(req->data);
 	 *} else {
-	 *    php_eio_free_eio_cb_custom(req->data);
+	 *	  php_eio_free_eio_cb_custom(req->data);
 	 *}
-     */
+	 */
 }
 
 
@@ -1098,8 +1104,8 @@ php_eio_req_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
  */
 /* 
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("eio.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_eio_globals, eio_globals)
-    STD_PHP_INI_ENTRY("eio.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_eio_globals, eio_globals)
+	STD_PHP_INI_ENTRY("eio.global_value",	   "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_eio_globals, eio_globals)
+	STD_PHP_INI_ENTRY("eio.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_eio_globals, eio_globals)
 PHP_INI_END()
 */
 /* }}} */
@@ -1247,20 +1253,20 @@ PHP_RINIT_FUNCTION(eio)
  */
 PHP_RSHUTDOWN_FUNCTION(eio)
 {
-    /*
+	/*
 	 *if (php_eio_is_initialized && eio_nreqs()) {
-	 *    [> Finish pending requests <]
-	 *    EIO_EVENT_LOOP();
-	 *    
-	 *    [> Close pipe descriptors <]
-	 *    if (php_eio_respipe[0]) {
-	 *        close(php_eio_respipe[0]);
-	 *    }
-	 *    if (php_eio_respipe[1]) {
-	 *        close(php_eio_respipe[1]);
-	 *    }
+	 *	  [> Finish pending requests <]
+	 *	  EIO_EVENT_LOOP();
+	 *	  
+	 *	  [> Close pipe descriptors <]
+	 *	  if (php_eio_respipe[0]) {
+	 *		  close(php_eio_respipe[0]);
+	 *	  }
+	 *	  if (php_eio_respipe[1]) {
+	 *		  close(php_eio_respipe[1]);
+	 *	  }
 	 *}
-     */
+	 */
 	int semid;
 
 	if (eio_nreqs()) {
@@ -1304,13 +1310,13 @@ PHP_MINFO_FUNCTION(eio)
  * Returns TRUE on success, FALSE otherwise. */
 PHP_FUNCTION(eio_event_loop)
 {
-    /*
+	/*
 	 *if (!php_eio_respipe[0] || !php_eio_respipe[1]) {
-	 *    php_error_docref(NULL TSRMLS_CC, E_ERROR, 
-	 *            "Event loop pipe descriptors unavailable");
-	 *    RETURN_FALSE;
+	 *	  php_error_docref(NULL TSRMLS_CC, E_ERROR, 
+	 *			  "Event loop pipe descriptors unavailable");
+	 *	  RETURN_FALSE;
 	 *}
-     */
+	 */
 
 	EIO_EVENT_LOOP();
 
@@ -1333,11 +1339,11 @@ PHP_FUNCTION(eio_poll)
  * Open a file. The file descriptor is passed as the second argument of the
  * event completion callback.
  *
- * flags 	One of EIO_O_* constants, or their combinations.
+ * flags	One of EIO_O_* constants, or their combinations.
  * EIO_O_* constants have the same meaning, as their corresponding O_*
  * counterparts defined in fnctl.h C header file. Default is EIO_O_RDWR.
  *
- * mode 	One of EIO_S_I* constants or their combination. The constants have the
+ * mode		One of EIO_S_I* constants or their combination. The constants have the
  * same meaning as their S_I* counterparts defined in sys/stat.h C header file.
  * Required, if a file is created. Ignored otherwise. 
  *
@@ -1416,7 +1422,7 @@ PHP_FUNCTION(eio_chown)
 #else
 	char *path; 
 	int path_len;
-	long uid = -1;
+	long uid;
 	long gid = -1;
 	EIO_INIT(pri, callback, data, eio_cb, req);
 
@@ -1630,7 +1636,7 @@ PHP_FUNCTION(eio_mknod)
 }
 /* }}} */
 
-/* {{{ proto bool eio_link(string path, string new_path[ ,int pri = 0 [, mixed callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_link(string path, string new_path[ ,int pri = 0 [, mixed callback = NULL[, mixed data = NULL]]]); 
  * Create a hardlink for file
  * Returns request resource on success, otherwise FALSE. Always returns FALSE for Windows and Netware. */
 PHP_FUNCTION(eio_link)
@@ -1697,7 +1703,7 @@ PHP_FUNCTION(eio_symlink)
 /* }}} */
 
 /* {{{ proto resource eio_rename(string path, string new_path[ ,int pri = 0 [, mixed callback = NULL[, mixed data = NULL]]]); 
- * Create a symlink for file
+ * Change the name or location of a file.
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_rename)
 {
@@ -1756,7 +1762,7 @@ PHP_FUNCTION(eio_close)
 
 /* {{{ proto resource eio_sync([int pri = 0 [, mixed callback = NULL[, mixed data = NULL]]]); 
  * Commit buffer cache to disk. 
- * Returns TRUE on success, otherwise FALSE. Always returns FALSE for Windows and Netware. */
+ * Returns request resource on success, otherwise FALSE. Always returns FALSE for Windows and Netware. */
 PHP_FUNCTION(eio_sync)
 {
 #if defined(WINDOWS) || defined(NETWARE)
@@ -1878,7 +1884,7 @@ PHP_FUNCTION(eio_ftruncate)
 /* }}} */
 
 /* {{{ proto resource eio_fchmod(int fd, int mode, [int pri = 0 [, mixed callback = NULL[, mixed data = NULL]]]); 
- * Change file/direcrory permissions system call by file descriptor fd.
+ * Change file permissions system call by file descriptor fd.
  * Returns resource on success, otherwise FALSE. 
  * The function always returns FALSE for NETWARE and WINDOWS */
 PHP_FUNCTION(eio_fchmod)
@@ -1999,10 +2005,10 @@ PHP_FUNCTION(eio_read)
 /* {{{ proto resource eio_write(int fd, mixed &str[, int length = NULL[, int offset = 0[, int pri = 0 [, mixed callback = NULL[, mixed data = NULL]]]]]); 
  * Writes string to the file specified by file descriptor fd.
  *
- * length 	amount of characters to write. If is NULL, entire string is
+ * length	amount of characters to write. If is NULL, entire string is
  * written to the file
  *
- * offset 	offset from the beginning of the buf contents. Default: 0.
+ * offset	offset from the beginning of the buf contents. Default: 0.
  *
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_write)
@@ -2037,7 +2043,7 @@ PHP_FUNCTION(eio_write)
 		num_bytes = Z_STRLEN_P(zbuf);
 	} else {
 		num_bytes = length;	
-	} 	
+	}	
 
 	if (!num_bytes) {
 		RETURN_FALSE;
@@ -2432,7 +2438,7 @@ PHP_FUNCTION(eio_custom)
 }
 /* }}} */
 
-/* {{{ proto resource eio_busy(int delay[, int pri[, mixed callback[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_busy(int delay[, int pri=EIO_PRI_DEFAULT[, mixed callback=NULL[, mixed data=NULL]]]); 
  * Artificially increase load. Could be useful in tests, benchmarking. 
  *
  * Returns request resource on success, otherwise FALSE. */
@@ -2615,19 +2621,19 @@ PHP_FUNCTION(eio_set_max_poll_time)
 /* }}} */
 
 /* Just another quickies for simple functions */
-#define EIO_SET_INT_FUNCTION(eio_func) 						\
+#define EIO_SET_INT_FUNCTION(eio_func)							\
 PHP_FUNCTION(eio_func)											\
 {																\
-	unsigned int nthreads;										\
+	unsigned int num;											\
 																\
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",	\
-				&nthreads) == FAILURE) {						\
+				&num) == FAILURE) {								\
 		return;													\
 	}															\
-	eio_func(nthreads);											\
+	eio_func(num);												\
 }
 
-#define EIO_GET_INT_FUNCTION(eio_func) 						\
+#define EIO_GET_INT_FUNCTION(eio_func)							\
 PHP_FUNCTION(eio_func)											\
 {																\
 	RETURN_LONG(eio_func());									\

@@ -11,9 +11,7 @@ function my_close_cb($data, $result) {
 	global $temp_filename;
 
 	var_dump($result == 0);
-	if ($result != 0) {
-		@unlink($temp_filename);
-	}
+	@unlink($temp_filename);
 }
 
 function my_file_opened_callback($data, $result) {
