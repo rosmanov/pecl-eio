@@ -25,7 +25,7 @@ PHP_ARG_WITH(eio-shm-key, for eio shared memory key,
 [  --with-eio-shm-key	  eio shared memory segment key default /tmp/php-eio-shm], no, no)
 
 PHP_ARG_WITH(eio-shm-prm, for eio shared memory segment permissions,
-[  --with-eio-shm-prm	  eio shared memory segment permissions default = 0600], no, no)
+[  --with-eio-shm-prm	  eio shared memory segment permissions default = 0660], no, no)
 
 dnl {{{ Debug support
 if test $PHP_EIO_DEBUG != "no"; then

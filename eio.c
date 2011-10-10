@@ -476,7 +476,7 @@ ZEND_GET_MODULE(eio)
 
 #define EIO_REQ_WARN_RESULT_ERROR()										\
 	php_error_docref(NULL TSRMLS_CC, E_WARNING,								\
-			"eio_req result: %ld, req->type: %d, errno: %d",				\
+			"eio_req result: %ld, req type: %d, errno: %d",				\
 			(long) EIO_RESULT(req), req->type, errno)
 
 #define EIO_REQ_WARN_INVALID_CB()										\

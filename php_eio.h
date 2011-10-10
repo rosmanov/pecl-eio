@@ -128,8 +128,9 @@ PHP_FUNCTION(eio_npending);
 
 #define PHP_EIO_SHM_KEY QUOTEME(PHP_EIO_SHM_KEY_)
 
+/* Web server user, or group must have read and write permissions */
 #ifndef PHP_EIO_SHM_PERM
-#define PHP_EIO_SHM_PERM 0600
+#define PHP_EIO_SHM_PERM 0660
 #endif
 
 /*
