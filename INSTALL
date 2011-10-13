@@ -36,7 +36,10 @@ ADDITIONAL CONFIGURE OPTIONS
 eio shared memory segment key default /tmp/php-eio-shm 
   
 --with-eio-shm-prm	  
-eio shared memory segment permissions default = 0600
+eio shared memory segment permissions default = 0660
+
+NOTE: always check for current options and flags:
+$ ./configure --help | grep eio
 
 These are semaphore options. Semaphores are currently used in internal event
 loop implementation. The only thing to note is to provide unique ID for the

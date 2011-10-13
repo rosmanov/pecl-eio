@@ -2,7 +2,6 @@ dnl +----------------------------------------------------------------------+
 dnl | PHP Version 5                                                        |
 dnl +----------------------------------------------------------------------+
 dnl | Copyrght (C) 1997-2011 The PHP Group                                 |
-dnl | Copyrght (C) 2011 Ruslan Osmanov <rrosmanov@gmail.com>               |
 dnl +----------------------------------------------------------------------+
 dnl | This source file is subject to version 3.01 of the PHP license,      |
 dnl | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +11,7 @@ dnl | If you did not receive a copy of the PHP license and are unable to   |
 dnl | obtain it through the world-wide-web, please send a note to          |
 dnl | license@php.net so we can mail you a copy immediately.               |
 dnl +----------------------------------------------------------------------+
-dnl | Author: Ruslan Osmanov <rrosmanov@gmail.com>                         |
+dnl | Author: Ruslan Osmanov <osmanov@php.net>                             |
 dnl +----------------------------------------------------------------------+
 
 PHP_ARG_WITH(eio, for eio support,

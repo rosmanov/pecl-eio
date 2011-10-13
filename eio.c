@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5														 |
   +----------------------------------------------------------------------+
-  | Copyrght (C) 2011 Ruslan Osmanov <rrosmanov@gmail.com>				 |
+  | Copyrght (C) 2011 Ruslan Osmanov <osmanov@php.net>				     |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,		 |
   | that is bundled with this package in the file LICENSE, and is		 |
@@ -12,7 +12,7 @@
   | obtain it through the world-wide-web, please send a note to			 |
   | license@php.net so we can mail you a copy immediately.				 |
   +----------------------------------------------------------------------+
-  | Author: Ruslan Osmanov <rrosmanov@gmail.com>						 |
+  | Author: Ruslan Osmanov <osmanov@php.net>						     |
   +----------------------------------------------------------------------+
   | Notes																 |
   |																		 |
@@ -36,7 +36,6 @@
 #define _GNU_SOURCE
 #endif
 
-/*#include <poll.h>*/
 #include <fcntl.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
@@ -51,15 +50,8 @@
 
 #include "eio.h"
 
-
-/*static int php_eio_respipe[2];*/
-/*static int php_eio_is_initialized = 0;*/
-
 static int le_eio_grp;
 static int le_eio_req;
-
-/*ZEND_DECLARE_MODULE_GLOBALS(eio)*/
-
 
 /* {{{ ARG_INFO */
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION > 5
@@ -466,7 +458,7 @@ ZEND_GET_MODULE(eio)
 
 #define EIO_CB_ALLOC(type) type *eio_cb = ecalloc(1, sizeof(type));
 
-#define EIO_CB_SET_FIELD(n, v)	\
+#define EIO_CB_SET_FIELD(n, v)		\
 	if (v) {						\
 		zval_add_ref(&v);			\
 	} else {						\
@@ -475,28 +467,28 @@ ZEND_GET_MODULE(eio)
 	eio_cb->n= v;
 
 #define EIO_REQ_WARN_RESULT_ERROR()										\
-	php_error_docref(NULL TSRMLS_CC, E_WARNING,								\
+	php_error_docref(NULL TSRMLS_CC, E_WARNING,							\
 			"eio_req result: %ld, req type: %d, errno: %d",				\
 			(long) EIO_RESULT(req), req->type, errno)
 
 #define EIO_REQ_WARN_INVALID_CB()										\
-	php_error_docref(NULL TSRMLS_CC, E_WARNING,								\
+	php_error_docref(NULL TSRMLS_CC, E_WARNING,							\
 			"'%s' is not a valid callback", func_name);
 
-#define EIO_REQ_CB_INIT(cb_type)											\
-	cb_type *eio_cb = (cb_type*) req->data;									\
-	TSRMLS_FETCH_FROM_CTX(eio_cb ? eio_cb->thread_ctx : NULL);				\
-	zval retval;															\
+#define EIO_REQ_CB_INIT(cb_type)										\
+	cb_type *eio_cb = (cb_type*) req->data;								\
+	TSRMLS_FETCH_FROM_CTX(eio_cb ? eio_cb->thread_ctx : NULL);			\
+	zval retval;														\
 	char *func_name; 
 
-#define EIO_REQ_FREE_ARGS			\
-		zval_ptr_dtor(&(args[0]));		\
+#define EIO_REQ_FREE_ARGS					\
+		zval_ptr_dtor(&(args[0]));			\
 		zval_ptr_dtor(&(args[1]));
 
 #define EIO_BUF_ZVAL_P(req) ((zval *)(EIO_BUF(req)))
 
 #define EIO_BUF_FETCH_FROM_ZVAL(req, z)		\
-	EIO_BUF(req) = emalloc(sizeof(zval));		\
+	EIO_BUF(req) = emalloc(sizeof(zval));	\
 	*EIO_BUF_ZVAL_P(req) = z;				\
 	zval_copy_ctor( EIO_BUF_ZVAL_P(req) );
 
@@ -516,7 +508,6 @@ php_eio_bin_semaphore_dealloc(int semid)
 {
 	php_eio_semun_t s;
 
-	/*printf("deallocating semaphore, semid: %d\n", semid);*/
 	return semctl(semid, 1, IPC_RMID, s);
 }
 
@@ -746,16 +737,11 @@ php_eio_custom_execute(eio_req *req)
 		if (!zend_is_callable(eio_cb->exec, 0, &func_name TSRMLS_CC)) {
 			EIO_REQ_WARN_INVALID_CB();
 		} else {
-			/*zval_add_ref(eio_cb->arg);*/
 			args[0] = eio_cb->arg;
 
 			if (call_user_function(EG(function_table), NULL, eio_cb->exec,
 						&retval, 1, args TSRMLS_CC) == SUCCESS) {
-				/* EIO_RESULT(req) = Z_LVAL(retval); */
-
-				/* zval_dtor(&retval); */
 				EIO_BUF_FETCH_FROM_ZVAL(req, retval);
-
 				EIO_RESULT(req) = 0;
 			}
 
@@ -785,11 +771,8 @@ php_eio_res_cb_custom(eio_req *req)
 		if (!zend_is_callable(eio_cb->func, 0, &func_name TSRMLS_CC)) {
 			EIO_REQ_WARN_INVALID_CB();
 		} else {
-
-			/*zval_add_ref(eio_cb->arg);*/
 			args[0] = eio_cb->arg;
 			ALLOC_INIT_ZVAL(args[1]);
-			/* ZVAL_LONG(args[1], EIO_RESULT(req)); */
 			*args[1] = *((zval *)EIO_BUF(req));
 			zval_copy_ctor(args[1]);
 
@@ -800,9 +783,8 @@ php_eio_res_cb_custom(eio_req *req)
 
 			/* 
 			 * Should be freed in EIO_REQ_FREE_ARGS;
-			 zval_dtor( ((zval *)EIO_BUF(req)) );
+			 * zval_dtor( ((zval *)EIO_BUF(req)) );
 			 */
-
 			EIO_REQ_FREE_ARGS;
 		}
 
@@ -846,13 +828,9 @@ php_eio_res_cb(eio_req *req)
 	 */
 	/* WARNING. If this callback returns nonzero, eio will stop processing
 	 * results(in eio_poll), and will return the value to it's caller */
+
 	if (EIO_RESULT(req) < 0) {
 		EIO_REQ_WARN_RESULT_ERROR();
-
-		/*
-		 *php_eio_free_eio_cb(eio_cb);
-		 *return 0;
-		 */
 	}
 
 	if (!eio_cb) {
@@ -985,22 +963,6 @@ php_eio_res_cb(eio_req *req)
 static void
 php_eio_want_poll_callback(void) 
 {
-/*
- *	  char dummy;
- *#ifdef EIO_DEBUG
- *	  TSRMLS_FETCH();
- *#endif
- *
- *	  if (!php_eio_respipe[1]) {
- *#ifdef EIO_DEBUG
- *		  php_error_docref(NULL TSRMLS_CC, E_ERROR, 
- *				  "write end descriptor invalid: '%d'", php_eio_respipe[1]);
- *#endif
- *		  return;
- *	  }
- *
- *	  write(php_eio_respipe[1], &dummy, 1);
- */
 	int semid;
 
 	semid = php_eio_bin_semaphore_get(PHP_EIO_SHM_KEY, 0);
@@ -1014,22 +976,6 @@ php_eio_want_poll_callback(void)
 static void
 php_eio_done_poll_callback(void) 
 {
-/*
- *	  char dummy;
- *#ifdef EIO_DEBUG
- *	  TSRMLS_FETCH();
- *#endif
- *
- *	  if (!php_eio_respipe[0]) {
- *#ifdef EIO_DEBUG
- *		  php_error_docref(NULL TSRMLS_CC, E_ERROR, 
- *				  "read end descriptor invalid: '%d'", php_eio_respipe[0]);
- *#endif
- *		  return;
- *	  }
- *
- *	  read(php_eio_respipe[0], &dummy, 1);
- */
 	int semid;
 
 	semid = php_eio_bin_semaphore_get(PHP_EIO_SHM_KEY, 0);
@@ -1037,55 +983,6 @@ php_eio_done_poll_callback(void)
 	php_eio_bin_semaphore_wait(semid);
 }
 /* }}} */
-
-/* {{{ php_eio_init 
- * Initializes eio. Normally is called once, when user calls eio_* function
- * first time */
-/* Not thread-safe
- *static void 
- *php_eio_init(TSRMLS_D)
- *{
- *	  int semid;
- *
- *	  if (php_eio_is_initialized) {
- *		  return;
- *	  }
- *	  
- *	  semid = php_eio_bin_semaphore_get(PHP_EIO_SHM_KEY, 
- *			  PHP_EIO_SHM_PERM | IPC_CREAT | IPC_EXCL);
- *	  if (semid == -1) {
- *		  php_error_docref(NULL TSRMLS_CC, E_ERROR, 
- *				  "Failed initializing eio, errno: '%d'", errno);
- *		  return;
- *	  }
- *
- *	  if (eio_init(php_eio_want_poll_callback, 
- *				  php_eio_done_poll_callback)) {
- *		  php_error_docref(NULL TSRMLS_CC, E_ERROR, 
- *				  "Failed initializing eio, errno: '%d'", errno);
- *		  return;
- *	  }
- *	  php_eio_is_initialized = 1;
- *}
- */
-/* }}} */
-
-void 
-php_eio_req_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
-{
-	/*
-	 *eio_req *req = (eio_req *) rsrc->ptr;
-	 *if (!req) {
-	 *	  return ;
-	 *}
-	 *if (req->type != EIO_CUSTOM) {
-	 *	  php_eio_free_eio_cb(req->data);
-	 *} else {
-	 *	  php_eio_free_eio_cb_custom(req->data);
-	 *}
-	 */
-}
-
 
 #undef EIO_CB_ALLOC
 #undef EIO_CB_SET_FIELD
@@ -1122,7 +1019,7 @@ PHP_MINIT_FUNCTION(eio)
 			NULL, NULL, PHP_EIO_GRP_DESCRIPTOR_NAME,
 			module_number);
 	le_eio_req = zend_register_list_destructors_ex(
-			php_eio_req_dtor, NULL, PHP_EIO_REQ_DESCRIPTOR_NAME,
+			NULL, NULL, PHP_EIO_REQ_DESCRIPTOR_NAME,
 			module_number);
 
 	/* {{{ Constants */
@@ -1209,9 +1106,6 @@ PHP_MINIT_FUNCTION(eio)
  */
 PHP_MSHUTDOWN_FUNCTION(eio)
 {
-	/* uncomment this line if you have INI entries
-	UNREGISTER_INI_ENTRIES();
-	*/
 	return SUCCESS;
 }
 /* }}} */
@@ -1220,9 +1114,6 @@ PHP_MSHUTDOWN_FUNCTION(eio)
  */
 PHP_RINIT_FUNCTION(eio)
 {
-	/*php_eio_respipe[0] = php_eio_respipe[1] = 0;*/
-	/*php_eio_is_initialized = 0;*/
-
 	int semid;
 
 	semid = php_eio_bin_semaphore_get(PHP_EIO_SHM_KEY, 0);
@@ -1253,20 +1144,6 @@ PHP_RINIT_FUNCTION(eio)
  */
 PHP_RSHUTDOWN_FUNCTION(eio)
 {
-	/*
-	 *if (php_eio_is_initialized && eio_nreqs()) {
-	 *	  [> Finish pending requests <]
-	 *	  EIO_EVENT_LOOP();
-	 *	  
-	 *	  [> Close pipe descriptors <]
-	 *	  if (php_eio_respipe[0]) {
-	 *		  close(php_eio_respipe[0]);
-	 *	  }
-	 *	  if (php_eio_respipe[1]) {
-	 *		  close(php_eio_respipe[1]);
-	 *	  }
-	 *}
-	 */
 	int semid;
 
 	if (eio_nreqs()) {
@@ -1295,10 +1172,6 @@ PHP_MINFO_FUNCTION(eio)
 #endif
 	php_info_print_table_row(2, "Version", PHP_EIO_VERSION);
 	php_info_print_table_end();
-
-	/* Remove comments if you have entries in php.ini
-	DISPLAY_INI_ENTRIES();
-	*/
 }
 /* }}} */
 
@@ -1310,14 +1183,6 @@ PHP_MINFO_FUNCTION(eio)
  * Returns TRUE on success, FALSE otherwise. */
 PHP_FUNCTION(eio_event_loop)
 {
-	/*
-	 *if (!php_eio_respipe[0] || !php_eio_respipe[1]) {
-	 *	  php_error_docref(NULL TSRMLS_CC, E_ERROR, 
-	 *			  "Event loop pipe descriptors unavailable");
-	 *	  RETURN_FALSE;
-	 *}
-	 */
-
 	EIO_EVENT_LOOP();
 
 	RETURN_TRUE;
@@ -2519,7 +2384,6 @@ PHP_FUNCTION(eio_grp)
 	zval *callback, *data = NULL;
 	php_eio_cb_t *eio_cb;
 	eio_req *req;
-	/*php_eio_init(TSRMLS_C);*/
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|z!",
 				&callback, &data) == FAILURE) {
@@ -2542,7 +2406,6 @@ PHP_FUNCTION(eio_grp_add)
 {
 	zval *zgrp, *zreq;
 	eio_req *grp, *req;
-	/*php_eio_init(TSRMLS_C);*/
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr/",
 				&zgrp, &zreq) == FAILURE) {
@@ -2566,7 +2429,6 @@ PHP_FUNCTION(eio_grp_limit)
 	zval *zgrp;
 	eio_req *grp;
 	long limit;
-	/*php_eio_init(TSRMLS_C);*/
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r/l",
 				&zgrp, &limit) == FAILURE) {
@@ -2586,7 +2448,6 @@ PHP_FUNCTION(eio_grp_cancel)
 {
 	zval *zgrp;
 	eio_req *grp;
-	/*php_eio_init(TSRMLS_C);*/
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r",
 				&zgrp) == FAILURE) {

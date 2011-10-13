@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyrght (C) 2011 Ruslan Osmanov <rrosmanov@gmail.com>               |
+  | Copyrght (C) 1997-2011 The PHP Group                                 |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Ruslan Osmanov <rrosmanov@gmail.com>                         |
+  | Author: Ruslan Osmanov <osmanov@php.net>                             |
   +----------------------------------------------------------------------+
 */
 
@@ -31,7 +31,7 @@ extern zend_module_entry eio_module_entry;
 #endif
 
 #ifndef PHP_EIO_VERSION
-#define PHP_EIO_VERSION "0.0.1dev"
+#define PHP_EIO_VERSION "0.0.1"
 #endif
 
 #ifdef ZTS
