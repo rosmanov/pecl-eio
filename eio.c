@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5														 |
   +----------------------------------------------------------------------+
-  | Copyrght (C) 2011 Ruslan Osmanov <osmanov@php.net>				     |
+  | Copyrght (C) 2011 Ruslan Osmanov <osmanov@php.net>					 |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,		 |
   | that is bundled with this package in the file LICENSE, and is		 |
@@ -12,7 +12,7 @@
   | obtain it through the world-wide-web, please send a note to			 |
   | license@php.net so we can mail you a copy immediately.				 |
   +----------------------------------------------------------------------+
-  | Author: Ruslan Osmanov <osmanov@php.net>						     |
+  | Author: Ruslan Osmanov <osmanov@php.net>							 |
   +----------------------------------------------------------------------+
   | Notes																 |
   |																		 |
@@ -36,6 +36,7 @@
 #define _GNU_SOURCE
 #endif
 
+#include <string.h> /* strerror() */
 #include <fcntl.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
@@ -466,10 +467,13 @@ ZEND_GET_MODULE(eio)
 	}								\
 	eio_cb->n= v;
 
+#define EIO_REQ_TYPE(type)	(type)
+
 #define EIO_REQ_WARN_RESULT_ERROR()										\
 	php_error_docref(NULL TSRMLS_CC, E_WARNING,							\
-			"eio_req result: %ld, req type: %d, errno: %d",				\
-			(long) EIO_RESULT(req), req->type, errno)
+			"%s, eio_req result: %ld, req type: %s",					\
+			strerror(req->errorno), (long) EIO_RESULT(req), 			\
+				php_eio_get_req_type_str(req->type))
 
 #define EIO_REQ_WARN_INVALID_CB()										\
 	php_error_docref(NULL TSRMLS_CC, E_WARNING,							\
@@ -495,6 +499,65 @@ ZEND_GET_MODULE(eio)
 #define EIO_CB_CUSTOM_LOCK eio_cb->locked = 1;
 #define EIO_CB_CUSTOM_UNLOCK eio_cb->locked = 0;
 #define EIO_CB_CUSTOM_IS_LOCKED(eio_cb) ((eio_cb) ? (eio_cb)->locked : 0)
+
+/* {{{ php_eio_get_req_type_str */
+#define CASE_RET_STR(x) case x: return #x
+static const char *
+php_eio_get_req_type_str(unsigned int code) 
+{
+	switch(code) {
+		CASE_RET_STR(EIO_CUSTOM);
+		CASE_RET_STR(EIO_WD_OPEN);
+		CASE_RET_STR(EIO_WD_CLOSE);
+		CASE_RET_STR(EIO_CLOSE);
+		CASE_RET_STR(EIO_DUP2);
+		CASE_RET_STR(EIO_READ);
+		CASE_RET_STR(EIO_WRITE);
+		CASE_RET_STR(EIO_READAHEAD);
+		CASE_RET_STR(EIO_SENDFILE);
+		CASE_RET_STR(EIO_FSTAT);
+		CASE_RET_STR(EIO_FSTATVFS);
+		CASE_RET_STR(EIO_FTRUNCATE);
+		CASE_RET_STR(EIO_FUTIME);
+		CASE_RET_STR(EIO_FCHMOD);
+		CASE_RET_STR(EIO_FCHOWN);
+		CASE_RET_STR(EIO_SYNC);
+		CASE_RET_STR(EIO_FSYNC);
+		CASE_RET_STR(EIO_FDATASYNC);
+		CASE_RET_STR(EIO_SYNCFS);
+		CASE_RET_STR(EIO_MSYNC);
+		CASE_RET_STR(EIO_MTOUCH);
+		CASE_RET_STR(EIO_SYNC_FILE_RANGE);
+		CASE_RET_STR(EIO_FALLOCATE);
+		CASE_RET_STR(EIO_MLOCK);
+		CASE_RET_STR(EIO_MLOCKALL);
+		CASE_RET_STR(EIO_GROUP);
+		CASE_RET_STR(EIO_NOP);
+		CASE_RET_STR(EIO_BUSY);
+		CASE_RET_STR(EIO_REALPATH);
+		CASE_RET_STR(EIO_STATVFS);
+		CASE_RET_STR(EIO_READDIR);
+		CASE_RET_STR(EIO_OPEN);
+		CASE_RET_STR(EIO_STAT);
+		CASE_RET_STR(EIO_LSTAT);
+		CASE_RET_STR(EIO_TRUNCATE);
+		CASE_RET_STR(EIO_UTIME);
+		CASE_RET_STR(EIO_CHMOD);
+		CASE_RET_STR(EIO_CHOWN);
+		CASE_RET_STR(EIO_UNLINK);
+		CASE_RET_STR(EIO_RMDIR);
+		CASE_RET_STR(EIO_MKDIR);
+		CASE_RET_STR(EIO_RENAME);
+		CASE_RET_STR(EIO_MKNOD);
+		CASE_RET_STR(EIO_LINK);
+		CASE_RET_STR(EIO_SYMLINK);
+		CASE_RET_STR(EIO_READLINK);
+		CASE_RET_STR(EIO_REQ_TYPE_NUM);
+		default: return "UNKNOWN";
+	}
+}
+#undef CASE_RET_STR
+/* }}} */
 
 /* Returns a binary semaphore's ID, allocate if nesessary */
 static inline int
@@ -523,6 +586,7 @@ php_eio_bin_semaphore_init(int semid)
 
 	return semctl(semid, 0, SETALL, s);
 }
+
 /* {{{ php_eio_bin_semaphore_wait
  * Wait on a binary semaphore. Will *NOT* Block until semaphore value is
  * positive (IPC_NOWAIT) , then decrement it by 1 */
@@ -1125,14 +1189,14 @@ PHP_RINIT_FUNCTION(eio)
 			PHP_EIO_SHM_PERM | IPC_CREAT | IPC_EXCL);
 	if (semid == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, 
-				"Failed initializing eio, errno: '%d'", errno);
+				"Failed initializing eio: %s", strerror(errno));
 		return FAILURE;
 	}
 
 	if (eio_init(php_eio_want_poll_callback, 
 				php_eio_done_poll_callback)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, 
-				"Failed initializing eio, errno: '%d'", errno);
+				"Failed initializing eio: %s", strerror(errno));
 		return FAILURE;
 	}
 
@@ -1283,6 +1347,7 @@ PHP_FUNCTION(eio_truncate)
 PHP_FUNCTION(eio_chown)
 {
 #if defined(WINDOWS) || defined(NETWARE)
+	errno = ENOSYS;
 	RETURN_FALSE;
 #else
 	char *path; 
@@ -1291,7 +1356,7 @@ PHP_FUNCTION(eio_chown)
 	long gid = -1;
 	EIO_INIT(pri, callback, data, eio_cb, req);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl/|l/lz!z!",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|llz!z!",
 				&path, &path_len, 
 				&uid, &gid, 
 				&pri, &callback, &data) == FAILURE) {
@@ -1303,7 +1368,7 @@ PHP_FUNCTION(eio_chown)
 	EIO_CHECK_WRITABLE(path, file);
 #endif
 
-	if (uid < 0 || gid < 0) {
+	if (uid < 0 && gid < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, 
 				"invalid uid and/or gid");
 		RETURN_FALSE;
@@ -1314,7 +1379,7 @@ PHP_FUNCTION(eio_chown)
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, 
 				"path '%s' is not writable", path);
 #endif
-		RETURN_FALSE;	
+		RETURN_FALSE;
 	}
 
 	EIO_NEW_CB(eio_cb, callback, data);

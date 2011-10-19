@@ -60,7 +60,7 @@ if test "$PHP_EIO" != "no"; then
 	fi
 	if test -z "$EIO_DIR"; then
 		AC_MSG_RESULT([not found])
-		AC_MSG_ERROR([Please reinstall the eio distribution])
+		AC_MSG_ERROR([Please reinstall libeio])
 	fi
 
 	# --with-eio -> add include path

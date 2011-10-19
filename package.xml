@@ -21,14 +21,12 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-
-  <date>2011-10-13</date>
-  <time>11:49:29</time>
-
+  <date>2011-10-19</date>
+  <time>19:54:19</time>
   <!--{{{ Current version -->
   <version>
-    <release>0.0.1</release>
-    <api>0.0.1</api>
+    <release>0.1.0</release>
+    <api>0.1.0</api>
   </version>
   <stability>
     <release>alpha</release>
@@ -36,14 +34,13 @@
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-  Change: Shared memory permissions are set to 0660 by default 
-  Change: Removed redundant code and comments
-  Add: Tests: eio_read_basic.phpt, eio_stat_basic.phpt
-  Fix: the package XML
-  Fix: docs
-  </notes>
+	  Change: refactored some tests
+	  Add: request types have readable values in error messages
+	  Add: errno replaced with the meaningful string in error messages
+	  Fix: eio_chown denied uid -1 value
+	  Fix: message about required libeio
+	  </notes>
   <!--}}}-->
-
   <!--{{{ contents -->
   <contents>
     <dir name="/">
@@ -79,7 +76,6 @@
     </dir>
   </contents>
   <!--}}}-->
-
   <dependencies>
     <required>
       <php>
@@ -90,14 +86,30 @@
       </pearinstaller>
     </required>
   </dependencies>
-
   <providesextension>eio</providesextension>
-
   <extsrcrelease/>
-
   <!--{{{ Changelog-->
   <changelog>
-
+    <!--{{{ 0.1.0 (alpha) -->
+    <release>
+      <version>
+        <release>0.1.0</release>
+        <api>0.1.0</api>
+      </version>
+      <stability>
+        <release>alpha</release>
+        <api>alpha</api>
+      </stability>
+      <license uri="http://www.php.net/license">PHP</license>
+      <notes>
+	  Change: refactored some tests
+	  Add: request types have readable values in error messages
+	  Add: errno replaced with the meaningful string in error messages
+	  Fix: eio_chown denied uid -1 value
+	  Fix: message about required libeio
+	  </notes>
+    </release>
+    <!--}}}-->
     <!--{{{ 0.0.1 (alpha) -->
     <release>
       <version>
@@ -118,7 +130,6 @@
 	  </notes>
     </release>
     <!--}}}-->
-
     <!--{{{ 0.0.1dev -->
     <release>
       <version>
@@ -135,7 +146,6 @@
 	  </notes>
     </release>
     <!--}}}-->
-
   </changelog>
   <!--}}}-->
 </package>

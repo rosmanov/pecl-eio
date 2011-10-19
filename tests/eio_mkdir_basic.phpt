@@ -2,7 +2,7 @@
 Check for eio_mkdir function basic behaviour
 --FILE--
 <?php 
-$temp_dirname = "eio-temp-dir";
+$temp_dirname = dirname(__FILE__) ."/eio-temp-dir";
 
 function my_mkdir_callback($data, $result) {
 	global $temp_dirname;
