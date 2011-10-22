@@ -85,8 +85,9 @@ if test "$PHP_EIO" != "no"; then
 	PHP_SUBST(EIO_SHARED_LIBADD)
 	dnl }}}
 
-	dnl Extension declaration
-	PHP_NEW_EXTENSION(eio, eio.c, $ext_shared,,$CFLAGS)
+	dnl Build extension 
+	eio_src="eio.c eio_fe.c"
+	PHP_NEW_EXTENSION(eio, $eio_src, $ext_shared,,$CFLAGS)
 fi
 dnl }}}
 

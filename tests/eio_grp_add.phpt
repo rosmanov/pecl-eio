@@ -4,7 +4,7 @@ Check for eio_grp_add function basic behaviour
 <?php 
 //$old_error_reporting = error_reporting(0);
 
-$temp_filename = "eio-file.tmp";
+$temp_filename = dirname(__FILE__) ."/eio-file.tmp";
 $fp = fopen($temp_filename, "w");
 fwrite($fp, "some data");
 fclose($fp);

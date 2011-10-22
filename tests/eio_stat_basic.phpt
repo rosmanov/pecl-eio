@@ -3,7 +3,7 @@ Check for eio_stat, eio_lstat, eio_fstat functions' basic behaviour
 --FILE--
 <?php 
 $old_err = error_reporting(E_ERROR);
-$tmp_filename = "eio-file.tmp";
+$tmp_filename = dirname(__FILE__) ."/eio-file.tmp";
 touch($tmp_filename);
 
 function my_res_cb($data, $result) {
