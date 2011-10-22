@@ -1975,7 +1975,9 @@ PHP_FUNCTION(eio_fallocate)
  * data		Optional argument passed to execute
  *
  * Returns request resource on success, otherwise FALSE. 
- * TODO: WARNING! Craches with xdebug extension. See issue http://bugs.xdebug.org/view.php?id=725
+ *
+ * WARNING! Craches when using EG(current_execute_data) with xdebug extension. 
+ * See http://bugs.xdebug.org/view.php?id=725
  */
 PHP_FUNCTION(eio_custom)
 {
