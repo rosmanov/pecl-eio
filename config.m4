@@ -20,25 +20,11 @@ PHP_ARG_WITH(eio, for eio support,
 PHP_ARG_ENABLE(eio-debug, for eio debug support,
 [  --enable-eio-debug	  Enable eio debug support], no, no)
 
-PHP_ARG_WITH(eio-shm-key, for eio shared memory key,
-[  --with-eio-shm-key	  eio shared memory segment key default /tmp/php-eio-shm], no, no)
-
-PHP_ARG_WITH(eio-shm-prm, for eio shared memory segment permissions,
-[  --with-eio-shm-prm	  eio shared memory segment permissions default = 0660], no, no)
-
 dnl {{{ Debug support
 if test $PHP_EIO_DEBUG != "no"; then
 	CFLAGS="-Wall -g -ggdb -O0 -DEIO_DEBUG"
 fi
 dnl }}}
-dnl
-if test "$PHP_EIO_SHM_KEY" != "no"; then
-	CFLAGS=$CFLAGS" -DPHP_EIO_SHM_KEY_=$PHP_EIO_SHM_KEY"
-fi
-
-if test "$PHP_EIO_SHM_PRM" != "no"; then
-	CFLAGS=$CFLAGS" -DPHP_EIO_SHM_PERM=$PHP_EIO_SHM_PRM"
-fi
 
 dnl {{{ eio support 
 if test "$PHP_EIO" != "no"; then
@@ -79,7 +65,7 @@ if test "$PHP_EIO" != "no"; then
 	],[
 	AC_MSG_ERROR([wrong eio lib version or lib not found])
 	],[
-	-L$EIO_DIR/lib -lm
+	-L$EIO_DIR/lib
 	])
 
 	PHP_SUBST(EIO_SHARED_LIBADD)

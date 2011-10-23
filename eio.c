@@ -33,8 +33,7 @@
 
 #include <string.h> /* strerror() */
 #include <fcntl.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
+#include <pthread.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 #include "linux/falloc.h"
@@ -50,20 +49,17 @@
 static int le_eio_grp;
 static int le_eio_req;
 
-static const zend_module_dep eio_deps[] = { /* {{{ */
-	/* TODO: Replace with ZEND_MOD_CONFLICTS_EX("xdebug", rel, ver) when the
-	 * issue will be fixed: http://bugs.xdebug.org/view.php?id=725 */
-	ZEND_MOD_CONFLICTS("xdebug")		
-	{NULL, NULL, NULL}
-};
-/* }}} */
+int php_eio_thread_flag;
+pthread_cond_t php_eio_thread_flag_cv;
+pthread_mutex_t php_eio_thread_flag_mutex;
+int php_eio_initialized = 0;
 
 /* {{{ eio_module_entry
  */
 zend_module_entry eio_module_entry = {
 	STANDARD_MODULE_HEADER_EX,
 	NULL,
-	eio_deps,
+	NULL,
 	"eio",
 	eio_functions,
 	PHP_MINIT(eio),
@@ -92,8 +88,6 @@ ZEND_GET_MODULE(eio)
 		ALLOC_INIT_ZVAL(v);			\
 	}								\
 	eio_cb->n= v;
-
-#define EIO_REQ_TYPE(type)	(type)
 
 #define EIO_REQ_WARN_RESULT_ERROR()										\
 	php_error_docref(NULL TSRMLS_CC, E_WARNING,							\
@@ -125,6 +119,7 @@ ZEND_GET_MODULE(eio)
 #define EIO_CB_CUSTOM_LOCK eio_cb->locked = 1;
 #define EIO_CB_CUSTOM_UNLOCK eio_cb->locked = 0;
 #define EIO_CB_CUSTOM_IS_LOCKED(eio_cb) ((eio_cb) ? (eio_cb)->locked : 0)
+
 
 /* {{{ php_eio_get_req_type_str */
 #define CASE_RET_STR(x) case x: return #x
@@ -183,90 +178,6 @@ php_eio_get_req_type_str(unsigned int code)
 	}
 }
 #undef CASE_RET_STR
-/* }}} */
-
-/* Returns a binary semaphore's ID, allocate if nesessary */
-static inline int
-php_eio_bin_semaphore_get(const char *str_key, int sem_flags) 
-{
-	return semget(ftok(str_key, 'E'), 1, sem_flags);
-}
-
-static inline int 
-php_eio_bin_semaphore_dealloc(int semid)
-{
-	php_eio_semun_t s;
-
-	return semctl(semid, 1, IPC_RMID, s);
-}
-
-/* Init semaphore with value of 1 */
-static inline int 
-php_eio_bin_semaphore_init(int semid)
-{
-	php_eio_semun_t s; 
-	unsigned short values[1]; 
-
-	values[0] = 1;
-	s.array = values; 
-
-	return semctl(semid, 0, SETALL, s);
-}
-
-/* {{{ php_eio_bin_semaphore_wait
- * Wait on a binary semaphore. Will *NOT* Block until semaphore value is
- * positive (IPC_NOWAIT) , then decrement it by 1 */
-static inline int
-php_eio_bin_semaphore_wait(int semid)
-{
-	struct sembuf operations[1]; 
-
-	operations[0].sem_num = 0;
-	/* Decrement by 1*/
-	operations[0].sem_op = -1;
-	/* Permit undo'ing */
-	/* Prevent blocking, since we poll in event loop */
-	operations[0].sem_flg = SEM_UNDO | IPC_NOWAIT;
-
-	return semop(semid, operations, 1);
-}
-/* }}} */
-
-/* {{{ php_eio_bin_semaphore_poll 
- * Wait on a binary semaphore. *Will* block until semaphore value is
- * positive , then decrement it by 1 */
-static inline int
-php_eio_bin_semaphore_poll(int semid)
-{
-	struct sembuf operations[1]; 
-
-	operations[0].sem_num = 0;
-	/* Decrement by 1*/
-	operations[0].sem_op = -1;
-	/* Permit undo'ing */
-	operations[0].sem_flg = SEM_UNDO;
-
-	return semop(semid, operations, 1);
-}
-/* }}} */
-
-/* {{{ php_eio_bin_semaphore_post
- * Post to a binary semaphore: increment it's value by 1.
- * This returns immediately */
-static inline int
-php_eio_bin_semaphore_post(int semid)
-{
-	struct sembuf operations[1]; 
-
-	operations[0].sem_num = 0;
-	/* Decrement by 1*/
-	operations[0].sem_op = 1;
-	/* Permit undo'ing */
-	/* Probably, IPC_NOWAIT is not required here */
-	operations[0].sem_flg = SEM_UNDO | IPC_NOWAIT; 
-
-	return semop(semid, operations, 1);
-}
 /* }}} */
 
 /* {{{ php_eio_set_readdir_names */
@@ -653,11 +564,7 @@ php_eio_res_cb(eio_req *req)
 static void
 php_eio_want_poll_callback(void) 
 {
-	int semid;
-
-	semid = php_eio_bin_semaphore_get(PHP_EIO_SHM_KEY, 0);
-
-	php_eio_bin_semaphore_post(semid);
+	PHP_EIO_MUTEX_SET_FLAG(1);
 }
 /* }}} */
 
@@ -666,11 +573,7 @@ php_eio_want_poll_callback(void)
 static void
 php_eio_done_poll_callback(void) 
 {
-	int semid;
-
-	semid = php_eio_bin_semaphore_get(PHP_EIO_SHM_KEY, 0);
-
-	php_eio_bin_semaphore_wait(semid);
+	PHP_EIO_MUTEX_SET_FLAG(0);
 }
 /* }}} */
 
@@ -702,10 +605,6 @@ PHP_INI_END()
  */
 PHP_MINIT_FUNCTION(eio)
 {
-	/* If you have INI entries, uncomment these lines 
-	REGISTER_INI_ENTRIES();
-	*/
-
 	le_eio_grp = zend_register_list_destructors_ex(
 			NULL, NULL, PHP_EIO_GRP_DESCRIPTOR_NAME,
 			module_number);
@@ -805,26 +704,17 @@ PHP_MSHUTDOWN_FUNCTION(eio)
  */
 PHP_RINIT_FUNCTION(eio)
 {
-	int semid;
+	if (!php_eio_initialized) {
+		PHP_EIO_MUTEX_INIT;
 
-	semid = php_eio_bin_semaphore_get(PHP_EIO_SHM_KEY, 0);
-	if (semid != -1) {
-		php_eio_bin_semaphore_dealloc(semid);
-	}
+		if (eio_init(php_eio_want_poll_callback, 
+					php_eio_done_poll_callback)) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, 
+					"Failed initializing eio: %s", strerror(errno));
+			return FAILURE;
+		}
 
-	semid = php_eio_bin_semaphore_get(PHP_EIO_SHM_KEY, 
-			PHP_EIO_SHM_PERM | IPC_CREAT | IPC_EXCL);
-	if (semid == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, 
-				"Failed initializing eio: %s", strerror(errno));
-		return FAILURE;
-	}
-
-	if (eio_init(php_eio_want_poll_callback, 
-				php_eio_done_poll_callback)) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, 
-				"Failed initializing eio: %s", strerror(errno));
-		return FAILURE;
+		php_eio_initialized = 1;
 	}
 
 	return SUCCESS;
@@ -835,15 +725,8 @@ PHP_RINIT_FUNCTION(eio)
  */
 PHP_RSHUTDOWN_FUNCTION(eio)
 {
-	int semid;
-
 	if (eio_nreqs()) {
 		EIO_EVENT_LOOP();
-	}
-
-	semid = php_eio_bin_semaphore_get(PHP_EIO_SHM_KEY, 0);
-	if (semid != -1) {
-		php_eio_bin_semaphore_dealloc(semid);
 	}
 
 	return SUCCESS;
@@ -887,9 +770,7 @@ PHP_FUNCTION(eio_event_loop)
  * Otherwise, it returns 0. */
 PHP_FUNCTION(eio_poll) 
 {
-	/* Poll semaphore, since user has no access to eio_init() and the want/done
-	 * poll callbacks */
-	php_eio_bin_semaphore_poll(php_eio_bin_semaphore_get(PHP_EIO_SHM_KEY, 0));
+	PHP_EIO_MUTEX_SET_FLAG(1);
 	RETURN_LONG(eio_poll());
 }
 /* }}} */
@@ -959,10 +840,6 @@ PHP_FUNCTION(eio_truncate)
 		offset = 0;
 	}
 
-#ifdef EIO_DEBUG
-	EIO_CHECK_WRITABLE(path, file);
-#endif
-
 	EIO_NEW_CB(eio_cb, callback, data);
 
 	req = eio_truncate(path, offset, pri, php_eio_res_cb, eio_cb);
@@ -994,9 +871,6 @@ PHP_FUNCTION(eio_chown)
 	}
 
 	EIO_CHECK_PATH_LEN(path, path_len);
-#ifdef EIO_DEBUG
-	EIO_CHECK_WRITABLE(path, file);
-#endif
 
 	if (uid < 0 && gid < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, 
@@ -1038,10 +912,6 @@ PHP_FUNCTION(eio_chmod)
 				&mode, &pri, &callback, &data) == FAILURE) {
 		RETURN_FALSE;
 	}
-
-#ifdef EIO_DEBUG
-	EIO_CHECK_WRITABLE(path, directory);
-#endif
 
 	EIO_NEW_CB(eio_cb, callback, data);
 
@@ -1157,10 +1027,6 @@ PHP_FUNCTION(eio_utime)
 
 	EIO_CHECK_PATH_LEN(path, path_len);
 
-#ifdef EIO_DEBUG
-	EIO_CHECK_WRITABLE(path, file);
-#endif
-
 	EIO_NEW_CB(eio_cb, callback, data);
 
 	req = eio_utime(path, (eio_tstamp) atime, (eio_tstamp) mtime, 
@@ -1218,8 +1084,6 @@ PHP_FUNCTION(eio_link)
 
 	EIO_CHECK_PATH_LEN(path, path_len);
 	EIO_CHECK_PATH_LEN(new_path, new_path_len);
-
-	/*EIO_CHECK_READABLE(path, file);*/
 
 	EIO_NEW_CB(eio_cb, callback, data);
 
@@ -1280,10 +1144,6 @@ PHP_FUNCTION(eio_rename)
 
 	EIO_CHECK_PATH_LEN(path, path_len);
 	EIO_CHECK_PATH_LEN(new_path, new_path_len);
-
-#ifdef EIO_DEBUG
-	EIO_CHECK_WRITABLE(path, file);
-#endif
 
 	EIO_NEW_CB(eio_cb, callback, data);
 
@@ -1639,8 +1499,6 @@ PHP_FUNCTION(eio_readlink)
 	}
 
 	EIO_CHECK_PATH_LEN(path, path_len);
-
-	EIO_CHECK_READABLE(path, file);
 
 	EIO_NEW_CB(eio_cb, callback, data);
 

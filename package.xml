@@ -21,12 +21,12 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2011-10-19</date>
-  <time>19:54:19</time>
+  <date>2011-10-23</date>
+  <time>23:08:47</time>
   <!--{{{ Current version -->
   <version>
-    <release>0.1.1</release>
-    <api>0.1.1</api>
+    <release>0.2.0</release>
+    <api>0.2.0</api>
   </version>
   <stability>
     <release>alpha</release>
@@ -34,10 +34,10 @@
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-  Fix: eio_poll was out of sync with the IPC
-  Fix: pathnames in tests
-  Change: dropped preprocessor checks on non-UNIX platforms, i.e. no plans to
-  support non-UNIX
+  Fix: heavy bulk requests damaged event loop causing much CPU consumption
+  Fix: in a threaded SAPI libeio in a single process might initialize mutex multiple times
+  Change: switch from semaphore to mutex
+  Change: dropped --with-eio-shm* configuration options
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -87,7 +87,7 @@
         <min>1.4.0b1</min>
       </pearinstaller>
       <package>
-        <name>libeio</name> 
+        <name>libeio</name>
         <uri>http://software.schmorp.de/pkg/libeio.html</uri>
       </package>
       <os>
@@ -99,6 +99,25 @@
   <extsrcrelease/>
   <!--{{{ Changelog-->
   <changelog>
+    <!--{{{ 0.2.0 (alpha) -->
+    <release>
+      <version>
+        <release>0.2.0</release>
+        <api>0.2.0</api>
+      </version>
+      <stability>
+        <release>alpha</release>
+        <api>alpha</api>
+      </stability>
+      <license uri="http://www.php.net/license">PHP</license>
+      <notes>
+      Fix: heavy bulk requests damaged event loop causing much CPU consumption
+      Fix: in a threaded SAPI libeio in a single process might initialize mutex multiple times
+      Change: switch from semaphore to mutex
+      Change: dropped --with-eio-shm* configuration options
+      </notes>
+    </release>
+    <!--}}}-->
     <!--{{{ 0.1.1 (alpha) -->
     <release>
       <version>
@@ -178,5 +197,5 @@
   <!--}}}-->
 </package>
 <!-- 
-vim: et tw=80 sts=2 ts=4 fdm=marker
+vim: et tw=80 sts=2 ts=2 fdm=marker
 -->

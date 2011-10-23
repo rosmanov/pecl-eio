@@ -1,10 +1,5 @@
 --TEST--
 Check for eio_chown function basic behaviour
---SKIPIF--
-<?php 
-if(substr(PHP_OS, 0, 3) == "WIN")
-	die("skip, not supported on Windows");
-?>
 --FILE--
 <?php 
 $er = error_reporting(E_WARNING);

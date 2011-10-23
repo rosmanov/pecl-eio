@@ -14,13 +14,6 @@
   +----------------------------------------------------------------------+
   | Author: Ruslan Osmanov <osmanov@php.net>							 |
   +----------------------------------------------------------------------+
-  | Notes																 |
-  |																		 |
-  | eio_mlock(), eio_mlockall(), eio_msync(), eio_mtouch() are not		 |
-  | implemented in this													 |
-  | extension because of PHP's obvious limitations on user-sie memory	 |
-  | management.															 |
-  +----------------------------------------------------------------------+
 */
 
 #ifndef EIO_PRIV_H
@@ -28,22 +21,8 @@
 
 extern const zend_function_entry eio_functions[];
 
-#define QUOTEME_(x) #x
-#define QUOTEME(x) QUOTEME_(x)
-
 #define PHP_EIO_GRP_DESCRIPTOR_NAME "EIO Group Descriptor"
 #define PHP_EIO_REQ_DESCRIPTOR_NAME "EIO Request Descriptor"
-
-#ifndef PHP_EIO_SHM_KEY_
-#define PHP_EIO_SHM_KEY_ "/tmp/php-eio-shm"
-#endif
-
-#define PHP_EIO_SHM_KEY QUOTEME(PHP_EIO_SHM_KEY_)
-
-/* Web server user, or group must have read and write permissions */
-#ifndef PHP_EIO_SHM_PERM
-#define PHP_EIO_SHM_PERM 0660
-#endif
 
 /* {{{ Macros */
 
@@ -55,6 +34,27 @@ extern const zend_function_entry eio_functions[];
 #define TSRMLS_SET_CTX(ctx)
 #endif
 
+
+#define PHP_EIO_MUTEX_INIT 									\
+	pthread_mutex_init(&php_eio_thread_flag_mutex, NULL);	\
+	pthread_cond_init(&php_eio_thread_flag_cv, NULL);		\
+	php_eio_thread_flag = 0;					
+
+#define PHP_EIO_MUTEX_SET_FLAG(val) 						\
+	pthread_mutex_lock(&php_eio_thread_flag_mutex);			\
+	php_eio_thread_flag = val;								\
+	pthread_cond_signal(&php_eio_thread_flag_cv);			\
+	pthread_mutex_unlock(&php_eio_thread_flag_mutex);
+
+#define EIO_EVENT_LOOP()									\
+	while (eio_nreqs()) {									\
+		pthread_mutex_lock(&php_eio_thread_flag_mutex);		\
+		while (!php_eio_thread_flag) 						\
+			pthread_cond_wait(&php_eio_thread_flag_cv,		\
+					&php_eio_thread_flag_mutex);			\
+		pthread_mutex_unlock(&php_eio_thread_flag_mutex);	\
+		eio_poll();											\
+	}
 
 
 #define EIO_RET_IF_NOT_CALLABLE(callback)							\
@@ -116,56 +116,6 @@ extern const zend_function_entry eio_functions[];
 		RETURN_FALSE;												\
 	}
 #endif
-
-#ifdef EIO_DEBUG
-#define EIO_CHECK_WRITABLE(path, file)								\
-	/*
-	 *if (access(path, W_OK) != 0) {								\
-	 *	  php_error_docref(NULL TSRMLS_CC, E_NOTICE,				\
-	 *	  #file " '%s' is not writable", path);						\
-	 *	  errno = EACCES;											\
-	 *	  RETURN_FALSE;												\
-	 *}																
-	 */
-#else			
-#define EIO_CHECK_WRITABLE(path, file)								\
-	/*
-	 *if (access(path, W_OK) != 0) {								\
-	 *	  errno = EACCES;											\
-	 *	  RETURN_FALSE;												\
-	 *}																
-	 */
-#endif
-
-#ifdef EIO_DEBUG
-#define EIO_CHECK_READABLE(path, file)								\
-	/*
-	 *if (access(path, W_OK) != 0) {								\
-	 *	  php_error_docref(NULL TSRMLS_CC, E_NOTICE,				\
-	 *	  #file " '%s' is not readable", path);						\
-	 *	  errno = EACCES;											\
-	 *	  RETURN_FALSE;												\
-	 *}																
-	 */
-#else			
-#define EIO_CHECK_READABLE(path, file)								\
-	/*
-	 *if (access(path, W_OK) != 0) {								\
-	 *	  errno = EACCES;											\
-	 *	  RETURN_FALSE;												\
-	 *}																
-	 */
-#endif
-
-#define EIO_EVENT_LOOP()											\
-	int semid;														\
-	semid = php_eio_bin_semaphore_get(PHP_EIO_SHM_KEY, 0);			\
-	while (eio_nreqs ())											\
-	{																\
-		/* Is want_poll() needed then? */							\
-		php_eio_bin_semaphore_poll(semid);							\
-		eio_poll();													\
-	}
 
 
 #define EIO_REGISTER_LONG_EIO_CONSTANT(name)						\

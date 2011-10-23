@@ -30,21 +30,8 @@ $ make test
 Do install with root priveleges:
 # make install
 
-ADDITIONAL CONFIGURE OPTIONS
-
---with-eio-shm-key	  
-eio shared memory segment key default /tmp/php-eio-shm 
-  
---with-eio-shm-prm	  
-eio shared memory segment permissions default = 0660
-
 NOTE: always check for current options and flags:
 $ ./configure --help | grep eio
-
-These are semaphore options. Semaphores are currently used in internal event
-loop implementation. The only thing to note is to provide unique ID for the
-semaphore key and provide sufficient priveleges to that. If you are not sure
-what these settings mean, just leave their defaults.
 
 3. CONFIGURE PHP TO USE LIBEIO EXTENSION
 

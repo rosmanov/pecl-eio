@@ -1,10 +1,5 @@
 --TEST--
 Check for eio_fallocate function basic behaviour
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 5) != 'Linux') 
-	die("skip this test is for Linux platforms only");
-?>
 --FILE--
 <?php 
 $old_error_reporting = error_reporting(0);

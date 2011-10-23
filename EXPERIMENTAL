@@ -1,1 +1,1 @@
-- Semaphores are triggering the event loop
+POSIX mutexes controlling event loop 

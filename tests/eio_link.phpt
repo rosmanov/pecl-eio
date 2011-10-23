@@ -1,10 +1,5 @@
 --TEST--
 Check for eio_link, eio_readlink, eio_symlink function basic behaviour
---SKIPIF--
-<?php 
-if (substr(PHP_OS, 0, 5) != 'Linux') 
-	die("skip this test is for Linux platforms only");
-?>
 --FILE--
 <?php 
 $filename = dirname(__FILE__)."/symlink.dat";

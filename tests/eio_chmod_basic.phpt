@@ -1,10 +1,5 @@
 --TEST--
 Check for eio_chmod function basic behaviour
---SKIPIF--
-<?php 
-if(substr(PHP_OS, 0, 3) == "WIN")
-	die("skip, not supported on Windows");
-?>
 --FILE--
 <?php 
 $temp_filename = "eio-temp-file.tmp";
