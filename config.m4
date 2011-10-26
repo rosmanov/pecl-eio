@@ -20,9 +20,18 @@ PHP_ARG_WITH(eio, for eio support,
 PHP_ARG_ENABLE(eio-debug, for eio debug support,
 [  --enable-eio-debug	  Enable eio debug support], no, no)
 
+PHP_ARG_ENABLE(eio-eventfd, for eio event file descriptor support,
+[  --enable-eio-eventfd	  Enable eio event file descriptor support], no, no)
+
 dnl {{{ Debug support
 if test $PHP_EIO_DEBUG != "no"; then
-	CFLAGS="-Wall -g -ggdb -O0 -DEIO_DEBUG"
+	CFLAGS="$CFLAGS -Wall -g -ggdb -O0 -DEIO_DEBUG"
+fi
+dnl }}}
+
+dnl {{{ eventfd support
+if test $PHP_EIO_EVENTFD != "no"; then
+	CFLAGS="$CFLAGS -DEIO_EVENTFD"
 fi
 dnl }}}
 

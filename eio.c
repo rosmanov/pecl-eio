@@ -34,6 +34,9 @@
 #include <string.h> /* strerror() */
 #include <fcntl.h>
 #include <pthread.h>
+#ifdef EIO_EVENTFD
+# include <sys/eventfd.h>
+#endif
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 #include "linux/falloc.h"
@@ -53,6 +56,9 @@ int php_eio_thread_flag;
 pthread_cond_t php_eio_thread_flag_cv;
 pthread_mutex_t php_eio_thread_flag_mutex;
 int php_eio_initialized = 0;
+#ifdef EIO_EVENTFD
+int php_eio_eventfd = 0;
+#endif
 
 /* {{{ eio_module_entry
  */
@@ -565,6 +571,10 @@ static void
 php_eio_want_poll_callback(void) 
 {
 	PHP_EIO_MUTEX_SET_FLAG(1);
+#ifdef EIO_EVENTFD
+	uint64_t u;
+	write(php_eio_eventfd, &u, sizeof(uint64_t));
+#endif
 }
 /* }}} */
 
@@ -574,6 +584,10 @@ static void
 php_eio_done_poll_callback(void) 
 {
 	PHP_EIO_MUTEX_SET_FLAG(0);
+#ifdef EIO_EVENTFD
+	uint64_t u;
+	read(php_eio_eventfd, &u, sizeof(uint64_t));
+#endif
 }
 /* }}} */
 
@@ -706,6 +720,9 @@ PHP_RINIT_FUNCTION(eio)
 {
 	if (!php_eio_initialized) {
 		PHP_EIO_MUTEX_INIT;
+#ifdef EIO_EVENTFD
+		php_eio_eventfd = eventfd(0, 0);
+#endif
 
 		if (eio_init(php_eio_want_poll_callback, 
 					php_eio_done_poll_callback)) {
@@ -728,6 +745,11 @@ PHP_RSHUTDOWN_FUNCTION(eio)
 	if (eio_nreqs()) {
 		EIO_EVENT_LOOP();
 	}
+
+#ifdef EIO_EVENTFD
+	if (php_eio_eventfd) 
+		close(php_eio_eventfd);
+#endif
 
 	return SUCCESS;
 }
@@ -2065,6 +2087,18 @@ EIO_GET_INT_FUNCTION(eio_npending);
 #undef EIO_SET_INT_FUNCTION
 #undef EIO_GET_INT_FUNCTION
 /* }}} */
+
+/* {{{ proto eio_get_eventfd(void) */
+PHP_FUNCTION(eio_get_eventfd) 
+{
+#ifdef EIO_EVENTFD
+	RETURN_LONG(php_eio_eventfd);
+#else
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
+
 /* }}} */
 
 /*
