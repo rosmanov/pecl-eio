@@ -21,24 +21,28 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2011-10-23</date>
-  <time>23:08:47</time>
+  <date>2011-10-28</date>
+  <time>00:52:11</time>
   <!--{{{ Current version -->
   <version>
-    <release>0.2.0</release>
-    <api>0.2.0</api>
+    <release>0.3.0</release>
+    <api>0.3.0</api>
   </version>
   <stability>
     <release>alpha</release>
     <api>alpha</api>
   </stability>
-  <license uri="http://www.php.net/license">PHP</license>
+  <license uri="http://www.php.net/license">php</license>
   <notes>
-  Fix: heavy bulk requests damaged event loop causing much CPU consumption
-  Fix: in a threaded SAPI libeio in a single process might initialize mutex multiple times
-  Change: switch from semaphore to mutex
-  Change: dropped --with-eio-shm* configuration options
-  </notes>
+      Change: mutex switch that used in communications with libeio replaced with
+      eventfd; the same descriptor exported to userspace to bind with existing
+      event loops
+      Add: eio_get_eventfd function to get eventfd descriptor
+      Add: header checks in configuration 
+      Change: libeio initialization moved to the MINIT phase, but unfinished
+      requests are still handled in the RSHUTDOWN phase
+      Change: simplified libeio callbacks
+      </notes>
   <!--}}}-->
   <!--{{{ contents -->
   <contents>
@@ -99,6 +103,29 @@
   <extsrcrelease/>
   <!--{{{ Changelog-->
   <changelog>
+    <!-- {{{ 0.3.0 (alpha) -->
+    <release>
+      <version>
+        <release>0.3.0</release>
+        <api>0.3.0</api>
+      </version>
+      <stability>
+        <release>alpha</release>
+        <api>alpha</api>
+      </stability>
+      <license uri="http://www.php.net/license">php</license>
+      <notes>
+      Change: mutex switch that used in communications with libeio replaced with
+      eventfd; the same descriptor exported to userspace to bind with existing
+      event loops
+      Add: eio_get_eventfd function to get eventfd descriptor
+      Add: header checks in configuration 
+      Change: libeio initialization moved to the MINIT phase, but unfinished
+      requests are still handled in the RSHUTDOWN phase
+      Change: simplified libeio callbacks
+      </notes>
+    </release>
+    <!--}}}-->
     <!--{{{ 0.2.0 (alpha) -->
     <release>
       <version>

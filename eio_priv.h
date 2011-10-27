@@ -35,26 +35,26 @@ extern const zend_function_entry eio_functions[];
 #endif
 
 
-#define PHP_EIO_MUTEX_INIT 									\
-	pthread_mutex_init(&php_eio_thread_flag_mutex, NULL);	\
-	pthread_cond_init(&php_eio_thread_flag_cv, NULL);		\
-	php_eio_thread_flag = 0;					
-
-#define PHP_EIO_MUTEX_SET_FLAG(val) 						\
-	pthread_mutex_lock(&php_eio_thread_flag_mutex);			\
-	php_eio_thread_flag = val;								\
-	pthread_cond_signal(&php_eio_thread_flag_cv);			\
-	pthread_mutex_unlock(&php_eio_thread_flag_mutex);
-
-#define EIO_EVENT_LOOP()									\
-	while (eio_nreqs()) {									\
-		pthread_mutex_lock(&php_eio_thread_flag_mutex);		\
-		while (!php_eio_thread_flag) 						\
-			pthread_cond_wait(&php_eio_thread_flag_cv,		\
-					&php_eio_thread_flag_mutex);			\
-		pthread_mutex_unlock(&php_eio_thread_flag_mutex);	\
-		eio_poll();											\
+# define PHP_EIO_EVENTFD_INIT php_eio_eventfd = eventfd(0, EFD_NONBLOCK);
+# define PHP_EIO_EVENTFD_DESTROY 			\
+	if (php_eio_eventfd) {					\
+		close(php_eio_eventfd);				\
 	}
+# define PHP_EIO_EVENTFD_WRITE						\
+	uint64_t u = 1;									\
+	write(php_eio_eventfd, &u, sizeof(uint64_t));
+# define PHP_EIO_EVENTFD_READ						\
+	uint64_t u;										\
+	read(php_eio_eventfd, &u, sizeof(uint64_t));
+
+#define EIO_EVENT_LOOP						\
+	while (eio_nreqs()) {					\
+		struct pollfd pfd;					\
+		pfd.fd = php_eio_eventfd;			\
+		pfd.events = POLLIN;				\
+		poll (&pfd, 1, -1);					\
+		eio_poll();							\
+	}	
 
 
 #define EIO_RET_IF_NOT_CALLABLE(callback)							\
@@ -70,14 +70,14 @@ extern const zend_function_entry eio_functions[];
 	}
 
 #ifdef EIO_DEBUG
-#define EIO_RET_IF_FAILED(req, eio_func)							\
+# define EIO_RET_IF_FAILED(req, eio_func)							\
 	if (!req || req->result != 0) {									\
 		php_error_docref(NULL TSRMLS_CC, E_ERROR,					\
 			#eio_func " failed: %s", strerror(req->errorno));		\
 		RETURN_FALSE;												\
 	}
 #else
-#define EIO_RET_IF_FAILED(req, eio_func)							\
+# define EIO_RET_IF_FAILED(req, eio_func)							\
 	if (!req || req->result != 0)									\
 		RETURN_FALSE;
 #endif
