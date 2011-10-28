@@ -83,6 +83,8 @@ PHP_FUNCTION(eio_nreqs);
 PHP_FUNCTION(eio_nready);
 PHP_FUNCTION(eio_npending);
 
+PHP_FUNCTION(eio_get_eventfd);
+
 #endif	/* EIO_FE_H */
 /* 
  * vim: ft=h.c fdm=marker 

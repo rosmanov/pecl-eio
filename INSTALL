@@ -42,6 +42,7 @@ extension=eio.so
 
 NOTE 
 To disable debug mode don't use --enable-eio-debug configuration option.
+It's recommended to build with this flag first time.
 
 NOTE
 If you set a special path when configuring libeio itself(e.g. by means of

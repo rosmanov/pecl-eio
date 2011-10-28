@@ -320,6 +320,8 @@ EIO_ARGINFO_FUNC_0(npending)
 
 /* }}} */
 
+EIO_ARGINFO_FUNC_0(get_eventfd);
+
 #undef EIO_ARGINFO
 #undef EIO_ARGINFO_FUNC_0
 #undef EIO_ARGINFO_FUNC_1
@@ -390,6 +392,7 @@ const zend_function_entry eio_functions[] = {
 	PHP_FE(eio_nreqs, arginfo_eio_nreqs)
 	PHP_FE(eio_nready, arginfo_eio_nready)
 	PHP_FE(eio_npending, arginfo_eio_npending)
+	PHP_FE(eio_get_eventfd, arginfo_eio_get_eventfd)
 	{NULL, NULL, NULL}	/* Must be the last line in eio_functions[] */
 };
 /* }}} */

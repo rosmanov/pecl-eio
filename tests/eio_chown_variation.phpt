@@ -18,7 +18,7 @@ eio_chown($temp_filename, 0);
 eio_event_loop();
 eio_chown($temp_filename, -1, -1);
 eio_event_loop();
-eio_chown($temp_filename, -1, 1001, EIO_PRI_DEFAULT, "my_eio_chown_cb");
+eio_chown($temp_filename, posix_getuid(), -1, EIO_PRI_DEFAULT, "my_eio_chown_cb");
 eio_event_loop();
 ?>
 --CLEAN--

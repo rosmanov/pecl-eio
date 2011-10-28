@@ -24,16 +24,20 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+# include "config.h"
 #endif
 
 #ifndef _GNU_SOURCE
-#define _GNU_SOURCE
+# define _GNU_SOURCE
 #endif
 
 #include <string.h> /* strerror() */
 #include <fcntl.h>
-#include <pthread.h>
+
+#include <poll.h>
+
+# include <sys/eventfd.h>
+
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 #include "linux/falloc.h"
@@ -49,9 +53,7 @@
 static int le_eio_grp;
 static int le_eio_req;
 
-int php_eio_thread_flag;
-pthread_cond_t php_eio_thread_flag_cv;
-pthread_mutex_t php_eio_thread_flag_mutex;
+int php_eio_eventfd = 0;
 int php_eio_initialized = 0;
 
 /* {{{ eio_module_entry
@@ -564,7 +566,7 @@ php_eio_res_cb(eio_req *req)
 static void
 php_eio_want_poll_callback(void) 
 {
-	PHP_EIO_MUTEX_SET_FLAG(1);
+	PHP_EIO_EVENTFD_WRITE;
 }
 /* }}} */
 
@@ -573,7 +575,7 @@ php_eio_want_poll_callback(void)
 static void
 php_eio_done_poll_callback(void) 
 {
-	PHP_EIO_MUTEX_SET_FLAG(0);
+	PHP_EIO_EVENTFD_READ;
 }
 /* }}} */
 
@@ -688,24 +690,8 @@ PHP_MINIT_FUNCTION(eio)
 
 	/* }}} */
 
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_MSHUTDOWN_FUNCTION
- */
-PHP_MSHUTDOWN_FUNCTION(eio)
-{
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_RINIT_FUNCTION
- */
-PHP_RINIT_FUNCTION(eio)
-{
 	if (!php_eio_initialized) {
-		PHP_EIO_MUTEX_INIT;
+		PHP_EIO_EVENTFD_INIT;
 
 		if (eio_init(php_eio_want_poll_callback, 
 					php_eio_done_poll_callback)) {
@@ -721,13 +707,29 @@ PHP_RINIT_FUNCTION(eio)
 }
 /* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
+PHP_MSHUTDOWN_FUNCTION(eio)
+{
+	PHP_EIO_EVENTFD_DESTROY;
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RINIT_FUNCTION
+ */
+PHP_RINIT_FUNCTION(eio)
+{
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ PHP_RSHUTDOWN_FUNCTION
  */
 PHP_RSHUTDOWN_FUNCTION(eio)
 {
-	if (eio_nreqs()) {
-		EIO_EVENT_LOOP();
-	}
+	EIO_EVENT_LOOP;
 
 	return SUCCESS;
 }
@@ -757,7 +759,7 @@ PHP_MINFO_FUNCTION(eio)
  * Returns TRUE on success, FALSE otherwise. */
 PHP_FUNCTION(eio_event_loop)
 {
-	EIO_EVENT_LOOP();
+	EIO_EVENT_LOOP;
 
 	RETURN_TRUE;
 }
@@ -770,7 +772,6 @@ PHP_FUNCTION(eio_event_loop)
  * Otherwise, it returns 0. */
 PHP_FUNCTION(eio_poll) 
 {
-	PHP_EIO_MUTEX_SET_FLAG(1);
 	RETURN_LONG(eio_poll());
 }
 /* }}} */
@@ -2065,6 +2066,14 @@ EIO_GET_INT_FUNCTION(eio_npending);
 #undef EIO_SET_INT_FUNCTION
 #undef EIO_GET_INT_FUNCTION
 /* }}} */
+
+/* {{{ proto eio_get_eventfd(void) */
+PHP_FUNCTION(eio_get_eventfd) 
+{
+	RETURN_LONG(php_eio_eventfd);
+}
+/* }}} */
+
 /* }}} */
 
 /*
