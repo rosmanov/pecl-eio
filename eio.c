@@ -850,14 +850,9 @@ PHP_FUNCTION(eio_truncate)
 
 /* {{{ proto resource eio_chown(string path, int uid[, int gid = -1 [,int pri = 0 [, mixed callback = NULL[, mixed data = NULL]]]]); 
  * Change file/direcrory permissions. uid is user ID. gid is group ID. uid/gid
- * is ignored when it's value is -1. Returns request resource on success, otherwise FALSE. 
- * The function always returns FALSE for NETWARE and WINDOWS */
+ * is ignored when it's value is -1. Returns request resource on success, otherwise FALSE */
 PHP_FUNCTION(eio_chown)
 {
-#if defined(WINDOWS) || defined(NETWARE)
-	errno = ENOSYS;
-	RETURN_FALSE;
-#else
 	char *path; 
 	int path_len;
 	long uid;
@@ -891,18 +886,13 @@ PHP_FUNCTION(eio_chown)
 
 	req = eio_chown(path, (uid_t) uid, (gid_t) gid, pri, php_eio_res_cb, eio_cb);
 	EIO_RET_REQ_RESOURCE(req, eio_chown);
-#endif
 }
 /* }}} */
 
 /* {{{ proto bool eio_chmod(string path, int mode, [int pri = 0 [, mixed callback = NULL[, mixed data = NULL]]]); 
- * Change file/direcrory permissions system call. Returns request resource on success, otherwise FALSE. 
- * The function always returns FALSE for NETWARE and WINDOWS */
+ * Change file/direcrory permissions system call. Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_chmod)
 {
-#if defined(WINDOWS) || defined(NETWARE)
-	RETURN_FALSE;
-#else
 	char *path; 
 	int path_len;
 	long mode;
@@ -918,7 +908,6 @@ PHP_FUNCTION(eio_chmod)
 
 	req = eio_chmod(path, mode, pri, php_eio_res_cb, eio_cb);
 	EIO_RET_REQ_RESOURCE(req, eio_chmod);
-#endif
 }
 /* }}} */
 
@@ -1068,10 +1057,6 @@ PHP_FUNCTION(eio_mknod)
  * Returns request resource on success, otherwise FALSE. Always returns FALSE for Windows and Netware. */
 PHP_FUNCTION(eio_link)
 {
-#if defined(WINDOWS) || defined(NETWARE)
-	errno = ENOSYS;
-	RETURN_FALSE;
-#else
 	char *path, *new_path; 
 	int path_len, new_path_len;
 	EIO_INIT(pri, callback, data, eio_cb, req);
@@ -1091,7 +1076,6 @@ PHP_FUNCTION(eio_link)
 	req = eio_link(path, new_path,
 			pri, php_eio_res_cb, eio_cb);
 	EIO_RET_REQ_RESOURCE(req, eio_link);
-#endif
 }
 /* }}} */
 	
@@ -1100,10 +1084,6 @@ PHP_FUNCTION(eio_link)
  * Returns resource on success, otherwise FALSE. Always returns FALSE for Windows and Netware. */
 PHP_FUNCTION(eio_symlink)
 {
-#if defined(WINDOWS) || defined(NETWARE)
-	errno = ENOSYS;
-	RETURN_FALSE;
-#else
 	char *path, *new_path; 
 	int path_len, new_path_len;
 	EIO_INIT(pri, callback, data, eio_cb, req);
@@ -1123,7 +1103,6 @@ PHP_FUNCTION(eio_symlink)
 	req = eio_symlink(path, new_path,
 			pri, php_eio_res_cb, eio_cb);
 	EIO_RET_REQ_RESOURCE(req, eio_symlink);
-#endif
 }
 /* }}} */
 
@@ -1186,10 +1165,6 @@ PHP_FUNCTION(eio_close)
  * Returns request resource on success, otherwise FALSE. Always returns FALSE for Windows and Netware. */
 PHP_FUNCTION(eio_sync)
 {
-#if defined(WINDOWS) || defined(NETWARE)
-	errno = ENOSYS;
-	RETURN_FALSE;
-#else
 	EIO_INIT(pri, callback, data, eio_cb, req);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lz!z!",
@@ -1201,7 +1176,6 @@ PHP_FUNCTION(eio_sync)
 
 	req = eio_sync(pri, php_eio_res_cb, eio_cb);
 	EIO_RET_REQ_RESOURCE(req, eio_sync);
-#endif
 }
 /* }}} */
 
@@ -1210,10 +1184,6 @@ PHP_FUNCTION(eio_sync)
  * Returns request resource on success, otherwise FALSE. Always returns FALSE for Windows and Netware. */
 PHP_FUNCTION(eio_fsync)
 {
-#if defined(WINDOWS) || defined(NETWARE)
-	errno = ENOSYS;
-	RETURN_FALSE;
-#else
 	unsigned long fd;
 	EIO_INIT(pri, callback, data, eio_cb, req);
 
@@ -1227,7 +1197,6 @@ PHP_FUNCTION(eio_fsync)
 
 	req = eio_fsync(fd, pri, php_eio_res_cb, eio_cb);
 	EIO_RET_REQ_RESOURCE(req, eio_fsync);
-#endif
 }
 /* }}} */
 

@@ -90,10 +90,6 @@
       <pearinstaller>
         <min>1.4.0b1</min>
       </pearinstaller>
-      <package>
-        <name>libeio</name>
-        <uri>http://software.schmorp.de/pkg/libeio.html</uri>
-      </package>
       <os>
         <name>UNIX</name>
       </os>
