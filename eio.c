@@ -2036,11 +2036,20 @@ EIO_GET_INT_FUNCTION(eio_npending);
 #undef EIO_GET_INT_FUNCTION
 /* }}} */
 
-/* {{{ proto eio_get_eventfd(void) */
-PHP_FUNCTION(eio_get_eventfd) 
+/* {{{ proto resource eio_get_eventfd(void) */
+PHP_FUNCTION(eio_get_eventfd)
 {
-	RETURN_LONG(php_eio_eventfd);
+	/* RETURN_LONG(php_eio_eventfd);
+	  Maybe support some flag arg depending on what I return? 
+	  Although, it's not a good idea. */
+	php_stream *stream = php_stream_fopen_from_fd(php_eio_eventfd, "r", NULL);
+	if (stream) {
+		php_stream_to_zval(stream, return_value);
+	} else {
+		RETURN_NULL();
+	}
 }
+
 /* }}} */
 
 /* }}} */
