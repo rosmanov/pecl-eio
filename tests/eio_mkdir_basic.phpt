@@ -3,6 +3,7 @@ Check for eio_mkdir function basic behaviour
 --FILE--
 <?php 
 $temp_dirname = dirname(__FILE__) ."/eio-temp-dir";
+@rmdir($temp_dirname);
 
 function my_mkdir_callback($data, $result) {
 	global $temp_dirname;
@@ -16,7 +17,7 @@ function my_mkdir_callback($data, $result) {
 }
 
 eio_mkdir($temp_dirname, 0300, 1, "my_mkdir_callback", NULL);
-eio_event_loop();
+//eio_event_loop();
 ?>
 --CLEAN--
 <?php

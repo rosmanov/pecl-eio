@@ -329,7 +329,7 @@ php_eio_custom_execute(eio_req *req)
 	EIO_REQ_CB_INIT(php_eio_cb_custom_t);
 
 	if (EIO_CANCELLED(req)) {
-		php_eio_free_eio_cb_custom(eio_cb);
+		/*php_eio_free_eio_cb_custom(eio_cb);*/
 		return;
 	}
 	EIO_CB_CUSTOM_LOCK;

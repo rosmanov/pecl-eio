@@ -146,13 +146,6 @@ extern const zend_function_entry eio_functions[];
 	zval* arg;								
 #endif
 
-typedef union php_eio_semun_ {
-	int val; 
-	struct semid_ds *buf; 
-	unsigned short int *array;
-	struct seminfo *__buf;
-} php_eio_semun_t;
-
 typedef struct php_eio_cb_ {
 	EIO_CB_T_COMMON;
 } php_eio_cb_t;
