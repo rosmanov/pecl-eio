@@ -444,6 +444,7 @@ php_eio_res_cb(eio_req *req)
 	if (eio_cb->func && Z_TYPE_P(eio_cb->func) != IS_NULL) {
 		/* set $data arg value */
 		args[0] = eio_cb->arg;
+		zval_add_ref(&args[0]);
 
 		/* {{{ set $result arg value */
 		MAKE_STD_ZVAL(args[1]);
