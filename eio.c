@@ -419,7 +419,7 @@ php_eio_res_cb(eio_req *req)
 	EIO_REQ_CB_INIT(php_eio_cb_t);
 
 	if (EIO_CANCELLED(req)) {
-		php_eio_free_eio_cb(eio_cb);
+		/*php_eio_free_eio_cb(eio_cb);*/
 		return 0;
 	}
 
