@@ -106,7 +106,7 @@ if test "$PHP_EIO" != "no"; then
     dnl }}}
 
     dnl Build extension 
-    eio_src="eio.c eio_fe.c"
+    eio_src="php_eio.c eio_fe.c"
     PHP_NEW_EXTENSION(eio, $eio_src, $ext_shared,,$CFLAGS)
 fi
 dnl }}}
