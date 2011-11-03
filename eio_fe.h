@@ -83,7 +83,7 @@ PHP_FUNCTION(eio_nreqs);
 PHP_FUNCTION(eio_nready);
 PHP_FUNCTION(eio_npending);
 
-PHP_FUNCTION(eio_get_eventfd);
+PHP_FUNCTION(eio_get_event_stream);
 
 #endif	/* EIO_FE_H */
 /* 

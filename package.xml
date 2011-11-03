@@ -34,7 +34,7 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-  Change: eio_get_eventfd returns stream resource
+  Change: eio_get_event_stream returns stream resource
   Fix: package dependencies didn't allow pecl install eio-alpha
   Fix: redundant MS/NETWARE platform checks
   </notes>
@@ -106,7 +106,7 @@
       </stability>
       <license uri="http://www.php.net/license">php</license>
       <notes>
-      Change: eio_get_eventfd returns stream resource
+      Change: eio_get_event_stream returns stream resource
       Fix: package dependencies didn't allow pecl install eio-alpha
       Fix: redundant MS/NETWARE platform checks
       </notes>

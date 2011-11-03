@@ -53,37 +53,43 @@ if test "$PHP_EIO" != "no"; then
     PHP_ADD_INCLUDE($EIO_DIR/include)
     dnl }}}
     
+
     dnl {{{ sys/eventfd.h
-    SEARCH_FOR="include/sys/eventfd.h"
-    AC_MSG_CHECKING([for sys/eventfd.h in default path])
-    for i in $SEARCH_PATH ; do
-        if test -r $i/$SEARCH_FOR; then
-            EVENTFD_DIR=$i
-            AC_MSG_RESULT(found in $i)
-        fi
-    done
-    if test -z "$EVENTFD_DIR"; then
-        AC_MSG_RESULT([not found])
-        AC_MSG_ERROR([Please install glibc 2.8 or greater])
-    fi
-    PHP_ADD_INCLUDE($EVENTFD_DIR/include)
+    dnl     SEARCH_FOR="include/sys/eventfd.h"
+    dnl     AC_MSG_CHECKING([for sys/eventfd.h in default path])
+    dnl     for i in $SEARCH_PATH ; do
+    dnl         if test -r $i/$SEARCH_FOR; then
+    dnl             EVENTFD_DIR=$i
+    dnl             AC_MSG_RESULT(found in $i)
+    dnl         fi
+    dnl     done
+    dnl     if test -z "$EVENTFD_DIR"; then
+    dnl         AC_MSG_RESULT([not found])
+    dnl         AC_MSG_ERROR([Please install glibc 2.8 or greater])
+    dnl     fi
+    dnl     PHP_ADD_INCLUDE($EVENTFD_DIR/include)
     dnl }}}
     
+    
     dnl {{{ linux/falloc.h
-    SEARCH_FOR="include/linux/falloc.h"
-    AC_MSG_CHECKING([for falloc.h file in default path])
-    for i in $SEARCH_PATH ; do
-        if test -r $i/$SEARCH_FOR; then
-            FALLOC_DIR=$i
-            AC_MSG_RESULT(found in $i)
-        fi
-    done
-    if test -z "$FALLOC_DIR"; then
-        AC_MSG_RESULT([not found])
-        AC_MSG_ERROR([Please install Linux headers, or make sure $SEARCH_FOR is available])
-    fi
-    PHP_ADD_INCLUDE($FALLOC_DIR/include)
+    dnl     SEARCH_FOR="include/linux/falloc.h"
+    dnl     AC_MSG_CHECKING([for falloc.h file in default path])
+    dnl     for i in $SEARCH_PATH ; do
+    dnl         if test -r $i/$SEARCH_FOR; then
+    dnl             FALLOC_DIR=$i
+    dnl             AC_MSG_RESULT(found in $i)
+    dnl         fi
+    dnl     done
+    dnl     if test -z "$FALLOC_DIR"; then
+    dnl         AC_MSG_RESULT([not found])
+    dnl         AC_MSG_ERROR([Please install Linux headers, or make sure $SEARCH_FOR is available])
+    dnl     fi
+    dnl     PHP_ADD_INCLUDE($FALLOC_DIR/include)
     dnl }}}
+
+    AC_CHECK_HEADERS(sys/eventfd.h linux/falloc.h)
+
+    AC_CHECK_FUNCS(eventfd fallocate)
 
     dnl }}}
 
@@ -111,4 +117,4 @@ if test "$PHP_EIO" != "no"; then
 fi
 dnl }}}
 
-dnl vim: ft=m4.sh et fdm=marker:
+dnl vim: ft=m4.sh et fdm=marker cms=dnl\ %s

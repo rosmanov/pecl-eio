@@ -36,7 +36,7 @@
 
 #include <poll.h>
 
-# include <sys/eventfd.h>
+#include <sys/eventfd.h>
 
 #include <sys/stat.h>
 #include <sys/statvfs.h>
@@ -2037,8 +2037,8 @@ EIO_GET_INT_FUNCTION(eio_npending);
 #undef EIO_GET_INT_FUNCTION
 /* }}} */
 
-/* {{{ proto resource eio_get_eventfd(void) */
-PHP_FUNCTION(eio_get_eventfd)
+/* {{{ proto resource eio_get_event_stream(void) */
+PHP_FUNCTION(eio_get_event_stream)
 {
 	/* RETURN_LONG(php_eio_eventfd);
 	  Maybe support some flag arg depending on what I return? 
