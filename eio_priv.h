@@ -34,29 +34,6 @@ extern const zend_function_entry eio_functions[];
 #define TSRMLS_SET_CTX(ctx)
 #endif
 
-
-# define PHP_EIO_EVENTFD_INIT php_eio_eventfd = eventfd(0, EFD_NONBLOCK);
-# define PHP_EIO_EVENTFD_DESTROY 			\
-	if (php_eio_eventfd) {					\
-		close(php_eio_eventfd);				\
-	}
-# define PHP_EIO_EVENTFD_WRITE						\
-	uint64_t u = 1;									\
-	write(php_eio_eventfd, &u, sizeof(uint64_t));
-# define PHP_EIO_EVENTFD_READ						\
-	uint64_t u;										\
-	read(php_eio_eventfd, &u, sizeof(uint64_t));
-
-#define EIO_EVENT_LOOP						\
-	while (eio_nreqs()) {					\
-		struct pollfd pfd;					\
-		pfd.fd = php_eio_eventfd;			\
-		pfd.events = POLLIN;				\
-		poll (&pfd, 1, -1);					\
-		eio_poll();							\
-	}	
-
-
 #define EIO_RET_IF_NOT_CALLABLE(callback)							\
 	char *func_name;												\
 	if (callback && Z_TYPE_P(callback) != IS_NULL) {				\
@@ -70,38 +47,27 @@ extern const zend_function_entry eio_functions[];
 	}
 
 #ifdef EIO_DEBUG
-# define EIO_RET_IF_FAILED(req, eio_func)							\
+# define PHP_EIO_RET_IF_FAILED(req, eio_func)							\
 	if (!req || req->result != 0) {									\
 		php_error_docref(NULL TSRMLS_CC, E_ERROR,					\
 			#eio_func " failed: %s", strerror(req->errorno));		\
 		RETURN_FALSE;												\
 	}
 #else
-# define EIO_RET_IF_FAILED(req, eio_func)							\
+# define PHP_EIO_RET_IF_FAILED(req, eio_func)							\
 	if (!req || req->result != 0)									\
 		RETURN_FALSE;
 #endif
 
-#define EIO_RET_REQ_RESOURCE(req, eio_func)							\
-	EIO_RET_IF_FAILED(req, eio_func);								\
+#define PHP_EIO_RET_REQ_RESOURCE(req, eio_func)							\
+	PHP_EIO_RET_IF_FAILED(req, eio_func);								\
 	ZEND_REGISTER_RESOURCE(return_value, req, le_eio_req);
 
-#define EIO_INIT_CUSTOM(pri, callback, data, execute, eio_cb, req)	\
-	long pri = EIO_PRI_DEFAULT;										\
-	zval *callback = NULL, *data = NULL, *execute = NULL;			\
-	php_eio_cb_custom_t *eio_cb;									\
-	eio_req *req;													\
-	/*php_eio_init(TSRMLS_C);*/
-
-#define EIO_INIT(pri, callback, data, eio_cb, req)					\
+#define PHP_EIO_INIT(pri, callback, data, eio_cb, req)				\
 	long pri = EIO_PRI_DEFAULT;										\
 	zval *callback = NULL, *data = NULL;							\
 	php_eio_cb_t *eio_cb;											\
-	eio_req *req;													\
-	/*php_eio_init(TSRMLS_C);*/
-
-#define EIO_NEW_CB(eio_cb, callback, data)							\
-	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
+	eio_req *req;
 
 #ifdef EIO_DEBUG
 #define EIO_CHECK_PATH_LEN(path, path_len)							\
@@ -117,7 +83,6 @@ extern const zend_function_entry eio_functions[];
 	}
 #endif
 
-
 #define EIO_REGISTER_LONG_EIO_CONSTANT(name)						\
 	REGISTER_LONG_CONSTANT(#name, name,								\
 			CONST_CS | CONST_PERSISTENT);
@@ -126,8 +91,6 @@ extern const zend_function_entry eio_functions[];
 	REGISTER_LONG_CONSTANT(#name, value,							\
 			CONST_CS | CONST_PERSISTENT);
 
-#define EIO_CB_CUSTOM_LOCK eio_cb->locked = 1;
-#define EIO_CB_CUSTOM_UNLOCK eio_cb->locked = 0;
 #define EIO_CB_CUSTOM_IS_LOCKED(eio_cb) ((eio_cb) ? (eio_cb)->locked : 0)
 
 /* }}} */
