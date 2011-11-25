@@ -574,7 +574,7 @@ php_eio_res_cb(eio_req *req)
 static void
 php_eio_want_poll_callback(void) 
 {
-	uint64_t u;									\
+	uint64_t u = 1;
 	write(php_eio_eventfd, &u, sizeof(uint64_t));
 }
 /* }}} */
@@ -584,7 +584,7 @@ php_eio_want_poll_callback(void)
 static void
 php_eio_done_poll_callback(void) 
 {
-	uint64_t u;										\
+	uint64_t u;
 	read(php_eio_eventfd, &u, sizeof(uint64_t));
 }
 /* }}} */
