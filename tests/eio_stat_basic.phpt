@@ -2,7 +2,7 @@
 Check for eio_stat, eio_lstat, eio_fstat functions' basic behaviour
 --FILE--
 <?php 
-$old_err = error_reporting(E_ERROR);
+error_reporting(E_ERROR);
 $tmp_filename = dirname(__FILE__) ."/eio-file.tmp";
 touch($tmp_filename);
 
@@ -29,10 +29,6 @@ eio_event_loop();
 
 eio_open($tmp_filename, EIO_O_RDONLY, NULL, EIO_PRI_DEFAULT, "my_open_cb", "eio_open");
 eio_event_loop();
-?>
---CLEAN--
-<?php 
-error_reporting($old_err);
 ?>
 --EXPECTF--
 string(%d) "eio_%stat"

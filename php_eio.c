@@ -810,7 +810,7 @@ PHP_FUNCTION(eio_open)
 				&path, &path_len,
 				&flags, &mode,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	EIO_CHECK_PATH_LEN(path, path_len);
@@ -843,7 +843,7 @@ PHP_FUNCTION(eio_truncate)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|llz!z!",
 				&path, &path_len, 
 				&offset, &pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (offset < 0) {
@@ -872,7 +872,7 @@ PHP_FUNCTION(eio_chown)
 				&path, &path_len, 
 				&uid, &gid, 
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	EIO_CHECK_PATH_LEN(path, path_len);
@@ -910,7 +910,7 @@ PHP_FUNCTION(eio_chmod)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|lz!z!",
 				&path, &path_len, 
 				&mode, &pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -932,7 +932,7 @@ PHP_FUNCTION(eio_mkdir)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|lz!z!",
 				&path, &path_len, 
 				&mode, &pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (access(path, F_OK) == 0) {
@@ -961,7 +961,7 @@ PHP_FUNCTION(eio_rmdir)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz!z!",
 				&path, &path_len, 
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	EIO_CHECK_PATH_LEN(path, path_len);
@@ -992,7 +992,7 @@ PHP_FUNCTION(eio_unlink)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz!z!",
 				&path, &path_len, 
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (access(path, F_OK) != 0) {
@@ -1021,7 +1021,7 @@ PHP_FUNCTION(eio_utime)
 				&path, &path_len, 
 				&atime, &mtime, 
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	EIO_CHECK_PATH_LEN(path, path_len);
@@ -1048,7 +1048,7 @@ PHP_FUNCTION(eio_mknod)
 				&path, &path_len, 
 				&mode, &dev, 
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	EIO_CHECK_PATH_LEN(path, path_len);
@@ -1074,7 +1074,7 @@ PHP_FUNCTION(eio_link)
 				&path, &path_len, 
 				&new_path, &new_path_len, 
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	EIO_CHECK_PATH_LEN(path, path_len);
@@ -1101,7 +1101,7 @@ PHP_FUNCTION(eio_symlink)
 				&path, &path_len, 
 				&new_path, &new_path_len, 
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	EIO_CHECK_PATH_LEN(path, path_len);
@@ -1128,7 +1128,7 @@ PHP_FUNCTION(eio_rename)
 				&path, &path_len, 
 				&new_path, &new_path_len, 
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	EIO_CHECK_PATH_LEN(path, path_len);
@@ -1152,7 +1152,7 @@ PHP_FUNCTION(eio_close)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/|lz!z!",
 				&fd,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 	if (!fd) {
 #ifdef EIO_DEBUG
@@ -1178,7 +1178,7 @@ PHP_FUNCTION(eio_sync)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lz!z!",
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -1199,7 +1199,7 @@ PHP_FUNCTION(eio_fsync)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|lz!z!",
 				&fd,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -1224,7 +1224,7 @@ PHP_FUNCTION(eio_fdatasync)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|lz!z!",
 				&fd,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -1248,7 +1248,7 @@ PHP_FUNCTION(eio_futime)
 				&fd,
 				&atime, &mtime, 
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -1268,7 +1268,7 @@ PHP_FUNCTION(eio_ftruncate)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|llz!z!",
 				&fd, &offset, &pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (offset < 0) {
@@ -1296,7 +1296,7 @@ PHP_FUNCTION(eio_fchmod)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/l/|lz!z!",
 				&fd, &mode, &pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -1323,7 +1323,7 @@ PHP_FUNCTION(eio_fchown)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/l/|l/lz!z!",
 				&fd, &uid, &gid, 
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (uid < 0 || gid < 0) {
@@ -1352,7 +1352,7 @@ PHP_FUNCTION(eio_dup2)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/l/|lz!z!",
 				&fd, &fd2, &pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -1378,7 +1378,7 @@ PHP_FUNCTION(eio_read)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/lllz!|z!",
 				&fd, &length, &offset,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -1421,7 +1421,7 @@ PHP_FUNCTION(eio_write)
 				&fd, &zbuf, 
 				&length, &offset,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!fd) {
@@ -1474,7 +1474,7 @@ PHP_FUNCTION(eio_readlink)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "slz!|z!",
 				&path, &path_len,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	EIO_CHECK_PATH_LEN(path, path_len);
@@ -1501,7 +1501,7 @@ PHP_FUNCTION(eio_realpath)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "slz!|z!",
 				&path, &path_len,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	EIO_CHECK_PATH_LEN(path, path_len);
@@ -1526,7 +1526,7 @@ PHP_FUNCTION(eio_stat)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "slz!|z!",
 				&path, &path_len,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	EIO_CHECK_PATH_LEN(path, path_len);
@@ -1551,7 +1551,7 @@ PHP_FUNCTION(eio_lstat)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "slz!|z!",
 				&path, &path_len,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	EIO_CHECK_PATH_LEN(path, path_len);
@@ -1577,7 +1577,7 @@ PHP_FUNCTION(eio_fstat)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/lz!|z!",
 				&fd,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -1600,7 +1600,7 @@ PHP_FUNCTION(eio_statvfs)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "slz!|z!",
 				&path, &path_len,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	EIO_CHECK_PATH_LEN(path, path_len);
@@ -1626,7 +1626,7 @@ PHP_FUNCTION(eio_fstatvfs)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/lz!|z!",
 				&fd,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -1657,7 +1657,7 @@ PHP_FUNCTION(eio_readdir)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sllz|z!",
 				&path, &path_len, &flags,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -1686,7 +1686,7 @@ PHP_FUNCTION(eio_sendfile)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/l/ll|lz!z!",
 				&out_fd, &in_fd, &offset, &length,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -1708,7 +1708,7 @@ PHP_FUNCTION(eio_readahead)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/ll|lz!z!",
 				&fd, &offset, &length,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -1729,7 +1729,7 @@ PHP_FUNCTION(eio_syncfs)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/|lz!z!",
 				&fd, &pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -1750,7 +1750,7 @@ PHP_FUNCTION(eio_sync_file_range)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/lll|lz!z!",
 				&fd, &offset, &nbytes, &flags,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -1781,7 +1781,7 @@ PHP_FUNCTION(eio_fallocate)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/lll|lz!z!",
 				&fd, &mode, &offset, &length,
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -1825,7 +1825,7 @@ PHP_FUNCTION(eio_custom)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zlz|z!",
 				&execute, &pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 	
 	eio_cb = php_eio_new_eio_cb_custom(callback, data, execute TSRMLS_CC);
@@ -1848,7 +1848,7 @@ PHP_FUNCTION(eio_busy)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|lz!z!",
 				&delay, &pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -1868,7 +1868,7 @@ PHP_FUNCTION(eio_nop)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lz!z!",
 				&pri, &callback, &data) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	eio_cb = php_eio_new_eio_cb(callback, data TSRMLS_CC);
@@ -2070,6 +2070,6 @@ PHP_FUNCTION(eio_get_event_stream)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
+ * vim600: noet sw=4 ts=4 sts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4 sts=4
  */

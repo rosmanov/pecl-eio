@@ -2,8 +2,6 @@
 Check for eio_grp_add function basic behaviour
 --FILE--
 <?php 
-//$old_error_reporting = error_reporting(0);
-
 $temp_filename = dirname(__FILE__) ."/eio-file.tmp";
 $fp = fopen($temp_filename, "w");
 fwrite($fp, "some data");
@@ -45,9 +43,6 @@ var_dump($grp);
 eio_event_loop();
 ?>
 --CLEAN--
-<?php
-//error_reporting($old_error_reporting);
-?>
 --EXPECTF--
 resource(%d) of type (EIO Group Descriptor)
 bool(true)

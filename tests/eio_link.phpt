@@ -36,9 +36,6 @@ function my_readlink_cb($data, $result) {
 eio_link($filename, $hardlink, EIO_PRI_DEFAULT, "my_hardlink_cb", $hardlink);
 eio_event_loop();
 ?>
---CLEAN--
-<?php
-?>
 --EXPECTF--
 bool(true)
 bool(true)

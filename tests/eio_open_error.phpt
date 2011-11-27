@@ -3,7 +3,7 @@ Check for eio_open function error behaviour
 --SKIPIF--
 --FILE--
 <?php 
-$old_error_reporting = error_reporting(0);
+error_reporting(0);
 
 $temp_filename = "eio-temp-file-nonexistant.tmp";
 function my_file_opened_callback($data, $result) {

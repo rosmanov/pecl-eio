@@ -2,7 +2,7 @@
 Check for eio_fallocate function basic behaviour
 --FILE--
 <?php 
-$old_error_reporting = error_reporting(0);
+error_reporting(0);
 
 $temp_filename = "eio-temp-file.tmp";
 
@@ -30,12 +30,8 @@ function my_file_opened_callback($data, $result) {
 
 eio_open($temp_filename, EIO_O_CREAT | EIO_O_RDWR, NULL, EIO_PRI_DEFAULT, "my_file_opened_callback", NULL);
 eio_event_loop();
-
 ?>
 --CLEAN--
-<?php
-error_reporting($old_error_reporting);
-?>
 --EXPECT--
 bool(true)
 bool(true)

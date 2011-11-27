@@ -3,7 +3,7 @@ Check for eio_truncate function basic behaviour
 --SKIPIF--
 --FILE--
 <?php 
-$old_error_reporting = error_reporting(0);
+error_reporting(0);
 
 $temp_filename = "eio-temp-file.tmp";
 
@@ -28,7 +28,6 @@ eio_event_loop();
 --CLEAN--
 <?php
 @unlink($temp_filename);
-error_reporting($old_error_reporting);
 ?>
 --EXPECT--
 eio_truncate_ok

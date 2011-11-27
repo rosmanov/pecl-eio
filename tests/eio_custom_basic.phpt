@@ -2,7 +2,7 @@
 Check for eio_custom function basic behaviour
 --FILE--
 <?php 
-$old_error_reporting = error_reporting(0);
+error_reporting(0);
 
 function my_custom_callback($data, $result) {
 	var_dump($data);
@@ -27,9 +27,6 @@ var_dump($req);
 eio_event_loop();
 ?>
 --CLEAN--
-<?php
-error_reporting($old_error_reporting);
-?>
 --EXPECTF--
 resource(%d) of type (EIO Request Descriptor)
 string(14) "my_custom_data"
