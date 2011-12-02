@@ -1,19 +1,19 @@
 /*
-  +----------------------------------------------------------------------+
-  | PHP Version 5														 |
-  +----------------------------------------------------------------------+
-  | Copyrght (C) 1997-2011 The PHP Group								 |
-  +----------------------------------------------------------------------+
-  | This source file is subject to version 3.01 of the PHP license,		 |
-  | that is bundled with this package in the file LICENSE, and is		 |
-  | available through the world-wide-web at the following url:			 |
-  | http://www.php.net/license/3_01.txt									 |
-  | If you did not receive a copy of the PHP license and are unable to	 |
-  | obtain it through the world-wide-web, please send a note to			 |
-  | license@php.net so we can mail you a copy immediately.				 |
-  +----------------------------------------------------------------------+
-  | Author: Ruslan Osmanov <osmanov@php.net>							 |
-  +----------------------------------------------------------------------+
+   +----------------------------------------------------------------------+
+   | PHP Version 5                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2011 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Author: Ruslan Osmanov <osmanov@php.net>                             |
+   +----------------------------------------------------------------------+
 */
 #ifndef EIO_FE_H
 #define EIO_FE_H
@@ -87,5 +87,6 @@ PHP_FUNCTION(eio_get_event_stream);
 
 #endif	/* EIO_FE_H */
 /* 
- * vim: ft=h.c fdm=marker 
+ * vim600: ft=h.c noet ci pi sts=4 sw=4 ts=8 fdm=marker 
+ * vim<600: noet ci pi sts=4 sw=4 ts=8
  */
