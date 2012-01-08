@@ -1,24 +1,34 @@
-INSTALLATION OF LIBEIO PECL EXTENSION
+INSTALLATION OF EIO PECL EXTENSION
+==================================
 
 Currently Linux platforms supported only.
 
-Checkout the project or download it as archive. Then enter the librio directory
-and issue the following commands.
 
-1. INSTALL LIBEIO, IF IT IS NOT INSTALLED YET
+AUTOMATIC INSTALLATION
+----------------------
 
-$ touch ~/.cvspass
-$ cvs -z3 -d :pserver:anonymous@cvs.schmorp.de/schmorpforge co libeio
-$ cd libeio
-$ ./autogen.sh
-$ ./configure
-$ make 
-# make install 
+To download and install eio automatically you need the following commands
 
-Note, the last command should be initiated with root priveleges, e.g.
-$ sudo make install
+# pecl install eio
 
-2. INSTALL LIBEIO PHP EXTENSION
+for stable release, and the following for beta release:
+
+# pecl install eio-beta
+
+If you have the package archive, unpack it and run: 
+
+# pecl install package.xml
+
+Note, these commands(started with `#') most likely need root priveleges.
+
+Since version 0.4.0 beta libeio is embedded. So you don't need to install the
+library separately.
+
+
+MANUAL INSTALLATION
+-------------------
+
+Checkout the project or download it as archive. In the package directory run: 
 
 $ phpize 
 $ ./configure --with-eio --enable-eio-debug
@@ -29,9 +39,6 @@ $ make test
 
 Do install with root priveleges:
 # make install
-
-NOTE: always check for current options and flags:
-$ ./configure --help | grep eio
 
 3. CONFIGURE PHP TO USE LIBEIO EXTENSION
 
@@ -44,12 +51,9 @@ NOTE
 To disable debug mode don't use --enable-eio-debug configuration option.
 It's recommended to build with this flag first time.
 
-NOTE
-If you set a special path when configuring libeio itself(e.g. by means of
---prefix option), you can point to that location by means of --with-eio
-option.
 
-4. FINALLY
+FINALLY
+------
 
 Restart the SAPI server(Apache, PHP-FPM etc.), if any.
 

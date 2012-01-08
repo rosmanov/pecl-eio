@@ -30,86 +30,60 @@ dnl }}}
 dnl {{{ eio support 
 if test "$PHP_EIO" != "no"; then
 
-    dnl {{{ Include paths
-    SEARCH_PATH="/usr/local /usr /opt"
+dnl {{{ COMMENTED OUT
+dnl     dnl {{{ Include paths
+dnl 
+dnl     SEARCH_PATH="/usr/local /usr /opt"
+dnl     
+dnl     dnl {{{ --with-eio
+dnl     SEARCH_FOR="include/eio.h"
+dnl     if test -r $PHP_EIO/$SEARCH_FOR; then # path given as parameter
+dnl         EIO_DIR=$PHP_EIO
+dnl     else # search default path list
+dnl         AC_MSG_CHECKING([for eio files in default path])
+dnl         for i in $SEARCH_PATH ; do
+dnl             if test -r $i/$SEARCH_FOR; then
+dnl                 EIO_DIR=$i
+dnl                 AC_MSG_RESULT(found in $i)
+dnl             fi
+dnl         done
+dnl     fi
+dnl     if test -z "$EIO_DIR"; then
+dnl         AC_MSG_RESULT([not found])
+dnl         AC_MSG_ERROR([Please reinstall libeio])
+dnl     fi
+dnl     PHP_ADD_INCLUDE($EIO_DIR/include)
+dnl     dnl }}}
+dnl 
+dnl     dnl }}}
+dnl 
+dnl     dnl {{{ Library checks
+dnl     # --with-eio -> check for lib and symbol presence
+dnl     LIBNAME=eio
+dnl     LIBSYMBOL=eio_init
+dnl 
+dnl     PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
+dnl     [
+dnl     PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $EIO_DIR/lib, EIO_SHARED_LIBADD)
+dnl     AC_DEFINE(HAVE_EIOLIB,1,[ ])
+dnl     ],[
+dnl     AC_MSG_ERROR([wrong eio lib version or lib not found])
+dnl     ],[
+dnl     -L$EIO_DIR/lib
+dnl     ])
+dnl 
+dnl     PHP_SUBST(EIO_SHARED_LIBADD)
+dnl     dnl }}}
+dnl
+dnl     dnl }}}
+
+    dnl AC_CHECK_HEADERS(sys/eventfd.h linux/falloc.h)
+    dnl AC_CHECK_FUNCS(eventfd fallocate)
     
-    dnl {{{ --with-eio
-    SEARCH_FOR="include/eio.h"
-    if test -r $PHP_EIO/$SEARCH_FOR; then # path given as parameter
-        EIO_DIR=$PHP_EIO
-    else # search default path list
-        AC_MSG_CHECKING([for eio files in default path])
-        for i in $SEARCH_PATH ; do
-            if test -r $i/$SEARCH_FOR; then
-                EIO_DIR=$i
-                AC_MSG_RESULT(found in $i)
-            fi
-        done
-    fi
-    if test -z "$EIO_DIR"; then
-        AC_MSG_RESULT([not found])
-        AC_MSG_ERROR([Please reinstall libeio])
-    fi
-    PHP_ADD_INCLUDE($EIO_DIR/include)
-    dnl }}}
-    
-
-    dnl {{{ sys/eventfd.h
-    dnl     SEARCH_FOR="include/sys/eventfd.h"
-    dnl     AC_MSG_CHECKING([for sys/eventfd.h in default path])
-    dnl     for i in $SEARCH_PATH ; do
-    dnl         if test -r $i/$SEARCH_FOR; then
-    dnl             EVENTFD_DIR=$i
-    dnl             AC_MSG_RESULT(found in $i)
-    dnl         fi
-    dnl     done
-    dnl     if test -z "$EVENTFD_DIR"; then
-    dnl         AC_MSG_RESULT([not found])
-    dnl         AC_MSG_ERROR([Please install glibc 2.8 or greater])
-    dnl     fi
-    dnl     PHP_ADD_INCLUDE($EVENTFD_DIR/include)
-    dnl }}}
-    
-    
-    dnl {{{ linux/falloc.h
-    dnl     SEARCH_FOR="include/linux/falloc.h"
-    dnl     AC_MSG_CHECKING([for falloc.h file in default path])
-    dnl     for i in $SEARCH_PATH ; do
-    dnl         if test -r $i/$SEARCH_FOR; then
-    dnl             FALLOC_DIR=$i
-    dnl             AC_MSG_RESULT(found in $i)
-    dnl         fi
-    dnl     done
-    dnl     if test -z "$FALLOC_DIR"; then
-    dnl         AC_MSG_RESULT([not found])
-    dnl         AC_MSG_ERROR([Please install Linux headers, or make sure $SEARCH_FOR is available])
-    dnl     fi
-    dnl     PHP_ADD_INCLUDE($FALLOC_DIR/include)
-    dnl }}}
-
-    AC_CHECK_HEADERS(sys/eventfd.h linux/falloc.h)
-
-    AC_CHECK_FUNCS(eventfd fallocate)
-
-    dnl }}}
-
-    dnl {{{ Library checks
-    # --with-eio -> check for lib and symbol presence
-    LIBNAME=eio
-    LIBSYMBOL=eio_init
-
-    PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
-    [
-    PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $EIO_DIR/lib, EIO_SHARED_LIBADD)
-    AC_DEFINE(HAVE_EIOLIB,1,[ ])
-    ],[
-    AC_MSG_ERROR([wrong eio lib version or lib not found])
-    ],[
-    -L$EIO_DIR/lib
-    ])
-
-    PHP_SUBST(EIO_SHARED_LIBADD)
-    dnl }}}
+    PHP_ADD_INCLUDE(.)
+    AC_CONFIG_SRCDIR([libeio/eio.h])
+    dnl AC_CONFIG_HEADERS([config.h])
+    m4_include([libeio/libeio.m4])
 
     dnl Build extension 
     eio_src="php_eio.c eio_fe.c"

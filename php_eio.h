@@ -17,18 +17,18 @@
 */
 
 #ifndef PHP_EIO_H
-#define PHP_EIO_H
+#  define PHP_EIO_H
 
 extern zend_module_entry eio_module_entry;
-#define phpext_eio_ptr &eio_module_entry
+#  define phpext_eio_ptr &eio_module_entry
 
-#ifndef PHP_EIO_VERSION
-#define PHP_EIO_VERSION "0.3.1"
-#endif
+#  ifndef PHP_EIO_VERSION
+#    define PHP_EIO_VERSION "0.4.0"
+#  endif
 
-#ifdef ZTS
-#include "TSRM.h"
-#endif
+#  ifdef ZTS
+#    include "TSRM.h"
+#  endif
 
 PHP_MINIT_FUNCTION(eio);
 PHP_MSHUTDOWN_FUNCTION(eio);
@@ -38,6 +38,6 @@ PHP_MINFO_FUNCTION(eio);
 
 #endif	/* PHP_EIO_H */
 /*
- * vim600: ft=h.c noet ci pi sts=4 sw=4 ts=8 fdm=marker 
- * vim<600: noet ci pi sts=4 sw=4 ts=8
+ * vim600: fdm=marker
+ * vim: noet sts=4 sw=4 ts=4
  */

@@ -1,21 +1,29 @@
-eio - PECL Extension
+Eio - PECL Extension
+
 
 DESCRIPTION
+-----------
 
 This is a PHP extension wrapping functions of the libeio library written by Marc
 Lehmann <libeio@schmorp.de>(see http://software.schmorp.de/pkg/libeio.html).
 
 For installation instructions see file named INSTALL.
 
+
 PORTABILITY
+-----------
 
 Currently Linux platforms supported only.
 
+
 AUTHORS
+-------
 
 Ruslan Osmanov <osmanov@php.net>
 
+
 COPYRIGHT
+---------
 
 Copyright (C) 2011 Ruslan Osmanov <osmanov@php.net>
 

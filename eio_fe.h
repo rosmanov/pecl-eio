@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
 */
 #ifndef EIO_FE_H
-#define EIO_FE_H
+#  define EIO_FE_H
 
 PHP_FUNCTION(eio_poll);
 PHP_FUNCTION(eio_event_loop);
@@ -85,8 +85,8 @@ PHP_FUNCTION(eio_npending);
 
 PHP_FUNCTION(eio_get_event_stream);
 
-#endif	/* EIO_FE_H */
+#endif							/* EIO_FE_H */
 /* 
- * vim600: ft=h.c noet ci pi sts=4 sw=4 ts=8 fdm=marker 
- * vim<600: noet ci pi sts=4 sw=4 ts=8
+ * vim600: fdm=marker
+ * vim: noet sts=4 sw=4 ts=4
  */

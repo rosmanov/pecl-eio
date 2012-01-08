@@ -21,12 +21,12 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2011-10-30</date>
-  <time>20:40:10</time>
+  <date>2012-01-08</date>
+  <time>11:42:00</time>
   <!--{{{ Current version -->
   <version>
-    <release>0.3.1</release>
-    <api>0.3.1</api>
+    <release>0.4.0</release>
+    <api>0.4.0</api>
   </version>
   <stability>
     <release>beta</release>
@@ -34,9 +34,9 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-  Change: eio_get_event_stream returns stream resource
-  Fix: package dependencies didn't allow pecl install eio-alpha
-  Fix: redundant MS/NETWARE platform checks
+  Change: libeio is now embedded, no need to install it separately
+  Change: functions call info and call info cache used instead of zvals
+  Fix: segmentation fault on 32-bit platforms with the default 4-bit LFS
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -54,6 +54,14 @@
       <file role="src" name="eio_fe.h"/>
       <file role="src" name="eio_priv.h"/>
       <file role="src" name="php_eio.h"/>
+      <file role="src" name="libeio/LICENSE"/>
+      <file role="src" name="libeio/Makefile.am"/>
+      <file role="src" name="libeio/configure.ac"/>
+      <file role="src" name="libeio/ecb.h"/>
+      <file role="src" name="libeio/eio.c"/>
+      <file role="src" name="libeio/eio.h"/>
+      <file role="src" name="libeio/libeio.m4"/>
+      <file role="src" name="libeio/xthread.h"/>
       <file role="test" name="tests/eio001.phpt"/>
       <file role="test" name="tests/eio_cancel_basic.phpt"/>
       <file role="test" name="tests/eio_chmod_basic.phpt"/>
@@ -91,9 +99,29 @@
     </required>
   </dependencies>
   <providesextension>eio</providesextension>
-  <extsrcrelease/>
+  <extsrcrelease>
+    <configureoption default="no" name="enable-eio-debug" prompt="Enable internal debugging in Eio"/>
+  </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
+    <!--{{{ 0.4.0 (beta) -->
+    <release>
+      <version>
+        <release>0.4.0</release>
+        <api>0.4.0</api>
+      </version>
+      <stability>
+        <release>beta</release>
+        <api>beta</api>
+      </stability>
+      <license uri="http://www.php.net/license">php</license>
+      <notes>
+      Change: libeio is now embedded, no need to install it separately
+      Change: functions call info and call info cache used instead of zvals
+      Fix: segmentation fault on 32-bit platforms with the default 4-bit LFS
+      </notes>
+    </release>
+    <!--}}}-->
     <!--{{{ 0.3.1 (beta) -->
     <release>
       <version>
@@ -233,5 +261,5 @@
   <!--}}}-->
 </package>
 <!-- 
-vim: et tw=80 sts=2 ts=2 fdm=marker
+vim: et sts=1 ts=1 fdm=marker
 -->
