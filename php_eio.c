@@ -1318,7 +1318,7 @@ PHP_FUNCTION(eio_futime)
 	double atime, mtime;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/l/l/|lf!z!",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/d/d/|lf!z!",
 			&fd, &atime, &mtime, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
 	}
@@ -1338,7 +1338,7 @@ PHP_FUNCTION(eio_ftruncate)
 	unsigned long fd, offset = 0;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|llf!z!",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|llf!z!",
 			&fd, &offset, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
 	}
