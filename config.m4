@@ -85,6 +85,8 @@ dnl     dnl }}}
     dnl AC_CONFIG_HEADERS([config.h])
     m4_include([libeio/libeio.m4])
 
+    LDFLAGS="$LDFLAGS -lpthread"
+
     dnl Build extension 
     eio_src="php_eio.c eio_fe.c"
     PHP_NEW_EXTENSION(eio, $eio_src, $ext_shared,,$CFLAGS)
