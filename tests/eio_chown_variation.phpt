@@ -2,7 +2,7 @@
 Check for eio_chown function basic behaviour
 --FILE--
 <?php 
-error_reporting(E_WARNING);
+//error_reporting(E_WARNING);
 $temp_filename = "eio-temp-file.tmp";
 
 touch($temp_filename);
@@ -24,5 +24,6 @@ eio_event_loop();
 ?>
 --EXPECTF--
 Warning: eio_chown() expects at least 2 parameters, 1 given in %s on line %a
+
 Warning: eio_chown(): invalid uid and/or gid in %s on line %a
 int(0)
