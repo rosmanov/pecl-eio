@@ -1,7 +1,7 @@
 INSTALLATION OF EIO PECL EXTENSION
 ==================================
 
-Currently Linux platforms supported only.
+Currently GNU/Linux platforms supported only.
 
 
 AUTOMATIC INSTALLATION
@@ -40,8 +40,6 @@ $ make test
 Do install with root priveleges:
 # make install
 
-3. CONFIGURE PHP TO USE LIBEIO EXTENSION
-
 In php.ini, or some other configuration like
 /usr/local/etc/php/conf.d/eio.ini write:
 
@@ -49,7 +47,7 @@ extension=eio.so
 
 NOTE 
 To disable debug mode don't use --enable-eio-debug configuration option.
-It's recommended to build with this flag first time.
+It's recommended to build with this flag first time though.
 
 
 FINALLY
