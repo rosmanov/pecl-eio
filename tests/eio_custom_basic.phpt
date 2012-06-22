@@ -2,7 +2,7 @@
 Check for eio_custom function basic behaviour
 --FILE--
 <?php 
-error_reporting(0);
+//error_reporting(0);
 
 function my_custom_callback($data, $result) {
 	var_dump($data);

@@ -1,7 +1,7 @@
 /*
  * libeio implementation
  *
- * Copyright (c) 2007,2008,2009,2010,2011 Marc Alexander Lehmann <libeio@schmorp.de>
+ * Copyright (c) 2007,2008,2009,2010,2011,2012 Marc Alexander Lehmann <libeio@schmorp.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modifica-
@@ -210,7 +210,7 @@ static void eio_destroy (eio_req *req);
   #define D_NAME(entp) entp->d_name
 
   /* POSIX_SOURCE is useless on bsd's, and XOPEN_SOURCE is unreliable there, too */
-  #if __FreeBSD__ || defined __NetBSD__ || defined __OpenBSD__
+  #if __FreeBSD__ || __NetBSD__ || __OpenBSD__
     #define _DIRENT_HAVE_D_TYPE /* sigh */
     #define D_INO(de) (de)->d_fileno
     #define D_NAMLEN(de) (de)->d_namlen
@@ -380,15 +380,6 @@ static xmutex_t wrklock;
 static xmutex_t reslock;
 static xmutex_t reqlock;
 static xcond_t  reqwait;
-
-#if !HAVE_PREADWRITE
-/*
- * make our pread/pwrite emulation safe against themselves, but not against
- * normal read/write by using a mutex. slows down execution a lot,
- * but that's your problem, not mine.
- */
-static xmutex_t preadwritelock;
-#endif
 
 typedef struct etp_worker
 {
@@ -945,45 +936,6 @@ int eio_poll (void)
 /*****************************************************************************/
 /* work around various missing functions */
 
-#if !HAVE_PREADWRITE
-# undef pread
-# undef pwrite
-# define pread  eio__pread
-# define pwrite eio__pwrite
-
-static eio_ssize_t
-eio__pread (int fd, void *buf, size_t count, off_t offset)
-{
-  eio_ssize_t res;
-  off_t ooffset;
-
-  X_LOCK (preadwritelock);
-  ooffset = lseek (fd, 0, SEEK_CUR);
-  lseek (fd, offset, SEEK_SET);
-  res = read (fd, buf, count);
-  lseek (fd, ooffset, SEEK_SET);
-  X_UNLOCK (preadwritelock);
-
-  return res;
-}
-
-static eio_ssize_t
-eio__pwrite (int fd, void *buf, size_t count, off_t offset)
-{
-  eio_ssize_t res;
-  off_t ooffset;
-
-  X_LOCK (preadwritelock);
-  ooffset = lseek (fd, 0, SEEK_CUR);
-  lseek (fd, offset, SEEK_SET);
-  res = write (fd, buf, count);
-  lseek (fd, ooffset, SEEK_SET);
-  X_UNLOCK (preadwritelock);
-
-  return res;
-}
-#endif
-
 #ifndef HAVE_UTIMES
 
 # undef utimes
@@ -1034,8 +986,7 @@ eio__syncfs (int fd)
 #if HAVE_SYS_SYNCFS
   res = (int)syscall (__NR_syncfs, (int)(fd));
 #else
-  res = -1;
-  errno = ENOSYS;
+  res = EIO_ENOSYS ();
 #endif
 
   if (res < 0 && errno == ENOSYS && fd >= 0)
@@ -1075,11 +1026,10 @@ eio__sync_file_range (int fd, off_t offset, size_t nbytes, unsigned int flags)
 static int
 eio__fallocate (int fd, int mode, off_t offset, size_t len)
 {
-#if HAVE_FALLOCATE
+#if HAVE_LINUX_FALLOCATE
   return fallocate (fd, mode, offset, len);
 #else
-  errno = ENOSYS;
-  return -1;
+  return EIO_ENOSYS ();
 #endif
 }
 
@@ -1104,8 +1054,9 @@ eio__readahead (int fd, off_t offset, size_t count, etp_worker *self)
 
   FUBd;
 
-  errno = 0;
-  return count;
+  /* linux's readahead basically only fails for EBADF or EINVAL (not mmappable) */
+  /* but not for e.g. EIO or eof, so we also never fail */
+  return 0;
 }
 
 #endif
@@ -1150,7 +1101,7 @@ eio__sendfile (int ofd, int ifd, off_t offset, size_t count)
       if (sbytes)
         res = sbytes;
 
-# elif defined (__APPLE__)
+# elif defined __APPLE__
       off_t sbytes = count;
       res = sendfile (ifd, ofd, offset, &sbytes, 0, 0);
 
@@ -1187,8 +1138,7 @@ eio__sendfile (int ofd, int ifd, off_t offset, size_t count)
       res = TransmitFile (TO_SOCKET (ofd), h, count, 0, 0, 0, 0);
 
 #else
-      res = -1;
-      errno = ENOSYS;
+      res = EIO_ENOSYS ();
 #endif
 
       /* we assume sendfile can copy at least 128mb in one go */
@@ -1383,6 +1333,20 @@ eio__mtouch (eio_req *req)
 
 /*****************************************************************************/
 /* requests implemented outside eio_execute, because they are so large */
+
+static void
+eio__lseek (eio_req *req)
+{
+  /* this usually gets optimised away completely, or your compiler sucks, */
+  /* or the whence constants really are not 0, 1, 2 */
+  int whence = req->int2 == EIO_SEEK_SET ? SEEK_SET
+             : req->int2 == EIO_SEEK_CUR ? SEEK_CUR
+             : req->int2 == EIO_SEEK_END ? SEEK_END
+             : req->int2;
+
+  req->offs   = lseek (req->int1, req->offs, whence);
+  req->result = req->offs == (off_t)-1 ? -1 : 0;
+}
 
 /* result will always end up in tmpbuf, there is always space for adding a 0-byte */
 static int
@@ -2230,8 +2194,6 @@ quit:
   X_LOCK (wrklock);
   etp_worker_free (self);
   X_UNLOCK (wrklock);
-
-  return 0;
 }
 
 /*****************************************************************************/
@@ -2239,10 +2201,6 @@ quit:
 int ecb_cold
 eio_init (void (*want_poll)(void), void (*done_poll)(void))
 {
-#if !HAVE_PREADWRITE
-  X_MUTEX_CREATE (preadwritelock);
-#endif
-
   return etp_init (want_poll, done_poll);
 }
 
@@ -2252,7 +2210,7 @@ eio_api_destroy (eio_req *req)
   free (req);
 }
 
-#define REQ(rtype)                                            	\
+#define REQ(rtype)						\
   eio_req *req;                                                 \
                                                                 \
   req = (eio_req *)calloc (1, sizeof *req);                     \
@@ -2316,6 +2274,7 @@ eio_execute (etp_worker *self, eio_req *req)
       case EIO_WD_CLOSE:  req->result = 0;
                           eio_wd_close_sync (req->wd); break;
 
+      case EIO_SEEK:      eio__lseek (req); break;
       case EIO_READ:      ALLOC (req->size);
                           req->result = req->offs >= 0
                                       ? pread     (req->int1, req->ptr2, req->size, req->offs)
@@ -2481,8 +2440,7 @@ eio_execute (etp_worker *self, eio_req *req)
         break;
 
       default:
-        errno = ENOSYS;
-        req->result = -1;
+        req->result = EIO_ENOSYS ();
         break;
     }
 
@@ -2569,6 +2527,11 @@ eio_req *eio_close (int fd, int pri, eio_cb cb, void *data)
 eio_req *eio_readahead (int fd, off_t offset, size_t length, int pri, eio_cb cb, void *data)
 {
   REQ (EIO_READAHEAD); req->int1 = fd; req->offs = offset; req->size = length; SEND;
+}
+
+eio_req *eio_seek (int fd, off_t offset, int whence, int pri, eio_cb cb, void *data)
+{
+  REQ (EIO_SEEK); req->int1 = fd; req->offs = offset; req->int2 = whence; SEND;
 }
 
 eio_req *eio_read (int fd, void *buf, size_t length, off_t offset, int pri, eio_cb cb, void *data)

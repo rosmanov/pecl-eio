@@ -580,6 +580,7 @@ static int php_eio_res_cb(eio_req *req)
 		add_assoc_long(key2, "st_mode", EIO_STAT_BUF(req)->st_mode);
 		add_assoc_long(key2, "st_nlink", EIO_STAT_BUF(req)->st_nlink);
 		add_assoc_long(key2, "st_uid", EIO_STAT_BUF(req)->st_uid);
+		add_assoc_long(key2, "st_size", EIO_STAT_BUF(req)->st_size);
 		add_assoc_long(key2, "st_gid", EIO_STAT_BUF(req)->st_gid);
 #ifdef HAVE_ST_RDEV
 		add_assoc_long(key2, "st_rdev", EIO_STAT_BUF(req)->st_rdev);

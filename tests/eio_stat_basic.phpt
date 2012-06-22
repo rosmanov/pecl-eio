@@ -4,11 +4,15 @@ Check for eio_stat, eio_lstat, eio_fstat functions' basic behaviour
 <?php 
 error_reporting(E_ERROR);
 $tmp_filename = dirname(__FILE__) ."/eio-file.tmp";
-touch($tmp_filename);
+//touch($tmp_filename);
+$fp = fopen($tmp_filename, 'w');
+fwrite($fp, '123');
+fclose($fp);
 
 function my_res_cb($data, $result) {
 	var_dump($data);
 	var_dump($result['st_mtime']);
+	var_dump($result['st_size']);
 }
 
 function my_open_cb($data, $result) {
@@ -33,7 +37,10 @@ eio_event_loop();
 --EXPECTF--
 string(%d) "eio_%stat"
 int(%d)
+int(3)
 string(%d) "eio_%stat"
 int(%d)
+int(3)
 string(%d) "eio_%stat"
 int(%d)
+int(3)

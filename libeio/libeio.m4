@@ -62,22 +62,6 @@ int main (void)
 ],ac_cv_fdatasync=yes,ac_cv_fdatasync=no)])
 test $ac_cv_fdatasync = yes && AC_DEFINE(HAVE_FDATASYNC, 1, fdatasync(2) is available)
 
-AC_CACHE_CHECK(for pread and pwrite, ac_cv_preadwrite, [AC_LINK_IFELSE([
-#include <unistd.h>
-int main (void)
-{
-   int fd = 0;
-   size_t count = 1;
-   char buf;
-   off_t offset = 1;
-   ssize_t res;
-   res = pread (fd, &buf, count, offset);
-   res = pwrite (fd, &buf, count, offset);
-   return 0;
-}
-],ac_cv_preadwrite=yes,ac_cv_preadwrite=no)])
-test $ac_cv_preadwrite = yes && AC_DEFINE(HAVE_PREADWRITE, 1, pread(2) and pwrite(2) are available)
-
 AC_CACHE_CHECK(for sendfile, ac_cv_sendfile, [AC_LINK_IFELSE([
 # include <sys/types.h>
 #if __linux
@@ -123,7 +107,7 @@ int main (void)
 ],ac_cv_sync_file_range=yes,ac_cv_sync_file_range=no)])
 test $ac_cv_sync_file_range = yes && AC_DEFINE(HAVE_SYNC_FILE_RANGE, 1, sync_file_range(2) is available)
 
-AC_CACHE_CHECK(for fallocate, ac_cv_fallocate, [AC_LINK_IFELSE([
+AC_CACHE_CHECK(for fallocate, ac_cv_linux_fallocate, [AC_LINK_IFELSE([
 #include <fcntl.h>
 int main (void)
 {
@@ -135,8 +119,8 @@ int main (void)
    res = fallocate (fd, mode, offset, len);
    return 0;
 }
-],ac_cv_fallocate=yes,ac_cv_fallocate=no)])
-test $ac_cv_fallocate = yes && AC_DEFINE(HAVE_FALLOCATE, 1, fallocate(2) is available)
+],ac_cv_linux_fallocate=yes,ac_cv_linux_fallocate=no)])
+test $ac_cv_linux_fallocate = yes && AC_DEFINE(HAVE_LINUX_FALLOCATE, 1, fallocate(2) is available)
 
 AC_CACHE_CHECK(for sys_syncfs, ac_cv_sys_syncfs, [AC_LINK_IFELSE([
 #include <unistd.h>
@@ -192,4 +176,20 @@ int main (void)
 }
 ],ac_cv_posix_fadvise=yes,ac_cv_posix_fadvise=no)])
 test $ac_cv_posix_fadvise = yes && AC_DEFINE(HAVE_POSIX_FADVISE, 1, posix_fadvise(2) is available)
+
+dnl lots of linux specifics
+AC_CHECK_HEADERS([linux/fs.h linux/fiemap.h])
+
+AC_CACHE_CHECK([for splice, vmsplice and tee], ac_cv_linux_splice, [AC_LINK_IFELSE([
+#include <fcntl.h>
+int main (void)
+{
+   ssize_t res;
+   res = splice ((int)0, (loff_t)0, (int)0, (loff_t *)0, (size_t)0, SPLICE_F_MOVE | SPLICE_F_NONBLOCK | SPLICE_F_MORE);
+   res = tee ((int)0, (int)0, (size_t)0, SPLICE_F_NONBLOCK);
+   res = vmsplice ((int)0, (struct iovec *)0, 0, SPLICE_F_NONBLOCK | SPLICE_F_GIFT);
+   return 0;
+}
+],ac_cv_linux_splice=yes,ac_cv_linux_splice=no)])
+test $ac_cv_linux_splice = yes && AC_DEFINE(HAVE_LINUX_SPLICE, 1, splice/vmsplice/tee(2) are available)
 
