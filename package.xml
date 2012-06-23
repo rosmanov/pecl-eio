@@ -25,7 +25,7 @@
   <time>01:04:47</time>
   <!--{{{ Current version -->
   <version>
-    <release>0.4.1</release>
+    <release>0.4.2</release>
     <api>0.4.0</api>
   </version>
   <stability>
@@ -37,6 +37,9 @@
   Refact: libeio upgraded
   Fix: bug #62392 where eio_*stat functions didn't return st_size
   Fix: package.xml referenced to some nonexistent files
+  Fix: garbage in result arg of the callbacks in case of error
+  Change: warn about failed op in cb only when compiled with debug support
+  Add: test for stat on nonexistent files
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -76,6 +79,7 @@
       <file role="test" name="tests/eio_rename_basic.phpt"/>
       <file role="test" name="tests/eio_rmdir_basic.phpt"/>
       <file role="test" name="tests/eio_stat_basic.phpt"/>
+      <file role="test" name="tests/eio_stat_error.phpt"/>
       <file role="test" name="tests/eio_sync.phpt"/>
       <file role="test" name="tests/eio_truncate_basic.phpt"/>
       <file role="test" name="tests/eio_unlink_basic.phpt"/>
@@ -102,9 +106,9 @@
   </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
-    <!--{{{ 0.4.1 (beta) -->
+    <!--{{{ 0.4.2 (beta) -->
     <version>
-      <release>0.4.1</release>
+      <release>0.4.2</release>
       <api>0.4.0</api>
     </version>
     <stability>
@@ -116,6 +120,9 @@
       Refact: libeio upgraded
       Fix: bug #62392 where eio_*stat functions didn't return st_size
       Fix: package.xml referenced to some nonexistent files
+      Fix: garbage in result arg of the callbacks in case of error
+      Change: warn about failed op in cb only when compiled with debug support
+      Add: test for stat on nonexistent files
     </notes>
     <!--}}}-->
     <!--{{{ 0.4.0 (beta) -->

@@ -92,11 +92,17 @@ ZEND_GET_MODULE(eio)
 		ALLOC_INIT_ZVAL(v); /* make new IS_NULL zval */ \
 	} \
 	eio_cb->n = v;
-#define EIO_REQ_WARN_RESULT_ERROR() \
+
+#ifdef EIO_DEBUG
+# define EIO_REQ_WARN_RESULT_ERROR() \
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, \
-		"%s, eio_req result: %ld, req type: %s", \
+		"ff%s, eio_req result: %ld, req type: %s", \
 		strerror(req->errorno), (long) EIO_RESULT(req), \
 		php_eio_get_req_type_str(req->type))
+#else 
+# define EIO_REQ_WARN_RESULT_ERROR()
+#endif
+
 #define EIO_REQ_WARN_INVALID_CB() \
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, \
 		"'%s' is not a valid callback", func_name);
@@ -532,12 +538,6 @@ static int php_eio_res_cb(eio_req *req)
 	 * EIO_RESULT(req), i.e. req->result, = return value of corresponding
 	 * system call(mkdir, rmdir etc.)
 	 */
-	/* WARNING. If this callback returns nonzero, eio will stop processing
-	 * results(in eio_poll), and will return the value to it's caller */
-
-	if (EIO_RESULT(req) < 0) {
-		EIO_REQ_WARN_RESULT_ERROR();
-	}
 
 	/* set $data arg value */
 	key1 = eio_cb->arg;
@@ -547,105 +547,113 @@ static int php_eio_res_cb(eio_req *req)
 	MAKE_STD_ZVAL(key2);
 	args[1] = &key2;
 
+
 	/* {{{ set $result arg value */
 
-	switch (req->type) {
-	case EIO_READ:
-		/* EIO_BUF(req) is the buffer with read contents 
-		 * (size_t) req->size = length parameter value passed to eio_read()
-		 * Since req is destroyed later, data stored in req should be
-		 * duplicated */
-		if (EIO_RESULT(req) != -1) {
-			ZVAL_STRINGL(key2, EIO_BUF(req), req->size, 1);
-		} else {
-			ZVAL_NULL(key2);
-		}
-		break;
+	/* WARNING. If this callback returns nonzero, eio will stop processing
+	 * results(in eio_poll), and will return the value to it's caller */
+	if (EIO_RESULT(req) < 0) {
+		EIO_REQ_WARN_RESULT_ERROR();
+		ZVAL_LONG(key2, EIO_RESULT(req));
+	} else {
+		switch (req->type) {
+			case EIO_READ:
+				/* EIO_BUF(req) is the buffer with read contents 
+				 * (size_t) req->size = length parameter value passed to eio_read()
+				 * Since req is destroyed later, data stored in req should be
+				 * duplicated */
+				if (EIO_RESULT(req) != -1) {
+					ZVAL_STRINGL(key2, EIO_BUF(req), req->size, 1);
+				} else {
+					ZVAL_NULL(key2);
+				}
+				break;
 
-	case EIO_READLINK:
-	case EIO_REALPATH:
-		/* EIO_BUF(req) is NOT-null-terminated string of result
-		 * EIO_RESULT(req) is the length of the string */
-		ZVAL_STRINGL(key2, EIO_BUF(req), EIO_RESULT(req), 1);
-		break;
+			case EIO_READLINK:
+			case EIO_REALPATH:
+				/* EIO_BUF(req) is NOT-null-terminated string of result
+				 * EIO_RESULT(req) is the length of the string */
+				ZVAL_STRINGL(key2, EIO_BUF(req), EIO_RESULT(req), 1);
+				break;
 
-	case EIO_STAT:
-	case EIO_LSTAT:
-	case EIO_FSTAT:			/* {{{ */
-		/* EIO_STAT_BUF(req) is ptr to EIO_STRUCT_STAT structure */
-		array_init(key2);
+			case EIO_STAT:
+			case EIO_LSTAT:
+			case EIO_FSTAT:			/* {{{ */
+				/* EIO_STAT_BUF(req) is ptr to EIO_STRUCT_STAT structure */
+				array_init(key2);
 
-		add_assoc_long(key2, "st_dev", EIO_STAT_BUF(req)->st_dev);
-		add_assoc_long(key2, "st_ino", EIO_STAT_BUF(req)->st_ino);
-		add_assoc_long(key2, "st_mode", EIO_STAT_BUF(req)->st_mode);
-		add_assoc_long(key2, "st_nlink", EIO_STAT_BUF(req)->st_nlink);
-		add_assoc_long(key2, "st_uid", EIO_STAT_BUF(req)->st_uid);
-		add_assoc_long(key2, "st_size", EIO_STAT_BUF(req)->st_size);
-		add_assoc_long(key2, "st_gid", EIO_STAT_BUF(req)->st_gid);
+				add_assoc_long(key2, "st_dev", EIO_STAT_BUF(req)->st_dev);
+				add_assoc_long(key2, "st_ino", EIO_STAT_BUF(req)->st_ino);
+				add_assoc_long(key2, "st_mode", EIO_STAT_BUF(req)->st_mode);
+				add_assoc_long(key2, "st_nlink", EIO_STAT_BUF(req)->st_nlink);
+				add_assoc_long(key2, "st_uid", EIO_STAT_BUF(req)->st_uid);
+				add_assoc_long(key2, "st_size", EIO_STAT_BUF(req)->st_size);
+				add_assoc_long(key2, "st_gid", EIO_STAT_BUF(req)->st_gid);
 #ifdef HAVE_ST_RDEV
-		add_assoc_long(key2, "st_rdev", EIO_STAT_BUF(req)->st_rdev);
+				add_assoc_long(key2, "st_rdev", EIO_STAT_BUF(req)->st_rdev);
 #else
-		add_assoc_long(key2, "st_rdev", -1);
+				add_assoc_long(key2, "st_rdev", -1);
 #endif
 
 #ifdef HAVE_ST_BLKSIZE
-		add_assoc_long(key2, "st_blksize", EIO_STAT_BUF(req)->st_blksize);
+				add_assoc_long(key2, "st_blksize", EIO_STAT_BUF(req)->st_blksize);
 #else
-		add_assoc_long(key2, "st_blksize", -1);
+				add_assoc_long(key2, "st_blksize", -1);
 #endif
 #ifdef HAVE_ST_BLOCKS
-		add_assoc_long(key2, "st_blocks", EIO_STAT_BUF(req)->st_blocks);
+				add_assoc_long(key2, "st_blocks", EIO_STAT_BUF(req)->st_blocks);
 #else
-		add_assoc_long(key2, "st_blocks", -1);
+				add_assoc_long(key2, "st_blocks", -1);
 #endif
 
-		add_assoc_long(key2, "st_atime", EIO_STAT_BUF(req)->st_atime);
-		add_assoc_long(key2, "st_mtime", EIO_STAT_BUF(req)->st_mtime);
-		add_assoc_long(key2, "st_ctime", EIO_STAT_BUF(req)->st_ctime);
-		break;
-		/* }}} */
+				add_assoc_long(key2, "st_atime", EIO_STAT_BUF(req)->st_atime);
+				add_assoc_long(key2, "st_mtime", EIO_STAT_BUF(req)->st_mtime);
+				add_assoc_long(key2, "st_ctime", EIO_STAT_BUF(req)->st_ctime);
+				break;
+				/* }}} */
 
-	case EIO_STATVFS:
-	case EIO_FSTATVFS:			/* {{{ */
-		/* EIO_STATVFS_BUF(req) is ptr to EIO_STRUCT_STATVFS structure */
-		array_init(key2);
+			case EIO_STATVFS:
+			case EIO_FSTATVFS:			/* {{{ */
+				/* EIO_STATVFS_BUF(req) is ptr to EIO_STRUCT_STATVFS structure */
+				array_init(key2);
 
-		add_assoc_long(key2, "f_bsize", EIO_STATVFS_BUF(req)->f_bsize);
-		add_assoc_long(key2, "f_frsize", EIO_STATVFS_BUF(req)->f_frsize);
-		add_assoc_long(key2, "f_blocks", EIO_STATVFS_BUF(req)->f_blocks);
-		add_assoc_long(key2, "f_bfree", EIO_STATVFS_BUF(req)->f_bfree);
-		add_assoc_long(key2, "f_bavail", EIO_STATVFS_BUF(req)->f_bavail);
-		add_assoc_long(key2, "f_files", EIO_STATVFS_BUF(req)->f_files);
-		add_assoc_long(key2, "f_ffree", EIO_STATVFS_BUF(req)->f_ffree);
-		add_assoc_long(key2, "f_favail", EIO_STATVFS_BUF(req)->f_favail);
-		add_assoc_long(key2, "f_fsid", EIO_STATVFS_BUF(req)->f_fsid);
-		add_assoc_long(key2, "f_flag", EIO_STATVFS_BUF(req)->f_flag);
-		add_assoc_long(key2, "f_namemax", EIO_STATVFS_BUF(req)->f_namemax);
-		break;
-		/* }}} */
+				add_assoc_long(key2, "f_bsize", EIO_STATVFS_BUF(req)->f_bsize);
+				add_assoc_long(key2, "f_frsize", EIO_STATVFS_BUF(req)->f_frsize);
+				add_assoc_long(key2, "f_blocks", EIO_STATVFS_BUF(req)->f_blocks);
+				add_assoc_long(key2, "f_bfree", EIO_STATVFS_BUF(req)->f_bfree);
+				add_assoc_long(key2, "f_bavail", EIO_STATVFS_BUF(req)->f_bavail);
+				add_assoc_long(key2, "f_files", EIO_STATVFS_BUF(req)->f_files);
+				add_assoc_long(key2, "f_ffree", EIO_STATVFS_BUF(req)->f_ffree);
+				add_assoc_long(key2, "f_favail", EIO_STATVFS_BUF(req)->f_favail);
+				add_assoc_long(key2, "f_fsid", EIO_STATVFS_BUF(req)->f_fsid);
+				add_assoc_long(key2, "f_flag", EIO_STATVFS_BUF(req)->f_flag);
+				add_assoc_long(key2, "f_namemax", EIO_STATVFS_BUF(req)->f_namemax);
+				break;
+				/* }}} */
 
-	case EIO_READDIR:
-		/* EIO_READDIR_* flags are in req->int1 
-		 *
-		 * EIO_BUF(req), which is req->ptr2, contains null-terminated names 
-		 * These will be stored in $result['names'] as a vector */
-		array_init(key2);
+			case EIO_READDIR:
+				/* EIO_READDIR_* flags are in req->int1 
+				 *
+				 * EIO_BUF(req), which is req->ptr2, contains null-terminated names 
+				 * These will be stored in $result['names'] as a vector */
+				array_init(key2);
 
-		if (req->int1 & (EIO_READDIR_DENTS | EIO_READDIR_DIRS_FIRST)) {
-			/* fill $result['dents'] with array of struct eio_dirent like arrays 
-			 * fill $result['names'] with dir names */
-			php_eio_set_readdir_dent_and_names(key2, req);
-		} else {
-			/* If none of flags chosen. Not a good option, since in
-			 * such case we've no info about offsets within EIO_BUF(req) ptr
-			 * fill $result['names'] with dir names */
-			php_eio_set_readdir_names(key2, req);
+				if (req->int1 & (EIO_READDIR_DENTS | EIO_READDIR_DIRS_FIRST)) {
+					/* fill $result['dents'] with array of struct eio_dirent like arrays 
+					 * fill $result['names'] with dir names */
+					php_eio_set_readdir_dent_and_names(key2, req);
+				} else {
+					/* If none of flags chosen. Not a good option, since in
+					 * such case we've no info about offsets within EIO_BUF(req) ptr
+					 * fill $result['names'] with dir names */
+					php_eio_set_readdir_names(key2, req);
+				}
+
+				break;
+
+			default:
+				ZVAL_LONG(key2, EIO_RESULT(req));
 		}
-
-		break;
-
-	default:
-		ZVAL_LONG(key2, EIO_RESULT(req));
 	}
 	/* }}} */
 
@@ -714,6 +722,9 @@ PHP_MINIT_FUNCTION(eio)
 		PHP_EIO_REQ_DESCRIPTOR_NAME, module_number);
 
 	/* {{{ Constants */
+#ifdef EIO_DEBUG
+	EIO_REGISTER_LONG_EIO_CONSTANT(EIO_DEBUG);
+#endif
 
 	/* {{{ EIO_PRI_* */
 	EIO_REGISTER_LONG_EIO_CONSTANT(EIO_PRI_MIN);
