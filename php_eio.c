@@ -96,7 +96,7 @@ ZEND_GET_MODULE(eio)
 #ifdef EIO_DEBUG
 # define EIO_REQ_WARN_RESULT_ERROR() \
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, \
-		"ff%s, eio_req result: %ld, req type: %s", \
+		"%s, eio_req result: %ld, req type: %s", \
 		strerror(req->errorno), (long) EIO_RESULT(req), \
 		php_eio_get_req_type_str(req->type))
 #else 
@@ -434,6 +434,7 @@ static void php_eio_custom_execute(eio_req * req)
 		if (zend_call_function(eio_cb->fci_exec, eio_cb->fcc_exec TSRMLS_CC) == SUCCESS
 			&& retval_ptr) {
 			EIO_BUF_FETCH_FROM_ZVAL(req, *retval_ptr);
+
 			/* Required for libeio */
 			EIO_RESULT(req) = 0;
 
@@ -496,6 +497,11 @@ static int php_eio_res_cb_custom(eio_req * req)
 
 	zval_ptr_dtor(&key1);
 	zval_ptr_dtor(&key2);
+	
+	if (EIO_BUF_ZVAL_P(req)) {
+		zval_dtor(EIO_BUF_ZVAL_P(req));
+		efree(EIO_BUF_ZVAL_P(req));
+	}
 
 	php_eio_free_eio_cb_custom(eio_cb);
 
