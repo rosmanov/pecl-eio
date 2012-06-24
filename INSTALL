@@ -31,7 +31,7 @@ MANUAL INSTALLATION
 Checkout the project or download it as archive. In the package directory run: 
 
 $ phpize 
-$ ./configure --with-eio --enable-eio-debug
+$ ./configure --with-eio --enable-eio-sockets --enable-eio-debug
 $ make 
 
 Optionally test the extension in CLI:
@@ -45,9 +45,14 @@ In php.ini, or some other configuration like
 
 extension=eio.so
 
-NOTE 
+NOTE
 To disable debug mode don't use --enable-eio-debug configuration option.
 It's recommended to build with this flag first time though.
+
+NOTE
+Since version 0.5.0 beta you're able to pass PHP streams, sockets(socket_create,
+socket_accept) or numeric file descriptors to functions like eio_sendfile,
+eio_readahead, eio_read etc.
 
 
 FINALLY
