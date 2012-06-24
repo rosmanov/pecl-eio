@@ -206,6 +206,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_eio_readahead, 0, 0, 3)
 	ZEND_ARG_INFO(0, data) 
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_eio_seek, 0, 0, 3)
+	ZEND_ARG_INFO(0, fd)
+	ZEND_ARG_INFO(0, offset)
+	ZEND_ARG_INFO(0, whence)
+	ZEND_ARG_INFO(0, pri)
+	ZEND_ARG_INFO(0, callback) 
+	ZEND_ARG_INFO(0, data) 
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_eio_syncfs, 0, 0, 1)
 	ZEND_ARG_INFO(0, fd)
 	ZEND_ARG_INFO(0, pri)
@@ -324,6 +333,7 @@ const zend_function_entry eio_functions[] = {
 
 	PHP_FE(eio_sendfile, arginfo_eio_sendfile)
 	PHP_FE(eio_readahead, arginfo_eio_readahead)
+	PHP_FE(eio_seek, arginfo_eio_seek)
 	PHP_FE(eio_syncfs, arginfo_eio_syncfs)
 	PHP_FE(eio_sync_file_range, arginfo_eio_sync_file_range)
 	PHP_FE(eio_fallocate, arginfo_eio_fallocate)

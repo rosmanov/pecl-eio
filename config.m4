@@ -20,12 +20,23 @@ PHP_ARG_WITH(eio, for eio support,
 PHP_ARG_ENABLE(eio-debug, for eio debug support,
 [  --enable-eio-debug       Enable eio debug support], no, no)
 
+PHP_ARG_ENABLE(eio-sockets, for sockets support,
+[  --enable-eio-sockets     Enable sockets support in eio], yes, no)
+
 dnl {{{ Debug support
 if test "$PHP_EIO_DEBUG" != "no"; then
     CFLAGS="$CFLAGS -Wall -g -ggdb -O0"
     AC_DEFINE(EIO_DEBUG,1,[Enable eio debug support])
 fi
 dnl }}}
+
+dnl {{{ Sockets support
+if test "$PHP_EIO_SOCKETS" != "no"; then
+    PHP_ADD_EXTENSION_DEP(eio, sockets, true)
+    AC_DEFINE([EIO_USE_SOCKETS], 1, [Whether to enable sockets support])
+fi
+dnl }}}
+
 
 dnl {{{ eio support 
 if test "$PHP_EIO" != "no"; then
@@ -86,6 +97,7 @@ dnl     dnl }}}
     m4_include([libeio/libeio.m4])
 
     LDFLAGS="$LDFLAGS -lpthread"
+
 
     dnl Build extension 
     eio_src="php_eio.c eio_fe.c"

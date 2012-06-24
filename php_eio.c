@@ -47,6 +47,12 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "php_network.h"
+#include "php_streams.h"
+#ifdef EIO_USE_SOCKETS
+# include "ext/sockets/php_sockets.h"
+#endif
+
 
 /* Internal */
 #include "php_eio.h"
@@ -62,11 +68,16 @@ static int le_eio_req;
 int php_eio_eventfd = 0;
 int php_eio_initialized = 0;
 
+static const zend_module_dep eio_deps[] = {
+	ZEND_MOD_OPTIONAL("sockets")
+	{NULL, NULL, NULL}
+};
+
 /* {{{ eio_module_entry */
 zend_module_entry eio_module_entry = {
 	STANDARD_MODULE_HEADER_EX,
 	NULL,
-	NULL,
+	eio_deps,
 	"eio",
 	eio_functions,
 	PHP_MINIT(eio),
@@ -144,6 +155,7 @@ static const char *php_eio_get_req_type_str(unsigned int code)
 		CASE_RET_STR(EIO_READ);
 		CASE_RET_STR(EIO_WRITE);
 		CASE_RET_STR(EIO_READAHEAD);
+		CASE_RET_STR(EIO_SEEK);
 		CASE_RET_STR(EIO_SENDFILE);
 		CASE_RET_STR(EIO_FSTAT);
 		CASE_RET_STR(EIO_FSTATVFS);
@@ -706,6 +718,54 @@ static void php_eio_done_poll_callback(void)
 }
 /* }}} */
 
+/* {{{ php_eio_zval_to_fd 
+ * Get numeric file descriptor from PHP stream or Socket resource */
+static php_socket_t php_eio_zval_to_fd(zval **ppfd TSRMLS_DC)
+{
+	php_socket_t file_desc = -1;
+	php_stream *stream;
+#ifdef EIO_USE_SOCKETS
+	php_socket *php_sock;
+#endif
+
+	if (Z_TYPE_PP(ppfd) == IS_RESOURCE) {
+		/* PHP stream or PHP socket resource  */
+		if (ZEND_FETCH_RESOURCE_NO_RETURN(stream, php_stream *, ppfd, -1, NULL, php_file_le_stream())) {
+			/* PHP stream */
+			if (php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_INTERNAL,
+						(void*)&file_desc, 1) != SUCCESS || file_desc < 0) {
+				return -1;
+			}
+		} else {
+			/* PHP socket resource */
+#ifdef EIO_USE_SOCKETS
+			if (ZEND_FETCH_RESOURCE_NO_RETURN(php_sock, php_socket *, ppfd, -1, NULL, php_sockets_le_socket())) {
+				return php_sock->bsd_socket;
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "either valid PHP stream or valid PHP socket resource expected");
+			}
+#else
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "valid PHP stream resource expected");
+#endif
+			return -1;
+		}
+	} else if (Z_TYPE_PP(ppfd) == IS_LONG) {
+		/* Numeric fd */
+		file_desc = Z_LVAL_PP(ppfd);
+		if (file_desc < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid file descriptor passed");
+			return -1;
+		}
+	} else {
+		/* Invalid fd */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid file descriptor passed");
+		return -1;
+	}
+
+	return file_desc;
+}
+/* }}} */
+
 #undef EIO_CB_SET_FIELD
 #undef EIO_REQ_WARN_RESULT_ERROR
 #undef EIO_REQ_WARN_INVALID_CB
@@ -731,6 +791,12 @@ PHP_MINIT_FUNCTION(eio)
 #ifdef EIO_DEBUG
 	EIO_REGISTER_LONG_EIO_CONSTANT(EIO_DEBUG);
 #endif
+
+	/* {{{ EIO_SEEK_* */
+	EIO_REGISTER_LONG_EIO_CONSTANT(EIO_SEEK_SET);
+	EIO_REGISTER_LONG_EIO_CONSTANT(EIO_SEEK_CUR);
+	EIO_REGISTER_LONG_EIO_CONSTANT(EIO_SEEK_END);
+	/* }}} */
 
 	/* {{{ EIO_PRI_* */
 	EIO_REGISTER_LONG_EIO_CONSTANT(EIO_PRI_MIN);
@@ -1240,21 +1306,24 @@ PHP_FUNCTION(eio_rename)
 }
 /* }}} */
 
-/* {{{ proto resource eio_close(int fd[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_close(mixed fd[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
  * Closes file. Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_close)
 {
-	unsigned long fd;
+	zval *zfd;
+	int fd;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/|lf!z!",
-			&fd, &pri, &fci, &fcc, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|lf!z!",
+			&zfd, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
 	}
-	if (!fd) {
+
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	if (fd <= 0) {
 #ifdef EIO_DEBUG
 		php_error_docref(NULL TSRMLS_CC, E_ERROR,
-			"invalid file descriptor '%ld'", fd);
+			"invalid file descriptor '%d'", fd);
 #endif
 		RETURN_FALSE;
 	}
@@ -1286,19 +1355,24 @@ PHP_FUNCTION(eio_sync)
 }
 /* }}} */
 
-/* {{{ proto resource feio_fsync(int fd[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto resource feio_fsync(mixed fd[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
  * Synchronize a file's in-core state with storage device. 
  * Returns request resource on success, otherwise FALSE. Always returns FALSE for Windows and Netware. */
 PHP_FUNCTION(eio_fsync)
 {
-	unsigned long fd;
+	zval *zfd;
+	int fd;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|lf!z!",
-			&fd, &pri, &fci, &fcc, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|lf!z!",
+			&zfd, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
 	}
 
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	if (fd <= 0) {
+		RETURN_FALSE;
+	}
 	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
 
 	req = eio_fsync(fd, pri, php_eio_res_cb, eio_cb);
@@ -1307,17 +1381,22 @@ PHP_FUNCTION(eio_fsync)
 
 /* }}} */
 
-/* {{{ proto resource eio_datafsync(int fd[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_datafsync(mixed fd[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
  * Synchronize a file's in-core state with storage device. 
  * Returns request resource on success, otherwise FALSE. Always returns FALSE for Windows and Netware. */
 PHP_FUNCTION(eio_fdatasync)
 {
-	unsigned long fd;
+	zval *zfd;
+	int fd;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|lf!z!",
-			&fd, &pri, &fci, &fcc, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|lf!z!",
+			&zfd, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
+	}
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	if (fd <= 0) {
+		RETURN_FALSE;
 	}
 
 	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
@@ -1327,18 +1406,24 @@ PHP_FUNCTION(eio_fdatasync)
 }
 /* }}} */
 
-/* {{{ proto resource eio_futime(int fd, double atime, double mtime[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_futime(mixed fd, double atime, double mtime[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
  * Change file last access and modification times by file descriptor fd.
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_futime)
 {
-	unsigned long fd;
+	zval *zfd;
+	int fd;
 	double atime, mtime;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/d/d/|lf!z!",
-			&fd, &atime, &mtime, &pri, &fci, &fcc, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zd/d/|lf!z!",
+			&zfd, &atime, &mtime, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
+	}
+
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	if (fd <= 0) {
+		RETURN_FALSE;
 	}
 
 	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
@@ -1349,20 +1434,26 @@ PHP_FUNCTION(eio_futime)
 }
 /* }}} */
 
-/* {{{ proto resource eio_ftruncate(int fd[, int offset = 0[, int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]); 
+/* {{{ proto resource eio_ftruncate(mixed fd[, int offset = 0[, int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]); 
  * Truncate a file. Returns resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_ftruncate)
 {
-	unsigned long fd, offset = 0;
+	zval *zfd;
+	int fd;
+	long offset = 0;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|llf!z!",
-			&fd, &offset, &pri, &fci, &fcc, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|llf!z!",
+			&zfd, &offset, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
 	}
 
 	if (offset < 0) {
 		offset = 0;
+	}
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	if (fd <= 0) {
+		RETURN_FALSE;
 	}
 
 	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
@@ -1372,18 +1463,25 @@ PHP_FUNCTION(eio_ftruncate)
 }
 /* }}} */
 
-/* {{{ proto resource eio_fchmod(int fd, int mode, [int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_fchmod(mixed fd, int mode, [int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
  * Change file permissions system call by file descriptor fd.
  * Returns resource on success, otherwise FALSE. 
  * The function always returns FALSE for NETWARE and WINDOWS */
 PHP_FUNCTION(eio_fchmod)
 {
-	unsigned long fd, mode;
+	zval *zfd;
+	int fd;
+	long mode;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/l/|lf!z!",
-			&fd, &mode, &pri, &fci, &fcc, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl/|lf!z!",
+			&zfd, &mode, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
+	}
+
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	if (fd <= 0) {
+		RETURN_FALSE;
 	}
 
 	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
@@ -1393,18 +1491,20 @@ PHP_FUNCTION(eio_fchmod)
 }
 /* }}} */
 
-/* {{{ proto resource eio_fchown(int fd, int uid[, int gid = -1 [,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]); 
+/* {{{ proto resource eio_fchown(mixed fd, int uid[, int gid = -1 [,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]); 
  * Change file/direcrory permissions by file descriptor. uid is user ID. gid is group ID. uid/gid
  * is ignored when it's value is -1. 
  * Returns resource on success, otherwise FALSE. 
  * The function always returns FALSE for NETWARE and WINDOWS */
 PHP_FUNCTION(eio_fchown)
 {
-	unsigned long fd, uid = -1, gid = -1;
+	zval *zfd;
+	int fd;
+	long uid = -1, gid = -1;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/l/|l/lf!z!",
-			&fd, &uid, &gid, &pri, &fci, &fcc, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl/|l/lf!z!",
+			&zfd, &uid, &gid, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
 	}
 
@@ -1412,6 +1512,11 @@ PHP_FUNCTION(eio_fchown)
 #  ifdef EIO_DEBUG
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid uid and/or gid");
 #  endif
+		RETURN_FALSE;
+	}
+	
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	if (fd <= 0) {
 		RETURN_FALSE;
 	}
 
@@ -1422,17 +1527,24 @@ PHP_FUNCTION(eio_fchown)
 }
 /* }}} */
 
-/* {{{ proto bool eio_dup2(int fd, int fd2, [int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto bool eio_dup2(mixed fd, mixed fd2, [int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
  * Duplicate a file descriptor.
  * Returns TRUE on success, otherwise FALSE. */
 PHP_FUNCTION(eio_dup2)
 {
-	unsigned long fd, fd2;
+	zval *zfd, *zfd2;
+	int fd, fd2;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/l/|lf!z!",
-			&fd, &fd2, &pri, &fci, &fcc, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|lf!z!",
+			&zfd, &zfd2, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
+	}
+
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	fd2 = php_eio_zval_to_fd(&zfd2 TSRMLS_CC);
+	if (fd <= 0 || fd2 <= 0) {
+		RETURN_FALSE;
 	}
 
 	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
@@ -1442,7 +1554,7 @@ PHP_FUNCTION(eio_dup2)
 }
 /* }}} */
 
-/* {{{ proto resource eio_read(int fd, int length, int offset, int pri, callback callback[, mixed data = NULL]); 
+/* {{{ proto resource eio_read(mixed fd, int length, int offset, int pri, callback callback[, mixed data = NULL]); 
  * Read from a file descriptor, fd, at a given offset.
  *
  * length specifies amount of bytes to read. 
@@ -1452,22 +1564,22 @@ PHP_FUNCTION(eio_dup2)
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_read)
 {
-	unsigned long fd, length = 0, offset = 0;
+	zval *zfd;
+	int fd;
+	long length = 0, offset = 0;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/lllf!|z!",
-			&fd, &length, &offset, &pri, &fci, &fcc, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zlllf!|z!",
+			&zfd, &length, &offset, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
 	}
 
-	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
-	if (!fd) {
-#ifdef EIO_DEBUG
-		php_error_docref(NULL TSRMLS_CC, E_ERROR,
-			"invalid file descriptor '%ld'", fd);
-#endif
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	if (fd <= 0) {
 		RETURN_FALSE;
 	}
+
+	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
 
 	/* Actually, second parameter is buffer for read contents. 
 	 * But eio allocates memory for it's eio_req->ptr2 internally, 
@@ -1479,7 +1591,7 @@ PHP_FUNCTION(eio_read)
 }
 /* }}} */
 
-/* {{{ proto resource eio_write(int fd, mixed &str[, int length = NULL[, int offset = 0[, int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]]); 
+/* {{{ proto resource eio_write(mixed fd, mixed &str[, int length = NULL[, int offset = 0[, int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]]); 
  * Writes string to the file specified by file descriptor fd.
  *
  * length	amount of characters to write. If is NULL, entire string is
@@ -1490,21 +1602,18 @@ PHP_FUNCTION(eio_read)
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_write)
 {
-	zval *zbuf;
-	int num_bytes;
-	unsigned long fd, length = 0, offset = 0;
+	zval *zbuf, *zfd;
+	int num_bytes, fd;
+	unsigned long length = 0, offset = 0;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/z|lllf!z!",
-			&fd, &zbuf, &length, &offset, &pri, &fci, &fcc, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|lllf!z!",
+			&zfd, &zbuf, &length, &offset, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
 	}
 
-	if (!fd) {
-#ifdef EIO_DEBUG
-		php_error_docref(NULL TSRMLS_CC, E_ERROR,
-			"invalid file descriptor '%ld'", fd);
-#endif
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	if (fd <= 0) {
 		RETURN_FALSE;
 	}
 
@@ -1630,19 +1739,25 @@ PHP_FUNCTION(eio_lstat)
 }
 /* }}} */
 
-/* {{{ proto resource eio_fstat(int fd, int pri, callback callback[, mixed data = NULL]); 
+/* {{{ proto resource eio_fstat(mixed fd, int pri, callback callback[, mixed data = NULL]); 
  * Get file status
 
  * fd	file descriptor
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_fstat)
 {
-	unsigned long fd;
+	zval *zfd;
+	int fd;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/lf!|z!",
-			&fd, &pri, &fci, &fcc, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zlf!|z!",
+			&zfd, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
+	}
+
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	if (fd <= 0) {
+		RETURN_FALSE;
 	}
 
 	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
@@ -1676,19 +1791,25 @@ PHP_FUNCTION(eio_statvfs)
 }
 /* }}} */
 
-/* {{{ proto resource eio_fstatvfs(int fd, int pri, callback callback[, mixed data = NULL]); 
+/* {{{ proto resource eio_fstatvfs(mixed fd, int pri, callback callback[, mixed data = NULL]); 
  * Get file system statistics
  *
  * fd	file descriptor
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_fstatvfs)
 {
-	unsigned long fd;
+	zval *zfd;
+	int fd;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/lf!|z!",
-			&fd, &pri, &fci, &fcc, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zlf!|z!",
+			&zfd, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
+	}
+
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	if (fd <= 0) {
+		RETURN_FALSE;
 	}
 
 	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
@@ -1736,18 +1857,28 @@ PHP_FUNCTION(eio_readdir)
 
 /* {{{ OS-SPECIFIC CALL WRAPPERS */
 
-/* {{{ proto resource eio_sendfile(int out_fd, int int in_fd, int offset, int length[, int pri[, callback callback[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_sendfile(mixed out_fd, mixed in_fd, int offset, int length[, int pri[, callback callback[, mixed data = NULL]]]); 
  *
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_sendfile)
 {
-	long out_fd, in_fd, offset, length;
+	zval *zout_fd, *zin_fd;
+	
+	php_socket_t out_fd, in_fd;
+	long offset, length;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/l/ll|lf!z!",
-			&out_fd, &in_fd, &offset, &length,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzll|lf!z!",
+			&zout_fd, &zin_fd, &offset, &length,
 			&pri, &fci, &fcc, &data) == FAILURE) {
 		return;
+	}
+
+	out_fd = php_eio_zval_to_fd(&zout_fd TSRMLS_CC);
+	in_fd = php_eio_zval_to_fd(&zin_fd TSRMLS_CC);
+	if (out_fd <= 0 || in_fd <= 0) {
+		/* php_eio_zval_to_fd reports errors if necessary */
+		RETURN_FALSE;
 	}
 
 	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
@@ -1758,17 +1889,24 @@ PHP_FUNCTION(eio_sendfile)
 }
 /* }}} */
 
-/* {{{ proto resource eio_readahead(int fd, int offset, int length[, int pri[, callback callback[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_readahead(mixed fd, int offset, int length[, int pri[, callback callback[, mixed data = NULL]]]); 
  *
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_readahead)
 {
-	long fd, offset, length;
+	zval *zfd;
+	int fd;
+	long offset, length;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/ll|lf!z!",
-			&fd, &offset, &length, &pri, &fci, &fcc, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zll|lf!z!",
+			&zfd, &offset, &length, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
+	}
+	
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	if (fd <= 0) {
+		RETURN_FALSE;
 	}
 
 	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
@@ -1778,17 +1916,50 @@ PHP_FUNCTION(eio_readahead)
 }
 /* }}} */
 
-/* {{{ proto resource eio_syncfs(int fd[, int pri[, callback callback[, mixed data = NULL]]]); 
+
+/* {{{ proto resource eio_seek(mixed fd, int offset, int whence[, int pri[, callback callback[, mixed data = NULL]]]); 
+ * Returns request resource on success, otherwise FALSE. */
+PHP_FUNCTION(eio_seek)
+{
+	zval *zfd;
+	int fd;
+	unsigned long offset, whence;
+	PHP_EIO_INIT;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zll|lf!z!",
+			&zfd, &offset, &whence, &pri, &fci, &fcc, &data) == FAILURE) {
+		return;
+	}
+	
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	if (fd <= 0) {
+		RETURN_FALSE;
+	}
+
+	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
+
+	req = eio_seek(fd, offset, whence, pri, php_eio_res_cb, eio_cb);
+	PHP_EIO_RET_REQ_RESOURCE(req, eio_seek);
+}
+/* }}} */
+
+/* {{{ proto resource eio_syncfs(mixed fd[, int pri[, callback callback[, mixed data = NULL]]]); 
  *
  * Returns resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_syncfs)
 {
-	long fd;
+	zval *zfd;
+	int fd;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/|lf!z!",
-			&fd, &pri, &fci, &fcc, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|lf!z!",
+			&zfd, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
+	}
+
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	if (fd <= 0) {
+		RETURN_FALSE;
 	}
 
 	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
@@ -1798,17 +1969,24 @@ PHP_FUNCTION(eio_syncfs)
 }
 /* }}} */
 
-/* {{{ proto resource eio_sync_file_range(int fd, int offset, int nbytes, int flags[, int pri[, callback callback[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_sync_file_range(mixed fd, int offset, int nbytes, int flags[, int pri[, callback callback[, mixed data = NULL]]]); 
  *
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_sync_file_range)
 {
-	unsigned long fd, offset, nbytes, flags;
+	zval *zfd;
+	int fd;
+	unsigned long offset, nbytes, flags;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/lll|lf!z!",
-			&fd, &offset, &nbytes, &flags, &pri, &fci, &fcc, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zlll|lf!z!",
+			&zfd, &offset, &nbytes, &flags, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
+	}
+
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	if (fd <= 0) {
+		RETURN_FALSE;
 	}
 
 	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
@@ -1819,7 +1997,7 @@ PHP_FUNCTION(eio_sync_file_range)
 }
 /* }}} */
 
-/* {{{ proto resource eio_fallocate(int fd, int mode, int offset, int length[, int pri[, callback callback[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_fallocate(mixed fd, int mode, int offset, int length[, int pri[, callback callback[, mixed data = NULL]]]); 
  * Allows the caller to directly manipulate the allocated disk space for the
  * file referred to by fd for the byte range starting at offset and continuing
  * for length bytes.
@@ -1833,12 +2011,19 @@ PHP_FUNCTION(eio_sync_file_range)
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_fallocate)
 {
-	unsigned long fd, mode = 0, offset = 0, length;
+	zval *zfd;
+	int fd;
+	unsigned long mode = 0, offset = 0, length;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l/lll|lf!z!",
-			&fd, &mode, &offset, &length, &pri, &fci, &fcc, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zlll|lf!z!",
+			&zfd, &mode, &offset, &length, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
+	}
+
+	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
+	if (fd <= 0) {
+		RETURN_FALSE;
 	}
 
 	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);

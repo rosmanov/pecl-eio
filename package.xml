@@ -21,25 +21,28 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2012-06-23</date>
-  <time>01:04:47</time>
+  <date>2012-06-24</date>
+  <time>11:43:00</time>
   <!--{{{ Current version -->
   <version>
-    <release>0.4.2</release>
-    <api>0.4.0</api>
+    <release>0.5.0</release>
+    <api>0.5.0</api>
   </version>
   <stability>
     <release>beta</release>
-    <api>beta</api>
+    <api>stable</api>
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-  Refact: libeio upgraded
-  Fix: bug #62392 where eio_*stat functions didn't return st_size
-  Fix: package.xml referenced to some nonexistent files
-  Fix: garbage in result arg of the callbacks in case of error
-  Change: warn about failed op in cb only when compiled with debug support
-  Add: test for stat on nonexistent files
+   Refact: libeio upgraded
+   Fix: bug #62392 where eio_*stat functions didn't return st_size
+   Fix: package.xml referenced to some nonexistent files
+   Fix: garbage in result arg of the callbacks in case of error
+   Change: warn about failed op in cb only when compiled with debug support
+   Add: test for stat on nonexistent files
+   Add: sockets support(eio_sendfile, eio_readahead etc.), enabled by default
+   Add: eio_seek function
+   Change: numeric fd arguments are now mixed(stream, Socket, or number)
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -78,6 +81,9 @@
       <file role="test" name="tests/eio_read_basic.phpt"/>
       <file role="test" name="tests/eio_rename_basic.phpt"/>
       <file role="test" name="tests/eio_rmdir_basic.phpt"/>
+      <file role="test" name="tests/eio_seek.phpt"/>
+      <file role="test" name="tests/eio_sendfile_basic.phpt"/>
+      <file role="test" name="tests/eio_sendfile_sockets.phpt"/>
       <file role="test" name="tests/eio_stat_basic.phpt"/>
       <file role="test" name="tests/eio_stat_error.phpt"/>
       <file role="test" name="tests/eio_sync.phpt"/>
@@ -90,7 +96,7 @@
   <dependencies>
     <required>
       <php>
-        <min>5.0.1</min>
+        <min>5.3.0</min>
       </php>
       <pearinstaller>
         <min>1.4.0b1</min>
@@ -103,62 +109,66 @@
   <providesextension>eio</providesextension>
   <extsrcrelease>
     <configureoption default="no" name="enable-eio-debug" prompt="Enable internal debugging in Eio"/>
+    <configureoption default="yes" name="enable-eio-sockets" prompt="Enable sockets support in Eio"/>
   </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
-    <!--{{{ 0.4.2 (beta) -->
+    <!--{{{ 0.5.0 (beta) -->
     <version>
-      <release>0.4.2</release>
-      <api>0.4.0</api>
+      <release>0.5.0</release>
+      <api>0.5.0</api>
     </version>
     <stability>
       <release>beta</release>
-      <api>beta</api>
+      <api>stable</api>
     </stability>
     <license uri="http://www.php.net/license">php</license>
     <notes>
-      Refact: libeio upgraded
-      Fix: bug #62392 where eio_*stat functions didn't return st_size
-      Fix: package.xml referenced to some nonexistent files
-      Fix: garbage in result arg of the callbacks in case of error
-      Change: warn about failed op in cb only when compiled with debug support
-      Add: test for stat on nonexistent files
+     Refact: libeio upgraded
+     Fix: bug #62392 where eio_*stat functions didn't return st_size
+     Fix: package.xml referenced to some nonexistent files
+     Fix: garbage in result arg of the callbacks in case of error
+     Change: warn about failed op in cb only when compiled with debug support
+     Add: test for stat on nonexistent files
+     Add: sockets support(eio_sendfile, eio_readahead etc.), enabled by default
+     Add: eio_seek function
+     Change: numeric fd arguments are now mixed(stream, Socket, or number)
     </notes>
     <!--}}}-->
     <!--{{{ 0.4.0 (beta) -->
     <release>
-      <version>
-        <release>0.4.0</release>
-        <api>0.4.0</api>
-      </version>
-      <stability>
-        <release>beta</release>
-        <api>beta</api>
-      </stability>
-      <license uri="http://www.php.net/license">php</license>
-      <notes>
+     <version>
+      <release>0.4.0</release>
+      <api>0.4.0</api>
+     </version>
+     <stability>
+      <release>beta</release>
+      <api>beta</api>
+     </stability>
+     <license uri="http://www.php.net/license">php</license>
+     <notes>
       Change: libeio is now embedded, no need to install it separately
       Change: functions call info and call info cache used instead of zvals
       Fix: segmentation fault on 32-bit platforms with the default 4-bit LFS
-      </notes>
+     </notes>
     </release>
     <!--}}}-->
     <!--{{{ 0.3.1 (beta) -->
     <release>
-      <version>
-        <release>0.3.1</release>
-        <api>0.3.1</api>
-      </version>
-      <stability>
-        <release>beta</release>
-        <api>beta</api>
-      </stability>
-      <license uri="http://www.php.net/license">php</license>
-      <notes>
+     <version>
+      <release>0.3.1</release>
+      <api>0.3.1</api>
+     </version>
+     <stability>
+      <release>beta</release>
+      <api>beta</api>
+     </stability>
+     <license uri="http://www.php.net/license">php</license>
+     <notes>
       Change: eio_get_event_stream returns stream resource
       Fix: package dependencies didn't allow pecl install eio-alpha
       Fix: redundant MS/NETWARE platform checks
-      </notes>
+     </notes>
     </release>
     <!--}}}-->
     <!-- {{{ 0.3.0 (alpha) -->
@@ -282,5 +292,5 @@
   <!--}}}-->
 </package>
 <!-- 
-vim: et sts=1 ts=1 fdm=marker
+vim: et sts=1 ts=1 sw=1 fdm=marker
 -->

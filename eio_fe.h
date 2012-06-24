@@ -58,6 +58,7 @@ PHP_FUNCTION(eio_readdir);
 
 PHP_FUNCTION(eio_sendfile);
 PHP_FUNCTION(eio_readahead);
+PHP_FUNCTION(eio_seek);
 PHP_FUNCTION(eio_syncfs);
 PHP_FUNCTION(eio_sync_file_range);
 PHP_FUNCTION(eio_fallocate);
