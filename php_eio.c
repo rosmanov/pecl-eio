@@ -1591,7 +1591,7 @@ PHP_FUNCTION(eio_read)
 }
 /* }}} */
 
-/* {{{ proto resource eio_write(mixed fd, mixed &str[, int length = NULL[, int offset = 0[, int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]]); 
+/* {{{ proto resource eio_write(mixed fd, mixed str[, int length = NULL[, int offset = 0[, int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]]); 
  * Writes string to the file specified by file descriptor fd.
  *
  * length	amount of characters to write. If is NULL, entire string is

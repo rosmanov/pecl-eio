@@ -166,7 +166,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_eio_write, 0, 0, 2)
 	ZEND_ARG_INFO(0, fd)
-	ZEND_ARG_INFO(1, str)
+	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, length)
 	ZEND_ARG_INFO(0, offset) 
 	EIO_ARGINFO_CB

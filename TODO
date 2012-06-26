@@ -1,5 +1,15 @@
+
 - Check for HAVE_EVENTFD (eventfd support) and use alternatives as AIO Perl module does
 	EFD_NONBLOCK and EFD_CLOEXEC are supported since Linux kernel 2.6.27
 - OOP API?
+
+- Fork support
+After a fork php_eio_eventfd is copied to the new process. Consequences are
+obvious - garbage in communication.
+
+We should:
+* create eio_init() userspace function allowing to re-create eventfd to the new
+  process
+* in eio_init() check whether we already have open event fd, and close if any 
 
 vim: tw=80:
