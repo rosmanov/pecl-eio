@@ -33,6 +33,7 @@ function my_readlink_cb($data, $result) {
 	@unlink($filename);
 }
 
+eio_init();
 eio_link($filename, $hardlink, EIO_PRI_DEFAULT, "my_hardlink_cb", $hardlink);
 eio_event_loop();
 ?>

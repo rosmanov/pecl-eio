@@ -65,8 +65,9 @@
 static int le_eio_grp;
 static int le_eio_req;
 
+static pid_t php_eio_pid = 0;
 int php_eio_eventfd = 0;
-int php_eio_initialized = 0;
+/*int php_eio_initialized = 0;*/
 
 static const zend_module_dep eio_deps[] = {
 	ZEND_MOD_OPTIONAL("sockets")
@@ -557,11 +558,12 @@ static int php_eio_res_cb(eio_req *req)
 	 * system call(mkdir, rmdir etc.)
 	 */
 
-	/* set $data arg value */
+	/* $data arg */
 	key1 = eio_cb->arg;
 	args[0] = &key1;
 	zval_add_ref(&key1);
 
+	/* $result arg */
 	MAKE_STD_ZVAL(key2);
 	args[1] = &key2;
 
@@ -600,33 +602,33 @@ static int php_eio_res_cb(eio_req *req)
 				/* EIO_STAT_BUF(req) is ptr to EIO_STRUCT_STAT structure */
 				array_init(key2);
 
-				add_assoc_long(key2, "st_dev", EIO_STAT_BUF(req)->st_dev);
-				add_assoc_long(key2, "st_ino", EIO_STAT_BUF(req)->st_ino);
-				add_assoc_long(key2, "st_mode", EIO_STAT_BUF(req)->st_mode);
-				add_assoc_long(key2, "st_nlink", EIO_STAT_BUF(req)->st_nlink);
-				add_assoc_long(key2, "st_uid", EIO_STAT_BUF(req)->st_uid);
-				add_assoc_long(key2, "st_size", EIO_STAT_BUF(req)->st_size);
-				add_assoc_long(key2, "st_gid", EIO_STAT_BUF(req)->st_gid);
+				add_assoc_long(key2, "dev", EIO_STAT_BUF(req)->st_dev);
+				add_assoc_long(key2, "ino", EIO_STAT_BUF(req)->st_ino);
+				add_assoc_long(key2, "mode", EIO_STAT_BUF(req)->st_mode);
+				add_assoc_long(key2, "nlink", EIO_STAT_BUF(req)->st_nlink);
+				add_assoc_long(key2, "uid", EIO_STAT_BUF(req)->st_uid);
+				add_assoc_long(key2, "size", EIO_STAT_BUF(req)->st_size);
+				add_assoc_long(key2, "gid", EIO_STAT_BUF(req)->st_gid);
 #ifdef HAVE_ST_RDEV
-				add_assoc_long(key2, "st_rdev", EIO_STAT_BUF(req)->st_rdev);
+				add_assoc_long(key2, "rdev", EIO_STAT_BUF(req)->st_rdev);
 #else
-				add_assoc_long(key2, "st_rdev", -1);
+				add_assoc_long(key2, "rdev", -1);
 #endif
 
 #ifdef HAVE_ST_BLKSIZE
-				add_assoc_long(key2, "st_blksize", EIO_STAT_BUF(req)->st_blksize);
+				add_assoc_long(key2, "blksize", EIO_STAT_BUF(req)->st_blksize);
 #else
-				add_assoc_long(key2, "st_blksize", -1);
+				add_assoc_long(key2, "blksize", -1);
 #endif
 #ifdef HAVE_ST_BLOCKS
-				add_assoc_long(key2, "st_blocks", EIO_STAT_BUF(req)->st_blocks);
+				add_assoc_long(key2, "blocks", EIO_STAT_BUF(req)->st_blocks);
 #else
-				add_assoc_long(key2, "st_blocks", -1);
+				add_assoc_long(key2, "blocks", -1);
 #endif
 
-				add_assoc_long(key2, "st_atime", EIO_STAT_BUF(req)->st_atime);
-				add_assoc_long(key2, "st_mtime", EIO_STAT_BUF(req)->st_mtime);
-				add_assoc_long(key2, "st_ctime", EIO_STAT_BUF(req)->st_ctime);
+				add_assoc_long(key2, "atime", EIO_STAT_BUF(req)->st_atime);
+				add_assoc_long(key2, "mtime", EIO_STAT_BUF(req)->st_mtime);
+				add_assoc_long(key2, "ctime", EIO_STAT_BUF(req)->st_ctime);
 				break;
 				/* }}} */
 
@@ -635,17 +637,17 @@ static int php_eio_res_cb(eio_req *req)
 				/* EIO_STATVFS_BUF(req) is ptr to EIO_STRUCT_STATVFS structure */
 				array_init(key2);
 
-				add_assoc_long(key2, "f_bsize", EIO_STATVFS_BUF(req)->f_bsize);
-				add_assoc_long(key2, "f_frsize", EIO_STATVFS_BUF(req)->f_frsize);
-				add_assoc_long(key2, "f_blocks", EIO_STATVFS_BUF(req)->f_blocks);
-				add_assoc_long(key2, "f_bfree", EIO_STATVFS_BUF(req)->f_bfree);
-				add_assoc_long(key2, "f_bavail", EIO_STATVFS_BUF(req)->f_bavail);
-				add_assoc_long(key2, "f_files", EIO_STATVFS_BUF(req)->f_files);
-				add_assoc_long(key2, "f_ffree", EIO_STATVFS_BUF(req)->f_ffree);
-				add_assoc_long(key2, "f_favail", EIO_STATVFS_BUF(req)->f_favail);
-				add_assoc_long(key2, "f_fsid", EIO_STATVFS_BUF(req)->f_fsid);
-				add_assoc_long(key2, "f_flag", EIO_STATVFS_BUF(req)->f_flag);
-				add_assoc_long(key2, "f_namemax", EIO_STATVFS_BUF(req)->f_namemax);
+				add_assoc_long(key2, "bsize", EIO_STATVFS_BUF(req)->f_bsize);
+				add_assoc_long(key2, "frsize", EIO_STATVFS_BUF(req)->f_frsize);
+				add_assoc_long(key2, "blocks", EIO_STATVFS_BUF(req)->f_blocks);
+				add_assoc_long(key2, "bfree", EIO_STATVFS_BUF(req)->f_bfree);
+				add_assoc_long(key2, "bavail", EIO_STATVFS_BUF(req)->f_bavail);
+				add_assoc_long(key2, "files", EIO_STATVFS_BUF(req)->f_files);
+				add_assoc_long(key2, "ffree", EIO_STATVFS_BUF(req)->f_ffree);
+				add_assoc_long(key2, "favail", EIO_STATVFS_BUF(req)->f_favail);
+				add_assoc_long(key2, "fsid", EIO_STATVFS_BUF(req)->f_fsid);
+				add_assoc_long(key2, "flag", EIO_STATVFS_BUF(req)->f_flag);
+				add_assoc_long(key2, "namemax", EIO_STATVFS_BUF(req)->f_namemax);
 				break;
 				/* }}} */
 
@@ -766,6 +768,27 @@ static php_socket_t php_eio_zval_to_fd(zval **ppfd TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{ php_eio_init() */
+static inline void php_eio_init(TSRMLS_C)
+{
+	pid_t cur_pid = getpid();
+
+	if (php_eio_pid <= 0 || (php_eio_pid > 0 && cur_pid != php_eio_pid)) {
+		/* Not initialized or forked a process(which needs it's own eventfd) */
+		/*TODO: EFD_ flags are available since kernel 2.6.7 */
+		php_eio_eventfd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+
+		if (eio_init(php_eio_want_poll_callback, php_eio_done_poll_callback)) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR,
+					"Failed initializing eio: %s", strerror(errno));
+			return;
+		}
+
+		php_eio_pid = cur_pid;
+	}
+}
+/* }}} */
+
 #undef EIO_CB_SET_FIELD
 #undef EIO_REQ_WARN_RESULT_ERROR
 #undef EIO_REQ_WARN_INVALID_CB
@@ -872,18 +895,10 @@ PHP_MINIT_FUNCTION(eio)
 
 	/* }}} */
 
-	if (!php_eio_initialized) {
-		/*TODO: EFD_ flags are available since kernel 2.6.7 */
-		php_eio_eventfd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+	/*if (!php_eio_initialized) {
+	  php_eio_init(TSRMLS_C) 
+	 } */
 
-		if (eio_init(php_eio_want_poll_callback, php_eio_done_poll_callback)) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR,
-				"Failed initializing eio: %s", strerror(errno));
-			return FAILURE;
-		}
-
-		php_eio_initialized = 1;
-	}
 
 	return SUCCESS;
 }
@@ -936,6 +951,35 @@ PHP_MINFO_FUNCTION(eio)
 /* }}} */
 
 /* {{{ API */
+
+/* {{{ proto void eio_init(void) 
+ * Create eventfd for current process and eio_init().
+ * Should be called from userspace within child process if forked. */
+PHP_FUNCTION(eio_init)
+{
+	php_eio_init(TSRMLS_C);
+}
+/* }}} */
+
+/* {{{ proto void eio_get_last_error(resource req) 
+ * Get last error associated with the request resource */
+PHP_FUNCTION(eio_get_last_error)
+{
+	zval *zreq;
+	eio_req *req;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zreq) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(req, eio_req *, &zreq, -1,
+		PHP_EIO_REQ_DESCRIPTOR_NAME, le_eio_req);
+
+	RETURN_STRING(strerror(req->errorno), 1);
+}
+/* }}} */
+
+
 /* {{{ POSIX API wrappers */
 
 /* {{{ proto bool eio_event_loop(void);
@@ -2064,6 +2108,7 @@ PHP_FUNCTION(eio_custom)
 	zend_fcall_info_cache fcc_exec;
 	php_eio_cb_custom_t *eio_cb;
 	eio_req *req;
+	PHP_EIO_IS_INIT();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "flf!|z!",
 			&fci_exec, &fcc_exec, &pri, &fci, &fcc, &data) == FAILURE) {

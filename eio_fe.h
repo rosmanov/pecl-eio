@@ -18,8 +18,10 @@
 #ifndef EIO_FE_H
 #  define EIO_FE_H
 
+PHP_FUNCTION(eio_init);
 PHP_FUNCTION(eio_poll);
 PHP_FUNCTION(eio_event_loop);
+PHP_FUNCTION(eio_get_last_error);
 
 PHP_FUNCTION(eio_open);
 PHP_FUNCTION(eio_truncate);

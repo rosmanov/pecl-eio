@@ -60,6 +60,7 @@ if (!$socket) {
 	die('Unable to accept connection');
 }
 
+eio_init();
 eio_sendfile($client, $fp, 0, 8, 0, 'my_cb', $socket);
 eio_event_loop();
 

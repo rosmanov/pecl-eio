@@ -22,6 +22,7 @@ function my_file_opened_callback($data, $result) {
 	}
 }
 
+eio_init();
 eio_open($temp_filename, EIO_O_CREAT, NULL, EIO_PRI_DEFAULT, "my_file_opened_callback", NULL);
 eio_event_loop();
 

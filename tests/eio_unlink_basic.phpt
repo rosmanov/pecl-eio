@@ -18,6 +18,7 @@ function my_unlink_callback($data, $result) {
 }
 
 
+eio_init();
 eio_unlink($temp_filename, EIO_PRI_DEFAULT, "my_unlink_callback");
 eio_event_loop();
 ?>

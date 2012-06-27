@@ -49,8 +49,13 @@
 	EIO_ARGINFO_CB \
 	ZEND_END_ARG_INFO()
 
+EIO_ARGINFO_FUNC_0(init);
 EIO_ARGINFO_FUNC_0(poll);
 EIO_ARGINFO_FUNC_0(event_loop);
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_eio_get_last_error, 0, 0, 1)
+	ZEND_ARG_INFO(0, req) 
+ZEND_END_ARG_INFO()
 
 /* {{{ POSIX API WRAPPERS */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_eio_open, 0, 0, 5)
@@ -297,8 +302,10 @@ EIO_ARGINFO_FUNC_0(get_event_stream);
 
 /* {{{ eio_functions[] */
 const zend_function_entry eio_functions[] = {
+	PHP_FE(eio_init, arginfo_eio_init)
 	PHP_FE(eio_poll, arginfo_eio_poll)
 	PHP_FE(eio_event_loop, arginfo_eio_event_loop)
+	PHP_FE(eio_get_last_error, arginfo_eio_get_last_error)
 	PHP_FE(eio_open, arginfo_eio_open)
 	PHP_FE(eio_truncate, arginfo_eio_truncate)
 	PHP_FE(eio_chown, arginfo_eio_chown)

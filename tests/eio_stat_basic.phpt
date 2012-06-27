@@ -11,8 +11,8 @@ fclose($fp);
 
 function my_res_cb($data, $result) {
 	var_dump($data);
-	var_dump($result['st_mtime']);
-	var_dump($result['st_size']);
+	var_dump($result['mtime']);
+	var_dump($result['size']);
 }
 
 function my_open_cb($data, $result) {
@@ -26,6 +26,8 @@ function my_open_cb($data, $result) {
 
 	@unlink($tmp_filename);
 }
+
+eio_init();
 
 eio_stat($tmp_filename, EIO_PRI_DEFAULT, "my_res_cb", "eio_stat");
 eio_lstat($tmp_filename, EIO_PRI_DEFAULT, "my_res_cb", "eio_lstat");

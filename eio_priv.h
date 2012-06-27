@@ -50,13 +50,23 @@ extern const zend_function_entry eio_functions[];
     PHP_EIO_RET_IF_FAILED(req, eio_func); \
 	ZEND_REGISTER_RESOURCE(return_value, req, le_eio_req);
 
+#  define PHP_EIO_IS_INIT() \
+{ \
+	if (php_eio_pid <= 0 || php_eio_eventfd <= 0) { \
+		php_error_docref(NULL TSRMLS_CC, \
+				E_ERROR,  "Eio is not initialized. You should call eio_init() before using Eio"); \
+		RETURN_FALSE; \
+	} \
+}
+
 #  define PHP_EIO_INIT \
 	long pri                  = EIO_PRI_DEFAULT; \
 	zval *data                = NULL; \
 	zend_fcall_info fci       = empty_fcall_info; \
 	zend_fcall_info_cache fcc = empty_fcall_info_cache; \
 	php_eio_cb_t *eio_cb; \
-	eio_req *req;
+	eio_req *req; \
+	PHP_EIO_IS_INIT();
 
 #  ifdef EIO_DEBUG
 #    define EIO_CHECK_PATH_LEN(path, path_len) \

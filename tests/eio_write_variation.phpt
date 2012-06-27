@@ -7,6 +7,7 @@ $filename = '/tmp/tmp_file' .uniqid();
 @unlink($filename);
 touch($filename);
 
+eio_init();
 eio_open($filename, EIO_O_RDWR, NULL, EIO_PRI_DEFAULT, function($filename, $fd) use ($str, $filename) {
 	eio_write($fd, $str, strlen($str), 0, null, function($fd, $written) use ($str, $filename) {
 		var_dump([

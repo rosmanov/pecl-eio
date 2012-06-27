@@ -21,20 +21,20 @@
   <email>osmanov@php.net</email>
   <active>yes</active>
  </lead>
- <date>2012-06-24</date>
- <time>11:43:00</time>
+ <date>2012-06-27</date>
+ <time>15:26:00</time>
  <!--{{{ Current version -->
  <version>
-  <release>0.5.1</release>
-  <api>0.5.1</api>
+  <release>1.0.0</release>
+  <api>1.0.0</api>
  </version>
  <stability>
   <release>beta</release>
-  <api>stable</api>
+  <api>beta</api>
  </stability>
  <license uri="http://www.php.net/license">php</license>
  <notes>
-  Fix: eio_write wrote garbage when 'str' arg passed by ref in a nested call with 'use' keyword
+  Change: Attention! You must call eio_init() before using Eio. This is done because of need to support forks. Similarly you must call eio_init() in forked child process.
  </notes>
  <!--}}}-->
  <!--{{{ contents -->
@@ -106,18 +106,38 @@
  </extsrcrelease>
  <!--{{{ Changelog-->
  <changelog>
-  <!--{{{ 0.5.1 (beta) -->
+<!--{{{ 1.0.0-->
+ <version>
+  <release>1.0.0</release>
+  <api>1.0.0</api>
+ </version>
+ <stability>
+  <release>beta</release>
+  <api>beta</api>
+ </stability>
+ <license uri="http://www.php.net/license">php</license>
+ <notes>
+  Fix: eio_write wrote garbage when 'str' arg passed by ref in a nested call with 'use' keyword
+  Change: Attention! You must call eio_init() before using Eio. This is done because of need to support forks. Similarly you must call eio_init() in forked child process.
+  Change: Cut 'st_' prefix in result of eio_*stat for the sake of simplicity and better 'compatability' with stat()
+  Change: Cut 'f_' prefix in result of eio_*statvfs
+ </notes>
+<!--}}}-->
+  <!--{{{ 1.0.0 (beta) -->
   <version>
-   <release>0.5.1</release>
-   <api>0.5.1</api>
+   <release>1.0.0</release>
+   <api>1.0.0</api>
   </version>
   <stability>
    <release>beta</release>
-   <api>stable</api>
+   <api>beta</api>
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
    Fix: eio_write wrote garbage when 'str' arg passed by ref in a nested call with 'use' keyword
+   Change: Attention! You must call eio_init() before using Eio. This is done because of need to support forks. Similarly you must call eio_init() in forked child process.
+   Change: Cut 'st_' prefix in result of eio_*stat for the sake of simplicity and better 'compatability' with stat()
+   Change: Cut 'f_' prefix in result of eio_*statvfs
   </notes>
   <!--}}}-->
   <!--{{{ 0.5.0 (beta) -->

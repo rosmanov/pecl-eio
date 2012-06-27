@@ -8,6 +8,8 @@ $temp_filename = "eio-temp-file.tmp";
 
 touch($temp_filename);
 
+eio_init();
+
 function my_eio_chown_cb($data, $result) {
 	var_dump($result);
 }

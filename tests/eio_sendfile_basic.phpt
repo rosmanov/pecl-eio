@@ -21,6 +21,7 @@ $fp_from = fopen($tmp_file_from, 'r');
 
 $fp_to = fopen($tmp_file_to, 'w');
 
+eio_init();
 eio_sendfile($fp_to, $fp_from, 0, 3, 0, 'my_cb', 'sendfile_data');
 eio_event_loop();
 

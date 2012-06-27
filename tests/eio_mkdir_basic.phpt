@@ -19,6 +19,7 @@ function my_mkdir_callback($data, $result) {
 		rmdir($temp_dirname);
 }
 
+eio_init();
 eio_mkdir($temp_dirname, 0300, 1, "my_mkdir_callback", NULL);
 eio_event_loop();
 ?>

@@ -19,6 +19,7 @@ function my_seek_cb($fp, $result) {
 		}
 	}
 }
+eio_init();
 if (!eio_seek($fp, 6, EIO_SEEK_SET, 0, 'my_seek_cb', $fp)) {
 	die("Failed to eio_seek");
 }
