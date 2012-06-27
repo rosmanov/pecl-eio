@@ -53,9 +53,7 @@ extern const zend_function_entry eio_functions[];
 #  define PHP_EIO_IS_INIT() \
 { \
 	if (php_eio_pid <= 0 || php_eio_eventfd <= 0) { \
-		php_error_docref(NULL TSRMLS_CC, \
-				E_ERROR,  "Eio is not initialized. You should call eio_init() before using Eio"); \
-		RETURN_FALSE; \
+		php_eio_init(TSRMLS_C); \
 	} \
 }
 

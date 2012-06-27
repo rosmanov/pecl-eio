@@ -567,7 +567,6 @@ static int php_eio_res_cb(eio_req *req)
 	MAKE_STD_ZVAL(key2);
 	args[1] = &key2;
 
-
 	/* {{{ set $result arg value */
 
 	/* WARNING. If this callback returns nonzero, eio will stop processing
@@ -681,7 +680,7 @@ static int php_eio_res_cb(eio_req *req)
 		eio_cb->fci->params         = args;
 		eio_cb->fci->retval_ptr_ptr = &retval_ptr;
 		eio_cb->fci->param_count    = 2;
-		eio_cb->fci->no_separation  = 0;
+		eio_cb->fci->no_separation  = 1;
 
 		if (zend_call_function(eio_cb->fci, eio_cb->fcc TSRMLS_CC) == SUCCESS
 			&& retval_ptr) {

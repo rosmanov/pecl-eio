@@ -1,323 +1,311 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <package xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
- <name>eio</name>
- <channel>pecl.php.net</channel>
- <summary>Provides interface to the libeio library</summary>
- <description>
-  This extension provides interface to the libeio library written by Marc Lehmann
-  &lt;libeio at schmorp dot de&gt;(see http://software.schmorp.de/pkg/libeio.html).
+  <name>eio</name>
+  <channel>pecl.php.net</channel>
+  <summary>Provides interface to the libeio library</summary>
+  <description>
+    This extension provides interface to the libeio library written by Marc Lehmann
+    &lt;libeio at schmorp dot de&gt;(see http://software.schmorp.de/pkg/libeio.html).
 
-  Libeio is a an asynchronous I/O library. Features basically include
-  asynchronous versions of POSIX API(read, write, open, close, stat, unlink,
-  fdatasync, mknod, readdir etc.); sendfile (native on Solaris, Linux, HP-UX,
-  FreeBSD); readahead. libeio itself emulates the system calls, if they are not
-  available on specific(UNIX-like) platform.
+    Libeio is a an asynchronous I/O library. Features basically include
+    asynchronous versions of POSIX API(read, write, open, close, stat, unlink,
+    fdatasync, mknod, readdir etc.); sendfile (native on Solaris, Linux, HP-UX,
+    FreeBSD); readahead. libeio itself emulates the system calls, if they are not
+    available on specific(UNIX-like) platform.
 
-  Currently this extension supports Linux platforms only.
- </description>
- <lead>
-  <name>Ruslan Osmanov</name>
-  <user>osmanov</user>
-  <email>osmanov@php.net</email>
-  <active>yes</active>
- </lead>
- <date>2012-06-27</date>
- <time>15:26:00</time>
- <!--{{{ Current version -->
- <version>
-  <release>1.0.0</release>
-  <api>1.0.0</api>
- </version>
- <stability>
-  <release>beta</release>
-  <api>beta</api>
- </stability>
- <license uri="http://www.php.net/license">php</license>
- <notes>
-  Change: Attention! You must call eio_init() before using Eio. This is done because of need to support forks. Similarly you must call eio_init() in forked child process.
- </notes>
- <!--}}}-->
- <!--{{{ contents -->
- <contents>
-  <dir name="/">
-   <file role="doc" name="CREDITS"/>
-   <file role="doc" name="EXPERIMENTAL"/>
-   <file role="doc" name="INSTALL"/>
-   <file role="doc" name="LICENSE"/>
-   <file role="doc" name="README"/>
-   <file role="doc" name="TODO"/>
-   <file role="src" name="config.m4"/>
-   <file role="src" name="php_eio.c"/>
-   <file role="src" name="eio_fe.c"/>
-   <file role="src" name="eio_fe.h"/>
-   <file role="src" name="eio_priv.h"/>
-   <file role="src" name="php_eio.h"/>
-   <file role="src" name="libeio/LICENSE"/>
-   <file role="src" name="libeio/ecb.h"/>
-   <file role="src" name="libeio/eio.c"/>
-   <file role="src" name="libeio/eio.h"/>
-   <file role="src" name="libeio/libeio.m4"/>
-   <file role="src" name="libeio/xthread.h"/>
-   <file role="test" name="tests/eio001.phpt"/>
-   <file role="test" name="tests/eio_cancel_basic.phpt"/>
-   <file role="test" name="tests/eio_chmod_basic.phpt"/>
-   <file role="test" name="tests/eio_chown_variation.phpt"/>
-   <file role="test" name="tests/eio_custom_basic.phpt"/>
-   <file role="test" name="tests/eio_fallocate_basic.phpt"/>
-   <file role="test" name="tests/eio_grp_add.phpt"/>
-   <file role="test" name="tests/eio_link.phpt"/>
-   <file role="test" name="tests/eio_mkdir_basic.phpt"/>
-   <file role="test" name="tests/eio_mknod_basic.phpt"/>
-   <file role="test" name="tests/eio_open_basic.phpt"/>
-   <file role="test" name="tests/eio_open_error.phpt"/>
-   <file role="test" name="tests/eio_read_basic.phpt"/>
-   <file role="test" name="tests/eio_rename_basic.phpt"/>
-   <file role="test" name="tests/eio_rmdir_basic.phpt"/>
-   <file role="test" name="tests/eio_seek.phpt"/>
-   <file role="test" name="tests/eio_sendfile_basic.phpt"/>
-   <file role="test" name="tests/eio_sendfile_sockets.phpt"/>
-   <file role="test" name="tests/eio_stat_basic.phpt"/>
-   <file role="test" name="tests/eio_stat_error.phpt"/>
-   <file role="test" name="tests/eio_sync.phpt"/>
-   <file role="test" name="tests/eio_truncate_basic.phpt"/>
-   <file role="test" name="tests/eio_write_variation.phpt"/>
-   <file role="test" name="tests/eio_unlink_basic.phpt"/>
-   <file role="test" name="tests/eio_utime_basic.phpt"/>
-  </dir>
- </contents>
- <!--}}}-->
- <dependencies>
-  <required>
-   <php>
-    <min>5.3.0</min>
-   </php>
-   <pearinstaller>
-    <min>1.4.0b1</min>
-   </pearinstaller>
-   <os>
-    <name>UNIX</name>
-   </os>
-  </required>
- </dependencies>
- <providesextension>eio</providesextension>
- <extsrcrelease>
-  <configureoption default="no" name="enable-eio-debug" prompt="Enable internal debugging in Eio"/>
-  <configureoption default="yes" name="enable-eio-sockets" prompt="Enable sockets support in Eio"/>
- </extsrcrelease>
- <!--{{{ Changelog-->
- <changelog>
-<!--{{{ 1.0.0-->
- <version>
-  <release>1.0.0</release>
-  <api>1.0.0</api>
- </version>
- <stability>
-  <release>beta</release>
-  <api>beta</api>
- </stability>
- <license uri="http://www.php.net/license">php</license>
- <notes>
-  Fix: eio_write wrote garbage when 'str' arg passed by ref in a nested call with 'use' keyword
-  Change: Attention! You must call eio_init() before using Eio. This is done because of need to support forks. Similarly you must call eio_init() in forked child process.
-  Change: Cut 'st_' prefix in result of eio_*stat for the sake of simplicity and better 'compatability' with stat()
-  Change: Cut 'f_' prefix in result of eio_*statvfs
- </notes>
-<!--}}}-->
-  <!--{{{ 1.0.0 (beta) -->
+    Currently this extension supports Linux platforms only.
+  </description>
+  <lead>
+    <name>Ruslan Osmanov</name>
+    <user>osmanov</user>
+    <email>osmanov@php.net</email>
+    <active>yes</active>
+  </lead>
+  <date>2012-06-27</date>
+  <time>15:26:00</time>
+  <!--{{{ Current version -->
   <version>
-   <release>1.0.0</release>
-   <api>1.0.0</api>
+    <release>1.0.0</release>
+    <api>1.0.0</api>
   </version>
   <stability>
-   <release>beta</release>
-   <api>beta</api>
+    <release>stable</release>
+    <api>stable</api>
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-   Fix: eio_write wrote garbage when 'str' arg passed by ref in a nested call with 'use' keyword
-   Change: Attention! You must call eio_init() before using Eio. This is done because of need to support forks. Similarly you must call eio_init() in forked child process.
-   Change: Cut 'st_' prefix in result of eio_*stat for the sake of simplicity and better 'compatability' with stat()
-   Change: Cut 'f_' prefix in result of eio_*statvfs
+    Fix: eio_write wrote garbage when 'str' arg passed by ref in a nested call with 'use' keyword
+    Add: eio_init(). You must call eio_init() before using Eio in a forked child process.
+    Change: Cut 'st_' prefix in result of eio_*stat for the sake of simplicity and better 'compatability' with stat()
+    Change: Cut 'f_' prefix in result of eio_*statvfs
+    Add: eio_get_last_error()
   </notes>
   <!--}}}-->
-  <!--{{{ 0.5.0 (beta) -->
-  <version>
-   <release>0.5.0</release>
-   <api>0.5.0</api>
-  </version>
-  <stability>
-   <release>beta</release>
-   <api>stable</api>
-  </stability>
-  <license uri="http://www.php.net/license">php</license>
-  <notes>
-   Refact: libeio upgraded
-   Fix: bug #62392 where eio_*stat functions didn't return st_size
-   Fix: package.xml referenced to some nonexistent files
-   Fix: garbage in result arg of the callbacks in case of error
-   Change: warn about failed op in cb only when compiled with debug support
-   Add: test for stat on nonexistent files
-   Add: sockets support(eio_sendfile, eio_readahead etc.), enabled by default
-   Add: eio_seek function
-   Change: numeric fd arguments are now mixed(stream, Socket, or number)
-  </notes>
+  <!--{{{ contents -->
+  <contents>
+    <dir name="/">
+      <file role="doc" name="CREDITS"/>
+      <file role="doc" name="EXPERIMENTAL"/>
+      <file role="doc" name="INSTALL"/>
+      <file role="doc" name="LICENSE"/>
+      <file role="doc" name="README"/>
+      <file role="doc" name="TODO"/>
+      <file role="src" name="config.m4"/>
+      <file role="src" name="php_eio.c"/>
+      <file role="src" name="eio_fe.c"/>
+      <file role="src" name="eio_fe.h"/>
+      <file role="src" name="eio_priv.h"/>
+      <file role="src" name="php_eio.h"/>
+      <file role="src" name="libeio/LICENSE"/>
+      <file role="src" name="libeio/ecb.h"/>
+      <file role="src" name="libeio/eio.c"/>
+      <file role="src" name="libeio/eio.h"/>
+      <file role="src" name="libeio/libeio.m4"/>
+      <file role="src" name="libeio/xthread.h"/>
+      <file role="test" name="tests/eio001.phpt"/>
+      <file role="test" name="tests/eio_cancel_basic.phpt"/>
+      <file role="test" name="tests/eio_chmod_basic.phpt"/>
+      <file role="test" name="tests/eio_chown_variation.phpt"/>
+      <file role="test" name="tests/eio_custom_basic.phpt"/>
+      <file role="test" name="tests/eio_fallocate_basic.phpt"/>
+      <file role="test" name="tests/eio_grp_add.phpt"/>
+      <file role="test" name="tests/eio_link.phpt"/>
+      <file role="test" name="tests/eio_mkdir_basic.phpt"/>
+      <file role="test" name="tests/eio_mknod_basic.phpt"/>
+      <file role="test" name="tests/eio_open_basic.phpt"/>
+      <file role="test" name="tests/eio_open_error.phpt"/>
+      <file role="test" name="tests/eio_read_basic.phpt"/>
+      <file role="test" name="tests/eio_rename_basic.phpt"/>
+      <file role="test" name="tests/eio_rmdir_basic.phpt"/>
+      <file role="test" name="tests/eio_seek.phpt"/>
+      <file role="test" name="tests/eio_sendfile_basic.phpt"/>
+      <file role="test" name="tests/eio_sendfile_sockets.phpt"/>
+      <file role="test" name="tests/eio_stat_basic.phpt"/>
+      <file role="test" name="tests/eio_stat_error.phpt"/>
+      <file role="test" name="tests/eio_sync.phpt"/>
+      <file role="test" name="tests/eio_truncate_basic.phpt"/>
+      <file role="test" name="tests/eio_write_variation.phpt"/>
+      <file role="test" name="tests/eio_unlink_basic.phpt"/>
+      <file role="test" name="tests/eio_utime_basic.phpt"/>
+    </dir>
+  </contents>
   <!--}}}-->
-  <!--{{{ 0.4.0 (beta) -->
-  <release>
-   <version>
-    <release>0.4.0</release>
-    <api>0.4.0</api>
-   </version>
-   <stability>
-    <release>beta</release>
-    <api>beta</api>
-   </stability>
-   <license uri="http://www.php.net/license">php</license>
-   <notes>
-    Change: libeio is now embedded, no need to install it separately
-    Change: functions call info and call info cache used instead of zvals
-    Fix: segmentation fault on 32-bit platforms with the default 4-bit LFS
-   </notes>
-  </release>
+  <dependencies>
+    <required>
+      <php>
+        <min>5.3.0</min>
+      </php>
+      <pearinstaller>
+        <min>1.4.0b1</min>
+      </pearinstaller>
+      <os>
+        <name>UNIX</name>
+      </os>
+    </required>
+  </dependencies>
+  <providesextension>eio</providesextension>
+  <extsrcrelease>
+    <configureoption default="no" name="enable-eio-debug" prompt="Enable internal debugging in Eio"/>
+    <configureoption default="yes" name="enable-eio-sockets" prompt="Enable sockets support in Eio"/>
+  </extsrcrelease>
+  <!--{{{ Changelog-->
+  <changelog>
+    <!--{{{ 1.0.0 -->
+    <version>
+      <release>1.0.0</release>
+      <api>1.0.0</api>
+    </version>
+    <stability>
+      <release>stable</release>
+      <api>stable</api>
+    </stability>
+    <license uri="http://www.php.net/license">php</license>
+    <notes>
+      Fix: eio_write wrote garbage when 'str' arg passed by ref in a nested call with 'use' keyword
+      Add: eio_init(). You must call eio_init() before using Eio in a forked child process.
+      Change: Cut 'st_' prefix in result of eio_*stat for the sake of simplicity and better 'compatability' with stat()
+      Change: Cut 'f_' prefix in result of eio_*statvfs
+      Add: eio_get_last_error()
+    </notes>
+    <!--}}}-->
+    <!--{{{ 0.5.0 (beta) -->
+    <version>
+      <release>0.5.0</release>
+      <api>0.5.0</api>
+    </version>
+    <stability>
+      <release>beta</release>
+      <api>stable</api>
+    </stability>
+    <license uri="http://www.php.net/license">php</license>
+    <notes>
+      Refact: libeio upgraded
+      Fix: bug #62392 where eio_*stat functions didn't return st_size
+      Fix: package.xml referenced to some nonexistent files
+      Fix: garbage in result arg of the callbacks in case of error
+      Change: warn about failed op in cb only when compiled with debug support
+      Add: test for stat on nonexistent files
+      Add: sockets support(eio_sendfile, eio_readahead etc.), enabled by default
+      Add: eio_seek function
+      Change: numeric fd arguments are now mixed(stream, Socket, or number)
+    </notes>
+    <!--}}}-->
+    <!--{{{ 0.4.0 (beta) -->
+    <release>
+      <version>
+        <release>0.4.0</release>
+        <api>0.4.0</api>
+      </version>
+      <stability>
+        <release>beta</release>
+        <api>beta</api>
+      </stability>
+      <license uri="http://www.php.net/license">php</license>
+      <notes>
+        Change: libeio is now embedded, no need to install it separately
+        Change: functions call info and call info cache used instead of zvals
+        Fix: segmentation fault on 32-bit platforms with the default 4-bit LFS
+      </notes>
+    </release>
+    <!--}}}-->
+    <!--{{{ 0.3.1 (beta) -->
+    <release>
+      <version>
+        <release>0.3.1</release>
+        <api>0.3.1</api>
+      </version>
+      <stability>
+        <release>beta</release>
+        <api>beta</api>
+      </stability>
+      <license uri="http://www.php.net/license">php</license>
+      <notes>
+        Change: eio_get_event_stream returns stream resource
+        Fix: package dependencies didn't allow pecl install eio-alpha
+        Fix: redundant MS/NETWARE platform checks
+      </notes>
+    </release>
+    <!--}}}-->
+    <!-- {{{ 0.3.0 (alpha) -->
+    <release>
+      <version>
+        <release>0.3.0</release>
+        <api>0.3.0</api>
+      </version>
+      <stability>
+        <release>alpha</release>
+        <api>alpha</api>
+      </stability>
+      <license uri="http://www.php.net/license">php</license>
+      <notes>
+        Change: mutex switch that used in communications with libeio replaced with
+        eventfd; the same descriptor exported to userspace to bind with existing
+        event loops
+        Add: eio_get_eventfd function to get eventfd descriptor
+        Add: header checks in configuration 
+        Change: libeio initialization moved to the MINIT phase, but unfinished
+        requests are still handled in the RSHUTDOWN phase
+        Change: simplified libeio callbacks
+      </notes>
+    </release>
+    <!--}}}-->
+    <!--{{{ 0.2.0 (alpha) -->
+    <release>
+      <version>
+        <release>0.2.0</release>
+        <api>0.2.0</api>
+      </version>
+      <stability>
+        <release>alpha</release>
+        <api>alpha</api>
+      </stability>
+      <license uri="http://www.php.net/license">PHP</license>
+      <notes>
+        Fix: heavy bulk requests damaged event loop causing much CPU consumption
+        Fix: in a threaded SAPI libeio in a single process might initialize mutex multiple times
+        Change: switch from semaphore to mutex
+        Change: dropped --with-eio-shm* configuration options
+      </notes>
+    </release>
+    <!--}}}-->
+    <!--{{{ 0.1.1 (alpha) -->
+    <release>
+      <version>
+        <release>0.1.1</release>
+        <api>0.1.1</api>
+      </version>
+      <stability>
+        <release>alpha</release>
+        <api>alpha</api>
+      </stability>
+      <license uri="http://www.php.net/license">PHP</license>
+      <notes>
+        Fix: eio_poll had been out of sync with the IPC
+        Fix: pathnames in tests
+        Change: dropped preprocessor checks on non-UNIX platforms, i.e. no plans to
+        support non-UNIX
+      </notes>
+    </release>
+    <!--}}}-->
+    <!--{{{ 0.1.0 (alpha) -->
+    <release>
+      <version>
+        <release>0.1.0</release>
+        <api>0.1.0</api>
+      </version>
+      <stability>
+        <release>alpha</release>
+        <api>alpha</api>
+      </stability>
+      <license uri="http://www.php.net/license">PHP</license>
+      <notes>
+        Change: refactored some tests
+        Add: request types have readable values in error messages
+        Add: errno replaced with the meaningful string in error messages
+        Fix: eio_chown denied uid -1 value
+        Fix: message about required libeio
+      </notes>
+    </release>
+    <!--}}}-->
+    <!--{{{ 0.0.1 (alpha) -->
+    <release>
+      <version>
+        <release>0.0.1</release>
+        <api>0.0.1</api>
+      </version>
+      <stability>
+        <release>alpha</release>
+        <api>alpha</api>
+      </stability>
+      <license uri="http://www.php.net/license">PHP</license>
+      <notes>
+        Change: Shared memory permissions are set to 0660 by default 
+        Change: Removed redundant code and comments
+        Add: Tests: eio_read_basic.phpt, eio_stat_basic.phpt
+        Fix: the package XML
+        Fix: docs
+      </notes>
+    </release>
+    <!--}}}-->
+    <!--{{{ 0.0.1dev -->
+    <release>
+      <version>
+        <release>0.0.1dev</release>
+        <api>0.0.1dev</api>
+      </version>
+      <stability>
+        <release>devel</release>
+        <api>devel</api>
+      </stability>
+      <license uri="http://www.php.net/license">PHP</license>
+      <notes>
+        Initial development release.
+      </notes>
+    </release>
+    <!--}}}-->
+  </changelog>
   <!--}}}-->
-  <!--{{{ 0.3.1 (beta) -->
-  <release>
-   <version>
-    <release>0.3.1</release>
-    <api>0.3.1</api>
-   </version>
-   <stability>
-    <release>beta</release>
-    <api>beta</api>
-   </stability>
-   <license uri="http://www.php.net/license">php</license>
-   <notes>
-    Change: eio_get_event_stream returns stream resource
-    Fix: package dependencies didn't allow pecl install eio-alpha
-    Fix: redundant MS/NETWARE platform checks
-   </notes>
-  </release>
-  <!--}}}-->
-  <!-- {{{ 0.3.0 (alpha) -->
-  <release>
-   <version>
-    <release>0.3.0</release>
-    <api>0.3.0</api>
-   </version>
-   <stability>
-    <release>alpha</release>
-    <api>alpha</api>
-   </stability>
-   <license uri="http://www.php.net/license">php</license>
-   <notes>
-    Change: mutex switch that used in communications with libeio replaced with
-    eventfd; the same descriptor exported to userspace to bind with existing
-    event loops
-    Add: eio_get_eventfd function to get eventfd descriptor
-    Add: header checks in configuration 
-    Change: libeio initialization moved to the MINIT phase, but unfinished
-    requests are still handled in the RSHUTDOWN phase
-    Change: simplified libeio callbacks
-   </notes>
-  </release>
-  <!--}}}-->
-  <!--{{{ 0.2.0 (alpha) -->
-  <release>
-   <version>
-    <release>0.2.0</release>
-    <api>0.2.0</api>
-   </version>
-   <stability>
-    <release>alpha</release>
-    <api>alpha</api>
-   </stability>
-   <license uri="http://www.php.net/license">PHP</license>
-   <notes>
-    Fix: heavy bulk requests damaged event loop causing much CPU consumption
-    Fix: in a threaded SAPI libeio in a single process might initialize mutex multiple times
-    Change: switch from semaphore to mutex
-    Change: dropped --with-eio-shm* configuration options
-   </notes>
-  </release>
-  <!--}}}-->
-  <!--{{{ 0.1.1 (alpha) -->
-  <release>
-   <version>
-    <release>0.1.1</release>
-    <api>0.1.1</api>
-   </version>
-   <stability>
-    <release>alpha</release>
-    <api>alpha</api>
-   </stability>
-   <license uri="http://www.php.net/license">PHP</license>
-   <notes>
-    Fix: eio_poll had been out of sync with the IPC
-    Fix: pathnames in tests
-    Change: dropped preprocessor checks on non-UNIX platforms, i.e. no plans to
-    support non-UNIX
-   </notes>
-  </release>
-  <!--}}}-->
-  <!--{{{ 0.1.0 (alpha) -->
-  <release>
-   <version>
-    <release>0.1.0</release>
-    <api>0.1.0</api>
-   </version>
-   <stability>
-    <release>alpha</release>
-    <api>alpha</api>
-   </stability>
-   <license uri="http://www.php.net/license">PHP</license>
-   <notes>
-    Change: refactored some tests
-    Add: request types have readable values in error messages
-    Add: errno replaced with the meaningful string in error messages
-    Fix: eio_chown denied uid -1 value
-    Fix: message about required libeio
-   </notes>
-  </release>
-  <!--}}}-->
-  <!--{{{ 0.0.1 (alpha) -->
-  <release>
-   <version>
-    <release>0.0.1</release>
-    <api>0.0.1</api>
-   </version>
-   <stability>
-    <release>alpha</release>
-    <api>alpha</api>
-   </stability>
-   <license uri="http://www.php.net/license">PHP</license>
-   <notes>
-    Change: Shared memory permissions are set to 0660 by default 
-    Change: Removed redundant code and comments
-    Add: Tests: eio_read_basic.phpt, eio_stat_basic.phpt
-    Fix: the package XML
-    Fix: docs
-   </notes>
-  </release>
-  <!--}}}-->
-  <!--{{{ 0.0.1dev -->
-  <release>
-   <version>
-    <release>0.0.1dev</release>
-    <api>0.0.1dev</api>
-   </version>
-   <stability>
-    <release>devel</release>
-    <api>devel</api>
-   </stability>
-   <license uri="http://www.php.net/license">PHP</license>
-   <notes>
-    Initial development release.
-   </notes>
-  </release>
-  <!--}}}-->
- </changelog>
- <!--}}}-->
 </package>
 <!-- 
-vim: et sts=1 ts=1 sw=1 fdm=marker
+vim: et sts=2 ts=2 sw=2 fdm=marker
 -->
