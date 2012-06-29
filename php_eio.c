@@ -572,7 +572,7 @@ static int php_eio_res_cb(eio_req *req)
 	/* WARNING. If this callback returns nonzero, eio will stop processing
 	 * results(in eio_poll), and will return the value to it's caller */
 	if (EIO_RESULT(req) < 0) {
-		EIO_REQ_WARN_RESULT_ERROR();
+		/*EIO_REQ_WARN_RESULT_ERROR();*/
 		ZVAL_LONG(key2, EIO_RESULT(req));
 	} else {
 		switch (req->type) {
