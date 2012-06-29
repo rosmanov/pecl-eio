@@ -1,9 +1,5 @@
 --TEST--
 Check for eio_*stat functions' error behaviour
---SKIPIF--
-<?php
-if (!defined('EIO_DEBUG')) die("skip this test is for debugging support only");
-?>
 --FILE--
 <?php 
 ini_set('display_errors', 'On');
@@ -51,11 +47,7 @@ string(%d) "eio_%stat"
 int(%d)
 string(%d) "eio_%stat"
 int(%d)
-
-Warning: eio_event_loop(): No such file or directory, eio_req result: -1%a
 string(%d) "eio_%stat"
 int(-1)
-
-Warning: eio_event_loop(): No such file or directory, eio_req result: -1%a
 string(%d) "eio_%stat"
 int(-1)

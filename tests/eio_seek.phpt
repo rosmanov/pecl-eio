@@ -11,8 +11,8 @@ $fp = fopen($temp_filename, "w+");
 fwrite($fp, "1234567890");
 
 function my_seek_cb($fp, $result) {
+	var_dump($result);
 	if ($result == 0) {
-		var_dump($result);
 		var_dump($fp);
 		if (is_resource($fp)) {
 			var_dump(fread($fp, 32));
@@ -43,5 +43,4 @@ string(4) "7890"
 int(0)
 resource(5) of type (stream)
 string(6) "567890"
-
-Warning: eio_event_loop(): Invalid argument, eio_req result: -1, req type: EIO_SEEK %a
+int(-1)
