@@ -670,6 +670,14 @@ static int php_eio_res_cb(eio_req *req)
 
 				break;
 
+			case EIO_WRITE:
+				if (EIO_BUF(req)) {
+					efree(EIO_BUF(req));
+					EIO_BUF(req) = NULL;
+				}
+				ZVAL_LONG(key2, EIO_RESULT(req));
+				break;
+
 			default:
 				ZVAL_LONG(key2, EIO_RESULT(req));
 		}
@@ -1660,7 +1668,9 @@ PHP_FUNCTION(eio_write)
 		RETURN_FALSE;
 	}
 
-	convert_to_string(zbuf);
+	if (Z_TYPE_P(zbuf) != IS_STRING) {
+		convert_to_string(zbuf);
+	}
 
 	if (Z_STRLEN_P(zbuf) < (length + offset)) {
 		RETURN_FALSE;
@@ -1680,6 +1690,11 @@ PHP_FUNCTION(eio_write)
 
 	req = eio_write(fd, Z_STRVAL_P(zbuf), num_bytes, offset,
 		pri, php_eio_res_cb, eio_cb);
+	if (!Z_ISREF_P(zbuf)) {
+		/* gonna be destructed. Prevent it. 
+		 * We then have to efree EIO_BUF(req) in php_eio_res_cb */
+		EIO_BUF(req) = estrndup(EIO_BUF(req), num_bytes);
+	}
 	PHP_EIO_RET_REQ_RESOURCE(req, eio_write);
 }
 /* }}} */

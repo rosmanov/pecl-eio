@@ -34,7 +34,8 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-    Fix: eio_write wrote garbage when 'str' arg passed by ref in a nested call with 'use' keyword
+    Fix: eio_write() wrote garbage when 'str' arg passed by ref in a nested call with 'use' keyword
+    Fix: eio_write() wrote garbage when 'str' arg passed by value
     Add: eio_init(). You must call eio_init() before using Eio in a forked child process.
     Change: Cut 'st_' prefix in result of eio_*stat for the sake of simplicity and better 'compatability' with stat()
     Change: Cut 'f_' prefix in result of eio_*statvfs
@@ -121,7 +122,8 @@
     </stability>
     <license uri="http://www.php.net/license">php</license>
     <notes>
-      Fix: eio_write wrote garbage when 'str' arg passed by ref in a nested call with 'use' keyword
+      Fix: eio_write() wrote garbage when 'str' arg passed by ref in a nested call with 'use' keyword
+      Fix: eio_write() wrote garbage when 'str' arg passed by value
       Add: eio_init(). You must call eio_init() before using Eio in a forked child process.
       Change: Cut 'st_' prefix in result of eio_*stat for the sake of simplicity and better 'compatability' with stat()
       Change: Cut 'f_' prefix in result of eio_*statvfs
