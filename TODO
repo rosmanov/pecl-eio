@@ -2,9 +2,7 @@
 - Check for HAVE_EVENTFD (eventfd support) and use alternatives as AIO Perl module does
 	EFD_NONBLOCK and EFD_CLOEXEC are supported since Linux kernel 2.6.27
 - OOP API?
-- make eio_get_last_error() usable in request callback, add an argument for it:
-void cb($data, $result, $req = NULL);
-pass request resource there;
-Try to determine whether user supplied the third argument in declaration.
+- throw exception instead of those warnings about failed eio_(library) calls
+  etc.
 
 vim: tw=80:
