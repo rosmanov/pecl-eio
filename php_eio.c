@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2011 The PHP Group                                |
+   | Copyright (c) 1997-2012 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2349,9 +2349,6 @@ EIO_GET_INT_FUNCTION(eio_npending);
 /* {{{ proto resource eio_get_event_stream(void) */
 PHP_FUNCTION(eio_get_event_stream)
 {
-	/* RETURN_LONG(php_eio_eventfd);
-	   Maybe support some flag arg depending on what I return? 
-	   Although, it's not a good idea. */
 	php_stream *stream = php_stream_fopen_from_fd(php_eio_eventfd, "r", NULL);
 	if (stream) {
 		php_stream_to_zval(stream, return_value);
@@ -2359,7 +2356,6 @@ PHP_FUNCTION(eio_get_event_stream)
 		RETURN_NULL();
 	}
 }
-
 /* }}} */
 
 /* }}} */

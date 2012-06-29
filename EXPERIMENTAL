@@ -1,10 +1,6 @@
 1. eventfd file descriptor exported to userpasce in order to bind to libevent
-extensionn and so; access is acquired with eio_get_eventfd().
+extensionn and so; access is acquired with eio_get_event_stream().
 
 2. mutex-relaxed communication 
 
-3. eio_init() in MINIT rather than in RINIT, as Pierre suggested
-
-4. poll() used in eio_event_loop()
-
-5. finishing eio requests in RSHUTDOWN
+3. poll() used in eio_event_loop()
