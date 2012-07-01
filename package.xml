@@ -21,8 +21,8 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2012-06-27</date>
-  <time>15:26:00</time>
+  <date>2012-07-01</date>
+  <time>21:30:00</time>
   <!--{{{ Current version -->
   <version>
     <release>1.0.0</release>
@@ -40,7 +40,10 @@
     Change: Cut 'st_' prefix in result of eio_*stat for the sake of simplicity and better 'compatability' with stat()
     Change: Cut 'f_' prefix in result of eio_*statvfs
     Add: eio_get_last_error()
+    Add: eio_req resource argument as the third optional callback argument
+    Add: phpt tests for the changes since 0.5.0b
     Removed: warnings having no much sense even in debug mode
+    Refact: no separation for callbacks
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -129,7 +132,10 @@
       Change: Cut 'st_' prefix in result of eio_*stat for the sake of simplicity and better 'compatability' with stat()
       Change: Cut 'f_' prefix in result of eio_*statvfs
       Add: eio_get_last_error()
+      Add: eio_req resource argument as the third optional callback argument
+      Add: phpt tests for the changes since 0.5.0b
       Removed: warnings having no much sense even in debug mode
+      Refact: no separation for callbacks
     </notes>
     <!--}}}-->
     <!--{{{ 0.5.0 (beta) -->

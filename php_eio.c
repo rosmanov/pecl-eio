@@ -466,7 +466,7 @@ static void php_eio_custom_execute(eio_req * req)
 static int php_eio_res_cb_custom(eio_req * req)
 {
 	zval **args[2];
-	zval *key1, *key2;
+	zval *key1, *key2, *key3;
 	php_eio_cb_custom_t *eio_cb = (php_eio_cb_custom_t *) req->data;
 	TSRMLS_FETCH_FROM_CTX(eio_cb ? eio_cb->thread_ctx : NULL);
 	zval *retval_ptr;
@@ -485,10 +485,16 @@ static int php_eio_res_cb_custom(eio_req * req)
 	args[0] = &key1;
 	zval_add_ref(&key1);
 
+	/* $result arg */
 	ALLOC_INIT_ZVAL(key2);
 	*key2 = *((zval *) EIO_BUF(req));
 	zval_copy_ctor(key2);
 	args[1] = &key2;
+
+	/* $req arg */
+	MAKE_STD_ZVAL(key3);
+	args[2] = &key3;
+	ZEND_REGISTER_RESOURCE(key3, req, le_eio_req);
 
 	/* 
 	 * Should be freed below
@@ -497,8 +503,8 @@ static int php_eio_res_cb_custom(eio_req * req)
 
 	eio_cb->fci->params = args;
 	eio_cb->fci->retval_ptr_ptr = &retval_ptr;
-	eio_cb->fci->param_count = 2;
-	eio_cb->fci->no_separation = 0;
+	eio_cb->fci->param_count = 3;
+	eio_cb->fci->no_separation = 1;
 
 	if (zend_call_function(eio_cb->fci, eio_cb->fcc TSRMLS_CC) == SUCCESS
 		&& retval_ptr) {
@@ -510,6 +516,7 @@ static int php_eio_res_cb_custom(eio_req * req)
 
 	zval_ptr_dtor(&key1);
 	zval_ptr_dtor(&key2);
+	zval_ptr_dtor(&key3);
 	
 	if (EIO_BUF_ZVAL_P(req)) {
 		zval_dtor(EIO_BUF_ZVAL_P(req));
@@ -536,8 +543,8 @@ static int php_eio_res_cb_custom(eio_req * req)
  */
 static int php_eio_res_cb(eio_req *req)
 {
-	zval **args[2];
-	zval *key1, *key2;
+	zval **args[3];
+	zval *key1, *key2, *key3;
 	zval *retval_ptr;
 	php_eio_cb_t *eio_cb = (php_eio_cb_t *) req->data;
 	TSRMLS_FETCH_FROM_CTX(eio_cb ? eio_cb->thread_ctx : NULL);
@@ -566,6 +573,11 @@ static int php_eio_res_cb(eio_req *req)
 	/* $result arg */
 	MAKE_STD_ZVAL(key2);
 	args[1] = &key2;
+
+	/* $req arg */
+	MAKE_STD_ZVAL(key3);
+	args[2] = &key3;
+	ZEND_REGISTER_RESOURCE(key3, req, le_eio_req);
 
 	/* {{{ set $result arg value */
 
@@ -687,7 +699,7 @@ static int php_eio_res_cb(eio_req *req)
 	if (ZEND_FCI_INITIALIZED(*eio_cb->fci)) {
 		eio_cb->fci->params         = args;
 		eio_cb->fci->retval_ptr_ptr = &retval_ptr;
-		eio_cb->fci->param_count    = 2;
+		eio_cb->fci->param_count    = 3;
 		eio_cb->fci->no_separation  = 1;
 
 		if (zend_call_function(eio_cb->fci, eio_cb->fcc TSRMLS_CC) == SUCCESS
@@ -701,6 +713,7 @@ static int php_eio_res_cb(eio_req *req)
 
 	zval_ptr_dtor(&key1);
 	zval_ptr_dtor(&key2);
+	zval_ptr_dtor(&key3);
 
 	php_eio_free_eio_cb(eio_cb);
 
@@ -968,7 +981,7 @@ PHP_FUNCTION(eio_init)
 }
 /* }}} */
 
-/* {{{ proto void eio_get_last_error(resource req) 
+/* {{{ proto string eio_get_last_error(resource req) 
  * Get last error associated with the request resource */
 PHP_FUNCTION(eio_get_last_error)
 {
