@@ -38,6 +38,8 @@
     Fix: tsrm_ls is not initialized in php_eio_init()
     Fix: EFD_NONBLOCK and EFD_CLOEXEC used despite the flags were not available until kernel 2.6.7. For the old kernels we call fcntl.
     Refact: set FD_CLOEXEC flag for file descriptor opened with eio_open()
+    Refact: no need to copy zval when passing request resource to eio_grp_*()
+    Fix: eio_grp_*() didn't initialize eio automatically
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -124,6 +126,8 @@
     Fix: tsrm_ls is not initialized in php_eio_init()
     Fix: EFD_NONBLOCK and EFD_CLOEXEC used despite the flags were not available until kernel 2.6.7. For the old kernels we call fcntl.
     Refact: set FD_CLOEXEC flag for file descriptor opened with eio_open()
+    Refact: no need to copy zval when passing request resource to eio_grp_*()
+    Fix: eio_grp_*() didn't initialize eio automatically
   </notes>
   <!--}}}-->
     <!--{{{ 1.0.0 -->

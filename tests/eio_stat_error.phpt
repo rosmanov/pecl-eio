@@ -27,7 +27,7 @@ function my_open_cb($data, $result) {
 	}
 }
 
-eio_init();
+
 eio_stat($tmp_filename, EIO_PRI_DEFAULT, "my_res_cb", "eio_stat");
 eio_lstat($tmp_filename, EIO_PRI_DEFAULT, "my_res_cb", "eio_lstat");
 eio_event_loop();

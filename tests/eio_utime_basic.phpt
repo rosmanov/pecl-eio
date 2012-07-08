@@ -18,7 +18,7 @@ function my_utime_callback($data, $result) {
 	@unlink($temp_filename);
 }
 
-eio_init();
+
 eio_utime($temp_filename, 1317665072, 1317665073, EIO_PRI_DEFAULT, "my_utime_callback");
 eio_event_loop();
 ?>

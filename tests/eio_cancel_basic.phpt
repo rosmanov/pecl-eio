@@ -8,7 +8,7 @@ function my_nop_cb($data, $result) {
 	echo "my_nop";
 }
 
-eio_init();
+
 
 $req = eio_nop(EIO_PRI_DEFAULT, "my_nop_cb", NULL);
 var_dump($req);

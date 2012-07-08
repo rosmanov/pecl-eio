@@ -22,7 +22,7 @@ function my_file_truncated_callback($data, $result) {
 	@unlink($temp_filename);
 }
 
-eio_init();
+
 $req = eio_truncate($temp_filename, 5, EIO_PRI_DEFAULT, "my_file_truncated_callback");
 eio_event_loop();
 ?>

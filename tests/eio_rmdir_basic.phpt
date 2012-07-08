@@ -17,7 +17,7 @@ function my_rmdir_callback($data, $result) {
 }
 
 
-eio_init();
+
 eio_rmdir($temp_dirname, EIO_PRI_DEFAULT, "my_rmdir_callback");
 eio_event_loop();
 ?>

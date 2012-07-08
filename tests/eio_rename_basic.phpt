@@ -18,7 +18,7 @@ function my_rename_cb($data, $result) {
 	}
 }
 
-eio_init();
+
 eio_rename($filename, $new_filename, EIO_PRI_DEFAULT, "my_rename_cb", $filename);
 eio_event_loop();
 ?>

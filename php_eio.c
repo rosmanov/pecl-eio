@@ -2250,6 +2250,7 @@ PHP_FUNCTION(eio_grp)
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	php_eio_cb_t *eio_cb;
 	eio_req *req;
+	PHP_EIO_IS_INIT();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "f|z!",
 			&fci, &fcc, &data) == FAILURE) {
@@ -2271,8 +2272,9 @@ PHP_FUNCTION(eio_grp_add)
 {
 	zval *zgrp, *zreq;
 	eio_req *grp, *req;
+	PHP_EIO_IS_INIT();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr/",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr",
 			&zgrp, &zreq) == FAILURE) {
 		return;
 	}
@@ -2294,8 +2296,9 @@ PHP_FUNCTION(eio_grp_limit)
 	zval *zgrp;
 	eio_req *grp;
 	long limit;
+	PHP_EIO_IS_INIT();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r/l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl",
 			&zgrp, &limit) == FAILURE) {
 		return;
 	}
@@ -2313,6 +2316,7 @@ PHP_FUNCTION(eio_grp_cancel)
 {
 	zval *zgrp;
 	eio_req *grp;
+	PHP_EIO_IS_INIT();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zgrp) == FAILURE) {
 		return;

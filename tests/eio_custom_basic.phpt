@@ -21,7 +21,7 @@ function my_custom($data) {
 	return $result;
 }
 
-eio_init();
+
 
 $data = "my_custom_data";
 $req = eio_custom("my_custom", 0, "my_custom_callback", $data);

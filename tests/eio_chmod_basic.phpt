@@ -6,7 +6,7 @@ $temp_filename = "eio-temp-file.tmp";
 
 touch($temp_filename);
 
-eio_init();
+
 
 function my_chmod_callback($data, $result) {
 	global $temp_filename;

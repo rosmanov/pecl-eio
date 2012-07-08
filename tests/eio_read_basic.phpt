@@ -30,7 +30,7 @@ function my_file_opened_callback($data, $result) {
 	}
 }
 
-eio_init();
+
 eio_open($temp_filename, EIO_O_CREAT | EIO_O_RDWR, NULL, 
 	EIO_PRI_DEFAULT, "my_file_opened_callback", $temp_filename);
 eio_event_loop();

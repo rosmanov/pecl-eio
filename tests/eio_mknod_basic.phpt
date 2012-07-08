@@ -17,7 +17,7 @@ function my_mknod_callback($data, $result) {
 	}
 }
 
-eio_init();
+
 eio_mknod($temp_filename, EIO_S_IFIFO, 0, 0, "my_mknod_callback", "mknod");
 eio_event_loop();
 ?>
