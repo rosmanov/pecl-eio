@@ -21,12 +21,12 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2012-07-01</date>
-  <time>21:30:00</time>
+  <date>2012-07-08</date>
+  <time>12:45:00</time>
   <!--{{{ Current version -->
   <version>
-    <release>1.0.0</release>
-    <api>1.0.0</api>
+    <release>1.1.0</release>
+    <api>1.1.0</api>
   </version>
   <stability>
     <release>stable</release>
@@ -34,16 +34,9 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-    Fix: eio_write() wrote garbage when 'str' arg passed by ref in a nested call with 'use' keyword
-    Fix: eio_write() wrote garbage when 'str' arg passed by value
-    Add: eio_init(). You must call eio_init() before using Eio in a forked child process.
-    Change: Cut 'st_' prefix in result of eio_*stat for the sake of simplicity and better 'compatability' with stat()
-    Change: Cut 'f_' prefix in result of eio_*statvfs
-    Add: eio_get_last_error()
-    Add: eio_req resource argument as the third optional callback argument
-    Add: phpt tests for the changes since 0.5.0b
-    Removed: warnings having no much sense even in debug mode
-    Refact: no separation for callbacks
+    Change: eio_init() deprecated. Will be removed in future. We use pthread_atfork() to re-init eio after a fork
+    Fix: tsrm_ls is not initialized in php_eio_init()
+    Fix: EFD_NONBLOCK and EFD_CLOEXEC used despite the flags were not available until kernel 2.6.7. For the old kernels we call fcntl.
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -115,6 +108,22 @@
   </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
+  <!--{{{ 1.1.0 -->
+  <version>
+    <release>1.1.0</release>
+    <api>1.1.0</api>
+  </version>
+  <stability>
+    <release>stable</release>
+    <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">php</license>
+  <notes>
+    Change: eio_init() deprecated. Will be removed in future. We use pthread_atfork() to re-init eio after a fork
+    Fix: tsrm_ls is not initialized in php_eio_init()
+    Fix: EFD_NONBLOCK and EFD_CLOEXEC used despite the flags were not available until kernel 2.6.7. For the old kernels we call fcntl.
+  </notes>
+  <!--}}}-->
     <!--{{{ 1.0.0 -->
     <version>
       <release>1.0.0</release>

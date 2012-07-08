@@ -1,6 +1,2 @@
-- Check for HAVE_EVENTFD (eventfd support) and use alternatives as AIO Perl module does
-	EFD_NONBLOCK and EFD_CLOEXEC are supported since Linux kernel 2.6.27
-- OOP API?
-
 
 vim: tw=80:

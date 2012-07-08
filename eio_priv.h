@@ -57,6 +57,25 @@ extern const zend_function_entry eio_functions[];
 	} \
 }
 
+#define PHP_EIO_SETFD_CLOEXEC(fd) \
+{ \
+	if (fcntl(fd, F_SETFD, FD_CLOEXEC) < 0) { \
+		php_error_docref(NULL TSRMLS_CC, \
+				E_WARNING, "Failed to set FD_CLOEXEC on descriptor"); \
+	} \
+}
+
+/* EFD_ flags are available since kernel 2.6.7 */
+#if defined(EFD_NONBLOCK) && defined(EFD_CLOEXEC)
+# define PHP_EIO_SET_EVENTFD(fd) \
+	fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+#else
+# define PHP_EIO_SET_EVENTFD(fd) \
+	fd = eventfd(0, 0); \
+	fcntl(fd, F_SETFL, O_NONBLOCK); \
+	fcntl(fd, F_SETFD, FD_CLOEXEC);
+#endif
+
 #  define PHP_EIO_INIT \
 	long pri                  = EIO_PRI_DEFAULT; \
 	zval *data                = NULL; \

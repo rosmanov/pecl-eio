@@ -789,14 +789,14 @@ static php_socket_t php_eio_zval_to_fd(zval **ppfd TSRMLS_DC)
 /* }}} */
 
 /* {{{ php_eio_init() */
-static inline void php_eio_init(TSRMLS_C)
+static inline void php_eio_init(TSRMLS_D)
 {
 	pid_t cur_pid = getpid();
 
 	if (php_eio_pid <= 0 || (php_eio_pid > 0 && cur_pid != php_eio_pid)) {
-		/* Not initialized or forked a process(which needs it's own eventfd) */
-		/*TODO: EFD_ flags are available since kernel 2.6.7 */
-		php_eio_eventfd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+		/* Uninitialized or forked a process(which needs it's own eventfd) */
+
+		PHP_EIO_SET_EVENTFD(php_eio_eventfd);
 
 		if (eio_init(php_eio_want_poll_callback, php_eio_done_poll_callback)) {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR,
@@ -806,6 +806,15 @@ static inline void php_eio_init(TSRMLS_C)
 
 		php_eio_pid = cur_pid;
 	}
+}
+/* }}} */
+
+/* {{{ php_eio_atfork_child() 
+ * Re-initialize eio and internal pipe at fork */
+static void php_eio_atfork_child(void)
+{
+	TSRMLS_FETCH();
+	php_eio_init(TSRMLS_C);
 }
 /* }}} */
 
@@ -823,6 +832,9 @@ static inline void php_eio_init(TSRMLS_C)
 */
 PHP_MINIT_FUNCTION(eio)
 {
+	/* Re-initialize eio and internal pipe at fork */
+	X_THREAD_ATFORK(NULL, NULL, php_eio_atfork_child);
+
 	le_eio_grp =
 		zend_register_list_destructors_ex(NULL, NULL,
 		PHP_EIO_GRP_DESCRIPTOR_NAME, module_number);
@@ -973,6 +985,9 @@ PHP_MINFO_FUNCTION(eio)
 /* {{{ API */
 
 /* {{{ proto void eio_init(void) 
+ * Deprecated. We use X_THREAD_ATFORK() to re-initialize eio on fork, and call php_eio_init() silently.
+ * So user doesn't need to call eio_init() anymore.
+ * TODO Remove in future
  * Create eventfd for current process and eio_init().
  * Should be called from userspace within child process if forked. */
 PHP_FUNCTION(eio_init)
@@ -2345,15 +2360,15 @@ PHP_FUNCTION(eio_set_max_poll_time)
 		RETURN_LONG(eio_func()); \
 	}
 
-EIO_SET_INT_FUNCTION(eio_set_max_poll_reqs);
-EIO_SET_INT_FUNCTION(eio_set_min_parallel);
-EIO_SET_INT_FUNCTION(eio_set_max_parallel);
-EIO_SET_INT_FUNCTION(eio_set_max_idle);
+EIO_SET_INT_FUNCTION(eio_set_max_poll_reqs)
+EIO_SET_INT_FUNCTION(eio_set_min_parallel)
+EIO_SET_INT_FUNCTION(eio_set_max_parallel)
+EIO_SET_INT_FUNCTION(eio_set_max_idle)
 
-EIO_GET_INT_FUNCTION(eio_nthreads);
-EIO_GET_INT_FUNCTION(eio_nreqs);
-EIO_GET_INT_FUNCTION(eio_nready);
-EIO_GET_INT_FUNCTION(eio_npending);
+EIO_GET_INT_FUNCTION(eio_nthreads)
+EIO_GET_INT_FUNCTION(eio_nreqs)
+EIO_GET_INT_FUNCTION(eio_nready)
+EIO_GET_INT_FUNCTION(eio_npending)
 
 #undef EIO_SET_INT_FUNCTION
 #undef EIO_GET_INT_FUNCTION
