@@ -37,6 +37,7 @@
     Change: eio_init() deprecated. Will be removed in future. We use pthread_atfork() to re-init eio after a fork
     Fix: tsrm_ls is not initialized in php_eio_init()
     Fix: EFD_NONBLOCK and EFD_CLOEXEC used despite the flags were not available until kernel 2.6.7. For the old kernels we call fcntl.
+    Refact: set FD_CLOEXEC flag for file descriptor opened with eio_open()
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -122,6 +123,7 @@
     Change: eio_init() deprecated. Will be removed in future. We use pthread_atfork() to re-init eio after a fork
     Fix: tsrm_ls is not initialized in php_eio_init()
     Fix: EFD_NONBLOCK and EFD_CLOEXEC used despite the flags were not available until kernel 2.6.7. For the old kernels we call fcntl.
+    Refact: set FD_CLOEXEC flag for file descriptor opened with eio_open()
   </notes>
   <!--}}}-->
     <!--{{{ 1.0.0 -->

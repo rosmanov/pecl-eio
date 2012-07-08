@@ -588,6 +588,10 @@ static int php_eio_res_cb(eio_req *req)
 		ZVAL_LONG(key2, EIO_RESULT(req));
 	} else {
 		switch (req->type) {
+			case EIO_OPEN:
+				PHP_EIO_SETFD_CLOEXEC(EIO_RESULT(req));
+				ZVAL_LONG(key2, EIO_RESULT(req));
+				break;
 			case EIO_READ:
 				/* EIO_BUF(req) is the buffer with read contents 
 				 * (size_t) req->size = length parameter value passed to eio_read()
