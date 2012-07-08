@@ -1,2 +1,3 @@
+- Update docs: eio_init() deprecated since 1.1.0, will be removed in future
 
 vim: tw=80:
