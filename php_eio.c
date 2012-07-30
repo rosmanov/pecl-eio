@@ -33,7 +33,10 @@
 
 /* IPC */
 #include <poll.h>
-#include <sys/eventfd.h>
+#ifdef HAVE_SYS_EVENTFD_H
+# include <stdint.h>
+# include <sys/eventfd.h>
+#endif
 
 #include <string.h>		/* strerror() */
 
@@ -41,7 +44,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
-#include "linux/falloc.h"
+
 
 /* PHP */
 #include "php.h"
@@ -66,8 +69,7 @@ static int le_eio_grp;
 static int le_eio_req;
 
 static pid_t php_eio_pid = 0;
-int php_eio_eventfd = 0;
-/*int php_eio_initialized = 0;*/
+static php_eio_pipe_t php_eio_pipe;
 
 static const zend_module_dep eio_deps[] = {
 	ZEND_MOD_OPTIONAL("sockets")
@@ -105,16 +107,6 @@ ZEND_GET_MODULE(eio)
 	} \
 	eio_cb->n = v;
 
-#ifdef EIO_DEBUG
-# define EIO_REQ_WARN_RESULT_ERROR() \
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, \
-		"%s, eio_req result: %ld, req type: %s", \
-		strerror(req->errorno), (long) EIO_RESULT(req), \
-		php_eio_get_req_type_str(req->type))
-#else 
-# define EIO_REQ_WARN_RESULT_ERROR()
-#endif
-
 #define EIO_REQ_WARN_INVALID_CB() \
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, \
 		"'%s' is not a valid callback", func_name);
@@ -132,76 +124,90 @@ ZEND_GET_MODULE(eio)
 	*EIO_BUF_ZVAL_P(req) = z; \
 	zval_copy_ctor( EIO_BUF_ZVAL_P(req) );
 
-static void php_eio_event_loop()
+#define php_eio_pipe(fd) pipe(fd)
+#define php_eio_fd(epp) ((epp)->fd[0])
+
+
+static int php_eio_fd_prepare(int fd)
+{
+	return (fcntl(fd, F_SETFL, O_NONBLOCK) || fcntl(fd, F_SETFD, FD_CLOEXEC));
+}
+
+/* {{{ php_eio_eventfd() */
+#ifdef HAVE_EVENTFD
+static int php_eio_eventfd(void)
+{
+# if defined(EFD_NONBLOCK) && defined(EFD_CLOEXEC)
+	/* Save extra calls to fcntl() */
+	return eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+# else
+	int fd = eventfd(0, 0);
+
+	if (fd >= 0) {
+		php_eio_fd_prepare(ep->fd[0]);
+	}
+
+	return fd;
+# endif
+}
+#else /* No eventfd */
+# define php_eio_eventfd() -1
+#endif
+/* }}} */
+
+/* {{{ php_eio_pipe_new() */
+static int php_eio_pipe_new(void)
+{
+	php_eio_pipe_t *ep = &php_eio_pipe;
+
+	ep->fd[0] = php_eio_eventfd();
+
+	if (ep->fd[0] >= 0) {
+		ep->fd[1] = ep->fd[0];
+		ep->len   = 8;
+	} else { /* No eventfd. Make pipe */
+		if (php_eio_pipe(ep->fd)) {
+			return -1;
+		}
+
+		if (php_eio_fd_prepare(ep->fd[0]) || php_eio_fd_prepare(ep->fd[1])) {
+			close(ep->fd[0]);
+			close(ep->fd[1]);
+			return -1;
+		}
+
+		ep->len = 1;
+	}
+
+	return 0;
+}
+/* }}} */
+
+/* {{{ php_eio_pipe_destroy() */
+static void php_eio_pipe_destroy(void)
+{
+	close (php_eio_pipe.fd[0]);
+
+	if (php_eio_pipe.fd[1] != php_eio_pipe.fd[0]) {
+		close(php_eio_pipe.fd [1]);
+	}
+
+	php_eio_pipe.len = 0;
+}
+/* }}} */
+
+/* {{{ php_eio_event_loop() */
+static void php_eio_event_loop(void)
 {
 	while (eio_nreqs()) {
 		struct pollfd pfd;
-		pfd.fd = php_eio_eventfd;
+		pfd.fd = php_eio_fd(&php_eio_pipe);
 		pfd.events = POLLIN;
 		poll(&pfd, 1, -1);
 		eio_poll();
 	}
-}
 
-/* {{{ php_eio_get_req_type_str */
-#define CASE_RET_STR(x) case x: return #x
-static const char *php_eio_get_req_type_str(unsigned int code)
-{
-	switch (code) {
-		CASE_RET_STR(EIO_CUSTOM);
-		CASE_RET_STR(EIO_WD_OPEN);
-		CASE_RET_STR(EIO_WD_CLOSE);
-		CASE_RET_STR(EIO_CLOSE);
-		CASE_RET_STR(EIO_DUP2);
-		CASE_RET_STR(EIO_READ);
-		CASE_RET_STR(EIO_WRITE);
-		CASE_RET_STR(EIO_READAHEAD);
-		CASE_RET_STR(EIO_SEEK);
-		CASE_RET_STR(EIO_SENDFILE);
-		CASE_RET_STR(EIO_FSTAT);
-		CASE_RET_STR(EIO_FSTATVFS);
-		CASE_RET_STR(EIO_FTRUNCATE);
-		CASE_RET_STR(EIO_FUTIME);
-		CASE_RET_STR(EIO_FCHMOD);
-		CASE_RET_STR(EIO_FCHOWN);
-		CASE_RET_STR(EIO_SYNC);
-		CASE_RET_STR(EIO_FSYNC);
-		CASE_RET_STR(EIO_FDATASYNC);
-		CASE_RET_STR(EIO_SYNCFS);
-		CASE_RET_STR(EIO_MSYNC);
-		CASE_RET_STR(EIO_MTOUCH);
-		CASE_RET_STR(EIO_SYNC_FILE_RANGE);
-		CASE_RET_STR(EIO_FALLOCATE);
-		CASE_RET_STR(EIO_MLOCK);
-		CASE_RET_STR(EIO_MLOCKALL);
-		CASE_RET_STR(EIO_GROUP);
-		CASE_RET_STR(EIO_NOP);
-		CASE_RET_STR(EIO_BUSY);
-		CASE_RET_STR(EIO_REALPATH);
-		CASE_RET_STR(EIO_STATVFS);
-		CASE_RET_STR(EIO_READDIR);
-		CASE_RET_STR(EIO_OPEN);
-		CASE_RET_STR(EIO_STAT);
-		CASE_RET_STR(EIO_LSTAT);
-		CASE_RET_STR(EIO_TRUNCATE);
-		CASE_RET_STR(EIO_UTIME);
-		CASE_RET_STR(EIO_CHMOD);
-		CASE_RET_STR(EIO_CHOWN);
-		CASE_RET_STR(EIO_UNLINK);
-		CASE_RET_STR(EIO_RMDIR);
-		CASE_RET_STR(EIO_MKDIR);
-		CASE_RET_STR(EIO_RENAME);
-		CASE_RET_STR(EIO_MKNOD);
-		CASE_RET_STR(EIO_LINK);
-		CASE_RET_STR(EIO_SYMLINK);
-		CASE_RET_STR(EIO_READLINK);
-		CASE_RET_STR(EIO_REQ_TYPE_NUM);
-	default:
-		return "UNKNOWN";
-	}
 }
-
-#undef CASE_RET_STR
 /* }}} */
 
 /* {{{ php_eio_set_readdir_names */
@@ -729,18 +735,25 @@ static int php_eio_res_cb(eio_req *req)
  * Is called when eio wants attention(ready to process further requests) */
 static void php_eio_want_poll_callback(void)
 {
-	uint64_t u = 1;
-	write(php_eio_eventfd, &u, sizeof(uint64_t));
+#if HAVE_EVENTFD 
+	static uint64_t counter = 1;
+#else
+	static char counter[8];
+#endif
+	if (write(php_eio_pipe.fd[1], &counter, php_eio_pipe.len) < 0
+			&& errno == EINVAL
+			&& php_eio_pipe.len != 8) {
+		write(php_eio_pipe.fd[1], &counter, (php_eio_pipe.len = 8));
+	}
 }
-
 /* }}} */
 
 /* {{{ php_eio_done_poll_callback 
  * Is invoked when eio detects that all pending requests have been handled */
 static void php_eio_done_poll_callback(void)
 {
-	uint64_t u;
-	read(php_eio_eventfd, &u, sizeof(uint64_t));
+	char buf[9];
+	read(php_eio_pipe.fd[0], buf, sizeof(buf));
 }
 /* }}} */
 
@@ -798,9 +811,13 @@ static inline void php_eio_init(TSRMLS_D)
 	pid_t cur_pid = getpid();
 
 	if (php_eio_pid <= 0 || (php_eio_pid > 0 && cur_pid != php_eio_pid)) {
-		/* Uninitialized or forked a process(which needs it's own eventfd) */
+		/* Uninitialized or forked a process(which needs it's own eio pipe) */
 
-		PHP_EIO_SET_EVENTFD(php_eio_eventfd);
+		if (php_eio_pipe_new()) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR,
+					"Failed creating internal pipe: %s", strerror(errno));
+			return;
+		}
 
 		if (eio_init(php_eio_want_poll_callback, php_eio_done_poll_callback)) {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR,
@@ -823,7 +840,6 @@ static void php_eio_atfork_child(void)
 /* }}} */
 
 #undef EIO_CB_SET_FIELD
-#undef EIO_REQ_WARN_RESULT_ERROR
 #undef EIO_REQ_WARN_INVALID_CB
 #undef EIO_REQ_CB_INIT
 #undef EIO_REQ_FREE_ARGS
@@ -927,13 +943,9 @@ PHP_MINIT_FUNCTION(eio)
 	EIO_REGISTER_LONG_EIO_CONSTANT(EIO_SYNC_FILE_RANGE_WAIT_AFTER);
 	/* }}} */
 
-	EIO_REGISTER_LONG_CONSTANT(EIO_FALLOC_FL_KEEP_SIZE, FALLOC_FL_KEEP_SIZE);
+	EIO_REGISTER_LONG_CONSTANT(EIO_FALLOC_FL_KEEP_SIZE, EIO_FALLOC_FL_KEEP_SIZE);
 
 	/* }}} */
-
-	/*if (!php_eio_initialized) {
-	  php_eio_init(TSRMLS_C) 
-	 } */
 
 
 	return SUCCESS;
@@ -944,8 +956,8 @@ PHP_MINIT_FUNCTION(eio)
 /* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(eio)
 {
-	if (php_eio_eventfd) {
-		close(php_eio_eventfd);
+	if (php_eio_pipe.len) {
+		php_eio_pipe_destroy();
 	}
 
 	return SUCCESS;
@@ -992,7 +1004,7 @@ PHP_MINFO_FUNCTION(eio)
  * Deprecated. We use X_THREAD_ATFORK() to re-initialize eio on fork, and call php_eio_init() silently.
  * So user doesn't need to call eio_init() anymore.
  * TODO Remove in future
- * Create eventfd for current process and eio_init().
+ * Create eio pipe for current process and eio_init().
  * Should be called from userspace within child process if forked. */
 PHP_FUNCTION(eio_init)
 {
@@ -2385,7 +2397,7 @@ EIO_GET_INT_FUNCTION(eio_npending)
 /* {{{ proto resource eio_get_event_stream(void) */
 PHP_FUNCTION(eio_get_event_stream)
 {
-	php_stream *stream = php_stream_fopen_from_fd(php_eio_eventfd, "r", NULL);
+	php_stream *stream = php_stream_fopen_from_fd(php_eio_fd(&php_eio_pipe), "r", NULL);
 	if (stream) {
 		php_stream_to_zval(stream, return_value);
 	} else {

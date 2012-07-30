@@ -23,6 +23,9 @@ PHP_ARG_ENABLE(eio-debug, for eio debug support,
 PHP_ARG_ENABLE(eio-sockets, for sockets support,
 [  --enable-eio-sockets     Enable sockets support in eio], yes, no)
 
+AC_CHECK_HEADERS(sys/eventfd.h linux/falloc.h)
+AC_CHECK_FUNCS(eventfd)
+
 dnl {{{ Debug support
 if test "$PHP_EIO_DEBUG" != "no"; then
     CFLAGS="$CFLAGS -Wall -g -ggdb -O0"

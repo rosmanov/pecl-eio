@@ -13,13 +13,15 @@ For installation instructions see file named INSTALL.
 PORTABILITY
 -----------
 
-Currently GNU/Linux platforms supported only.
+Currently this extension supports GNU/Linux and BSD platforms only. But you can
+try it on any UNIX OS.
 
 
-AUTHORS
--------
+AUTHOR
+------
 
 Ruslan Osmanov <osmanov@php.net>
+<http://megagroup.ru/>
 
 
 COPYRIGHT

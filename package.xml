@@ -13,7 +13,8 @@
     FreeBSD); readahead. libeio itself emulates the system calls, if they are not
     available on specific(UNIX-like) platform.
 
-    Currently this extension supports Linux platforms only.
+    Currently this extension supports GNU/Linux and BSD platforms only. But you can
+    try it on any UNIX OS.
   </description>
   <lead>
     <name>Ruslan Osmanov</name>
@@ -21,11 +22,11 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2012-07-08</date>
-  <time>12:45:00</time>
+  <date>2012-07-30</date>
+  <time>22:15:00</time>
   <!--{{{ Current version -->
   <version>
-    <release>1.1.0</release>
+    <release>1.2.0</release>
     <api>1.1.0</api>
   </version>
   <stability>
@@ -34,13 +35,10 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-    Change: eio_init() deprecated. Will be removed in future. We use pthread_atfork() to re-init eio after a fork
-    Add: phpt test for the fork support
-    Fix: tsrm_ls is not initialized in php_eio_init()
-    Fix: EFD_NONBLOCK and EFD_CLOEXEC used despite the flags were not available until kernel 2.6.7. For the old kernels we call fcntl.
-    Refact: set FD_CLOEXEC flag for file descriptor opened with eio_open()
-    Refact: no need to copy zval when passing request resource to eio_grp_*()
-    Fix: eio_grp_*() didn't initialize eio automatically
+    Add: BSD support
+    Change: internal event notification uses pipe() when eventfd() is not available.
+    Del: some redundant code
+    Fix: use libeio's EIO_FALLOC_FL_KEEP_SIZE instead of the system constant
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -102,7 +100,7 @@
         <min>1.4.0b1</min>
       </pearinstaller>
       <os>
-        <name>UNIX</name>
+        <name>unix</name>
       </os>
     </required>
   </dependencies>
@@ -113,6 +111,23 @@
   </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
+  <!--{{{ 1.2.0 -->
+  <version>
+    <release>1.2.0</release>
+    <api>1.1.0</api>
+  </version>
+  <stability>
+    <release>stable</release>
+    <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">php</license>
+  <notes>
+    Add: BSD support
+    Change: internal event notification uses pipe() when eventfd() is not available.
+    Del: some redundant code
+    Fix: use libeio's EIO_FALLOC_FL_KEEP_SIZE instead of the system constant
+  </notes>
+  <!--}}}-->
   <!--{{{ 1.1.0 -->
   <version>
     <release>1.1.0</release>

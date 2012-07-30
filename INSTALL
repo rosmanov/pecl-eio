@@ -1,25 +1,27 @@
 INSTALLATION OF EIO PECL EXTENSION
 ==================================
 
-Currently GNU/Linux platforms supported only.
+Currently this extension supports GNU/Linux and BSD platforms only. But you can
+try it on any UNIX OS.
 
 
 AUTOMATIC INSTALLATION
 ----------------------
 
 To download and install eio automatically you need the following commands
+for stable release:
 
-# pecl install eio
+	# pecl install eio
 
-for stable release, and the following for beta release:
+, and the following for beta release:
 
-# pecl install eio-beta
+	# pecl install eio-beta
 
 If you have the package archive, unpack it and run: 
 
-# pecl install package.xml
+	# pecl install package.xml
 
-Note, these commands(started with `#') most likely need root priveleges.
+Note, these commands(started with '#') most likely need root priveleges.
 
 Since version 0.4.0 beta libeio is embedded. So you don't need to install the
 library separately.
@@ -28,36 +30,43 @@ library separately.
 MANUAL INSTALLATION
 -------------------
 
-Checkout the project or download it as archive. In the package directory run: 
+Easy way, if you want just install it as root:
 
-$ phpize 
-$ ./configure --with-eio --enable-eio-sockets --enable-eio-debug
-$ make 
+	# pecl install eio
+
+If you want to tweak or debug it, checkout the project or download it as
+archive. In the package directory run: 
+
+	$ phpize
+	$ ./configure --with-eio --enable-eio-sockets --enable-eio-debug
+	$ make 
 
 Optionally test the extension in CLI:
-$ make test
+
+	$ make test
 
 Do install with root priveleges:
-# make install
+
+	# make install
 
 In php.ini, or some other configuration like
-/usr/local/etc/php/conf.d/eio.ini write:
+</usr/local/etc/php/conf.d/eio.ini> write:
 
-extension=eio.so
+	extension=eio.so
 
-NOTE
-To disable debug mode don't use --enable-eio-debug configuration option.
-It's recommended to build with this flag first time though.
+NOTES
+-----
 
-NOTE
-Since version 0.5.0 beta you're able to pass PHP streams, sockets(socket_create,
-socket_accept) or numeric file descriptors to functions like eio_sendfile,
-eio_readahead, eio_read etc.
+Since version 0.5.0 beta you're able to pass PHP streams, sockets(`socket_create`,
+`socket_accept`), or numeric file descriptors to functions like `eio_sendfile`,
+`eio_readahead`, `eio_read` etc.
 
 
-FINALLY
+AUTHOR
 ------
 
-Restart the SAPI server(Apache, PHP-FPM etc.), if any.
+Ruslan Osmanov <osmanov@php.net>
+<http://megagroup.ru/>
 
-vim: tw=80:
+
+vim: tw=80 ft=markdown

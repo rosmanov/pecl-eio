@@ -52,7 +52,7 @@ extern const zend_function_entry eio_functions[];
 
 #  define PHP_EIO_IS_INIT() \
 { \
-	if (php_eio_pid <= 0 || php_eio_eventfd <= 0) { \
+	if (php_eio_pid <= 0 || php_eio_pipe.len == 0) { \
 		php_eio_init(TSRMLS_C); \
 	} \
 }
@@ -65,16 +65,6 @@ extern const zend_function_entry eio_functions[];
 	} \
 }
 
-/* EFD_ flags are available since kernel 2.6.7 */
-#if defined(EFD_NONBLOCK) && defined(EFD_CLOEXEC)
-# define PHP_EIO_SET_EVENTFD(fd) \
-	fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
-#else
-# define PHP_EIO_SET_EVENTFD(fd) \
-	fd = eventfd(0, 0); \
-	fcntl(fd, F_SETFL, O_NONBLOCK); \
-	fcntl(fd, F_SETFD, FD_CLOEXEC);
-#endif
 
 #  define PHP_EIO_INIT \
 	long pri                  = EIO_PRI_DEFAULT; \
@@ -137,6 +127,11 @@ typedef struct {
     zend_fcall_info_cache *fcc_exec;
 	zend_bool locked;
 } php_eio_cb_custom_t;
+
+typedef struct {
+	int fd[2];
+	int len; /* 1 for pipe, 8 for eventfd */
+} php_eio_pipe_t;
 
 /* }}} */
 
