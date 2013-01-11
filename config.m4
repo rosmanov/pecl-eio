@@ -20,9 +20,6 @@ PHP_ARG_WITH(eio, for eio support,
 PHP_ARG_ENABLE(eio-debug, for eio debug support,
 [  --enable-eio-debug       Enable eio debug support], no, no)
 
-PHP_ARG_ENABLE(eio-sockets, for sockets support,
-[  --enable-eio-sockets     Enable sockets support in eio], yes, no)
-
 AC_CHECK_HEADERS(sys/eventfd.h linux/falloc.h)
 AC_CHECK_FUNCS(eventfd)
 
@@ -33,12 +30,7 @@ if test "$PHP_EIO_DEBUG" != "no"; then
 fi
 dnl }}}
 
-dnl {{{ Sockets support
-if test "$PHP_EIO_SOCKETS" != "no"; then
-    PHP_ADD_EXTENSION_DEP(eio, sockets, true)
-    AC_DEFINE([EIO_USE_SOCKETS], 1, [Whether to enable sockets support])
-fi
-dnl }}}
+PHP_ADD_EXTENSION_DEP(eio, sockets, true)
 
 
 dnl {{{ eio support 

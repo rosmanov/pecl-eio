@@ -47,6 +47,11 @@
 
 
 /* PHP */
+
+#if PHP_VERSION_ID >= 50301 && (HAVE_SOCKETS || defined(COMPILE_DL_SOCKETS))
+# define EIO_USE_SOCKETS
+#endif
+
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
