@@ -22,11 +22,10 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2012-07-30</date>
-  <time>22:15:00</time>
+  <date>2013-01-12</date>
   <!--{{{ Current version -->
   <version>
-    <release>1.2.0</release>
+    <release>1.2.1</release>
     <api>1.1.0</api>
   </version>
   <stability>
@@ -35,10 +34,7 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-    Add: BSD support
-    Change: internal event notification uses pipe() when eventfd() is not available.
-    Del: some redundant code
-    Fix: use libeio's EIO_FALLOC_FL_KEEP_SIZE instead of the system constant
+    Fix: build failed without sockets extension
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -75,6 +71,7 @@
       <file role="test" name="tests/eio_open_basic.phpt"/>
       <file role="test" name="tests/eio_open_error.phpt"/>
       <file role="test" name="tests/eio_read_basic.phpt"/>
+      <file role="test" name="tests/eio_readdir.phpt"/>
       <file role="test" name="tests/eio_rename_basic.phpt"/>
       <file role="test" name="tests/eio_rmdir_basic.phpt"/>
       <file role="test" name="tests/eio_seek.phpt"/>
@@ -111,6 +108,20 @@
   </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
+  <!--{{{ 1.2.1 -->
+  <version>
+    <release>1.2.1</release>
+    <api>1.1.0</api>
+  </version>
+  <stability>
+    <release>stable</release>
+    <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">php</license>
+  <notes>
+    Fix: build failed without sockets extension
+  </notes>
+  <!--}}}-->
   <!--{{{ 1.2.0 -->
   <version>
     <release>1.2.0</release>
