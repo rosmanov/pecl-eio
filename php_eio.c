@@ -48,17 +48,16 @@
 
 /* PHP */
 
-#if PHP_VERSION_ID >= 50301 && (HAVE_SOCKETS || defined(COMPILE_DL_SOCKETS))
-# define EIO_USE_SOCKETS
-#endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_network.h"
 #include "php_streams.h"
-#ifdef EIO_USE_SOCKETS
+
+#if PHP_VERSION_ID >= 50301 && (HAVE_SOCKETS || defined(COMPILE_DL_SOCKETS))
 # include "ext/sockets/php_sockets.h"
+# define EIO_USE_SOCKETS
 #endif
 
 
@@ -453,7 +452,7 @@ static void php_eio_custom_execute(eio_req * req)
 		eio_cb->fci_exec->params         = args;
 		eio_cb->fci_exec->retval_ptr_ptr = &retval_ptr;
 		eio_cb->fci_exec->param_count    = 1;
-		eio_cb->fci_exec->no_separation  = 0;
+		eio_cb->fci_exec->no_separation  = 1;
 
 		if (zend_call_function(eio_cb->fci_exec, eio_cb->fcc_exec TSRMLS_CC) == SUCCESS
 			&& retval_ptr) {
