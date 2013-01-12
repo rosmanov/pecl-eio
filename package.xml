@@ -103,7 +103,6 @@
   <providesextension>eio</providesextension>
   <extsrcrelease>
     <configureoption default="no" name="enable-eio-debug" prompt="Enable internal debugging in Eio"/>
-    <configureoption default="yes" name="enable-eio-sockets" prompt="Enable sockets support in Eio"/>
   </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
