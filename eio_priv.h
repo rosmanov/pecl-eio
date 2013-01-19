@@ -36,7 +36,7 @@ extern const zend_function_entry eio_functions[];
 
 #  ifdef EIO_DEBUG
 #    define PHP_EIO_RET_IF_FAILED(req, eio_func) \
-    	if (!req || req->result != 0) { \
+    	if (!req || (req->result != 0 && req->errorno)) { \
 			php_error_docref(NULL TSRMLS_CC, \
 				E_WARNING, #eio_func " failed: %s", strerror(req->errorno)); \
 			RETURN_FALSE; \
