@@ -1713,6 +1713,7 @@ PHP_FUNCTION(eio_write)
 
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
 	if (fd <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid file descriptor");
 		RETURN_FALSE;
 	}
 
@@ -1720,8 +1721,8 @@ PHP_FUNCTION(eio_write)
 		convert_to_string(zbuf);
 	}
 
-	if (Z_STRLEN_P(zbuf) < (length + offset)) {
-		RETURN_FALSE;
+	if (Z_STRLEN_P(zbuf) < length) {
+		length = Z_STRLEN_P(zbuf);
 	}
 
 	if (ZEND_NUM_ARGS() == 2 || length <= 0) {
@@ -1731,6 +1732,7 @@ PHP_FUNCTION(eio_write)
 	}
 
 	if (!num_bytes) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Nothing to do");
 		RETURN_FALSE;
 	}
 

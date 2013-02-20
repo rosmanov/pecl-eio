@@ -22,7 +22,7 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2013-01-12</date>
+  <date>2013-02-20</date>
   <!--{{{ Current version -->
   <version>
     <release>1.2.1</release>
@@ -35,6 +35,7 @@
   <license uri="http://www.php.net/license">php</license>
   <notes>
     Fix: build failed without sockets extension
+    Fix: eio_write failed when buffer length was lesser than size + offset
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -118,6 +119,7 @@
   <license uri="http://www.php.net/license">php</license>
   <notes>
     Fix: build failed without sockets extension
+    Fix: eio_write failed when buffer length was lesser than size + offset
   </notes>
   <!--}}}-->
   <!--{{{ 1.2.0 -->
