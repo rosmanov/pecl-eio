@@ -45,10 +45,7 @@
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 
-
 /* PHP */
-
-
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
@@ -119,15 +116,7 @@ ZEND_GET_MODULE(eio)
 	TSRMLS_FETCH_FROM_CTX(eio_cb ? eio_cb->thread_ctx : NULL); \
 	zval retval; \
 	char *func_name;
-#define EIO_REQ_FREE_ARGS \
-	zval_ptr_dtor(&(args[0])); \
-	zval_ptr_dtor(&(args[1]));
 #define EIO_BUF_ZVAL_P(req) ((zval *)(EIO_BUF(req)))
-#define EIO_BUF_FETCH_FROM_ZVAL(req, z) \
-	EIO_BUF(req) = emalloc(sizeof(zval)); \
-	*EIO_BUF_ZVAL_P(req) = z; \
-	zval_copy_ctor( EIO_BUF_ZVAL_P(req) );
-
 #define php_eio_pipe(fd) pipe(fd)
 #define php_eio_fd(epp) ((epp)->fd[0])
 
@@ -309,13 +298,23 @@ static inline void php_eio_free_eio_cb(php_eio_cb_t * eio_cb)
 
 /* {{{ php_eio_free_eio_cb_custom
  * Free an instance of php_eio_cb_custom_t */
-static inline void php_eio_free_eio_cb_custom(php_eio_cb_custom_t * eio_cb)
+static inline void php_eio_free_eio_cb_custom(php_eio_cb_custom_t *eio_cb)
 {
-	if (eio_cb) {
+	if (!eio_cb) {
+		return;
+	}
+
+	if (eio_cb->arg) {
 		zval_ptr_dtor(&eio_cb->arg);
+		eio_cb->arg = NULL;
+	}
 
+	if (eio_cb->fcc) {
 		efree(eio_cb->fcc);
+		eio_cb->fcc = NULL;
+	}
 
+	if (eio_cb->fci) {
 		if (ZEND_FCI_INITIALIZED(*eio_cb->fci)) {
 			zval_ptr_dtor(&eio_cb->fci->function_name);
 #if PHP_VERSION_ID >= 50300
@@ -325,9 +324,15 @@ static inline void php_eio_free_eio_cb_custom(php_eio_cb_custom_t * eio_cb)
 #endif
 		}
 		efree(eio_cb->fci);
+		eio_cb->fci = NULL;
+	}
 
+	if (eio_cb->fcc_exec) {
 		efree(eio_cb->fcc_exec);
+		eio_cb->fcc_exec = NULL;
+	}
 
+	if (eio_cb->fci_exec) {
 		if (ZEND_FCI_INITIALIZED(*eio_cb->fci_exec)) {
 			zval_ptr_dtor(&eio_cb->fci_exec->function_name);
 #if PHP_VERSION_ID >= 50300
@@ -337,10 +342,11 @@ static inline void php_eio_free_eio_cb_custom(php_eio_cb_custom_t * eio_cb)
 #endif
 		}
 		efree(eio_cb->fci_exec);
-
-		efree(eio_cb);
-		eio_cb = NULL;
+		eio_cb->fci_exec = NULL;
 	}
+
+	efree(eio_cb);
+	eio_cb = NULL;
 }
 /* }}} */
 
@@ -360,8 +366,8 @@ static inline php_eio_cb_t * php_eio_new_eio_cb(zend_fcall_info * fci_ptr, zend_
 		/* Prevent auto-destruction of the zvals within */
 		Z_ADDREF_P(eio_cb->fci->function_name);
 #if PHP_VERSION_ID >= 50300
-		if (fci_ptr->object_ptr) {
-			Z_ADDREF_P(fci_ptr->object_ptr);
+		if (eio_cb->fci->object_ptr) {
+			Z_ADDREF_P(eio_cb->fci->object_ptr);
 		}
 #endif
 	} 
@@ -390,22 +396,22 @@ static inline php_eio_cb_custom_t * php_eio_new_eio_cb_custom(zend_fcall_info * 
 	memcpy(eio_cb->fci_exec, fci_exec_ptr, sizeof(zend_fcall_info));
 	memcpy(eio_cb->fcc_exec, fcc_exec_ptr, sizeof(zend_fcall_info_cache));
 
-	if (ZEND_FCI_INITIALIZED(*fci_ptr)) {
+	if (ZEND_FCI_INITIALIZED(*eio_cb->fci)) {
 		/* Prevent auto-destruction of the zvals within */
-		Z_ADDREF_P(fci_ptr->function_name);
+		Z_ADDREF_P(eio_cb->fci->function_name);
 #if PHP_VERSION_ID >= 50300
-		if (fci_ptr->object_ptr) {
-			Z_ADDREF_P(fci_ptr->object_ptr);
+		if (eio_cb->fci->object_ptr) {
+			Z_ADDREF_P(eio_cb->fci->object_ptr);
 		}
 #endif
 	} 
 
-	if (ZEND_FCI_INITIALIZED(*fci_exec_ptr)) {
+	if (ZEND_FCI_INITIALIZED(*eio_cb->fci_exec)) {
 		/* Prevent auto-destruction of the zvals within */
-		Z_ADDREF_P(fci_exec_ptr->function_name);
+		Z_ADDREF_P(eio_cb->fci_exec->function_name);
 #if PHP_VERSION_ID >= 50300
-		if (fci_exec_ptr->object_ptr) {
-			Z_ADDREF_P(fci_exec_ptr->object_ptr);
+		if (eio_cb->fci_exec->object_ptr) {
+			Z_ADDREF_P(eio_cb->fci_exec->object_ptr);
 		}
 #endif
 	} 
@@ -456,12 +462,13 @@ static void php_eio_custom_execute(eio_req * req)
 
 		if (zend_call_function(eio_cb->fci_exec, eio_cb->fcc_exec TSRMLS_CC) == SUCCESS
 			&& retval_ptr) {
-			EIO_BUF_FETCH_FROM_ZVAL(req, *retval_ptr);
+			zval **ppz = (zval **)&(EIO_BUF(req));
+			MAKE_STD_ZVAL(*ppz);
+			ZVAL_ZVAL(*ppz, retval_ptr, 1, 1);
+			/*zval_ptr_dtor(&retval_ptr);*/
 
 			/* Required for libeio */
 			EIO_RESULT(req) = 0;
-
-			zval_ptr_dtor(&retval_ptr);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 				"An error occurred while invoking exec function");
@@ -496,20 +503,22 @@ static int php_eio_res_cb_custom(eio_req * req)
 	zval_add_ref(&key1);
 
 	/* $result arg */
-	ALLOC_INIT_ZVAL(key2);
-	*key2 = *((zval *) EIO_BUF(req));
-	zval_copy_ctor(key2);
+	if (EIO_BUF_ZVAL_P(req)) {
+		key2 = (zval *) EIO_BUF(req);
+		zval_add_ref(&key2);
+	} else {
+		ALLOC_INIT_ZVAL(key2);
+	}
 	args[1] = &key2;
 
 	/* $req arg */
-	MAKE_STD_ZVAL(key3);
+	if (EIO_BUF_ZVAL_P(req)) {
+		key3 = EIO_BUF_ZVAL_P(req);
+		zval_add_ref(&key3);
+	} else {
+		ALLOC_INIT_ZVAL(key3);
+	}
 	args[2] = &key3;
-	ZEND_REGISTER_RESOURCE(key3, req, le_eio_req);
-
-	/* 
-	 * Should be freed below
-	 * zval_dtor( ((zval *)EIO_BUF(req)) );
-	 */
 
 	eio_cb->fci->params = args;
 	eio_cb->fci->retval_ptr_ptr = &retval_ptr;
@@ -529,8 +538,11 @@ static int php_eio_res_cb_custom(eio_req * req)
 	zval_ptr_dtor(&key3);
 	
 	if (EIO_BUF_ZVAL_P(req)) {
-		zval_dtor(EIO_BUF_ZVAL_P(req));
-		efree(EIO_BUF_ZVAL_P(req));
+		{
+			zval *tmp = EIO_BUF_ZVAL_P(req);
+			zval_ptr_dtor(&tmp);
+			/*efree(EIO_BUF_ZVAL_P(req));*/
+		}
 	}
 
 	php_eio_free_eio_cb_custom(eio_cb);
@@ -846,9 +858,7 @@ static void php_eio_atfork_child(void)
 #undef EIO_CB_SET_FIELD
 #undef EIO_REQ_WARN_INVALID_CB
 #undef EIO_REQ_CB_INIT
-#undef EIO_REQ_FREE_ARGS
 #undef EIO_BUF_ZVAL_P
-#undef EIO_BUF_FETCH_FROM_ZVAL
 
 /* }}} */
 
