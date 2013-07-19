@@ -1429,7 +1429,7 @@ PHP_FUNCTION(eio_close)
 	}
 
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
-	if (fd <= 0) {
+	if (fd < 0) {
 #ifdef EIO_DEBUG
 		php_error_docref(NULL TSRMLS_CC, E_ERROR,
 			"invalid file descriptor '%d'", fd);
@@ -1479,7 +1479,7 @@ PHP_FUNCTION(eio_fsync)
 	}
 
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
-	if (fd <= 0) {
+	if (fd < 0) {
 		RETURN_FALSE;
 	}
 	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
@@ -1504,7 +1504,7 @@ PHP_FUNCTION(eio_fdatasync)
 		return;
 	}
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
-	if (fd <= 0) {
+	if (fd < 0) {
 		RETURN_FALSE;
 	}
 
@@ -1531,7 +1531,7 @@ PHP_FUNCTION(eio_futime)
 	}
 
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
-	if (fd <= 0) {
+	if (fd < 0) {
 		RETURN_FALSE;
 	}
 
@@ -1561,7 +1561,7 @@ PHP_FUNCTION(eio_ftruncate)
 		offset = 0;
 	}
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
-	if (fd <= 0) {
+	if (fd < 0) {
 		RETURN_FALSE;
 	}
 
@@ -1589,7 +1589,7 @@ PHP_FUNCTION(eio_fchmod)
 	}
 
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
-	if (fd <= 0) {
+	if (fd < 0) {
 		RETURN_FALSE;
 	}
 
@@ -1625,7 +1625,7 @@ PHP_FUNCTION(eio_fchown)
 	}
 	
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
-	if (fd <= 0) {
+	if (fd < 0) {
 		RETURN_FALSE;
 	}
 
@@ -1652,7 +1652,7 @@ PHP_FUNCTION(eio_dup2)
 
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
 	fd2 = php_eio_zval_to_fd(&zfd2 TSRMLS_CC);
-	if (fd <= 0 || fd2 <= 0) {
+	if (fd < 0 || fd2 < 0) {
 		RETURN_FALSE;
 	}
 
@@ -1684,7 +1684,7 @@ PHP_FUNCTION(eio_read)
 	}
 
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
-	if (fd <= 0) {
+	if (fd < 0) {
 		RETURN_FALSE;
 	}
 
@@ -1722,7 +1722,7 @@ PHP_FUNCTION(eio_write)
 	}
 
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
-	if (fd <= 0) {
+	if (fd < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid file descriptor");
 		RETURN_FALSE;
 	}
@@ -1874,7 +1874,7 @@ PHP_FUNCTION(eio_fstat)
 	}
 
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
-	if (fd <= 0) {
+	if (fd < 0) {
 		RETURN_FALSE;
 	}
 
@@ -1926,7 +1926,7 @@ PHP_FUNCTION(eio_fstatvfs)
 	}
 
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
-	if (fd <= 0) {
+	if (fd < 0) {
 		RETURN_FALSE;
 	}
 
@@ -1994,7 +1994,7 @@ PHP_FUNCTION(eio_sendfile)
 
 	out_fd = php_eio_zval_to_fd(&zout_fd TSRMLS_CC);
 	in_fd = php_eio_zval_to_fd(&zin_fd TSRMLS_CC);
-	if (out_fd <= 0 || in_fd <= 0) {
+	if (out_fd < 0 || in_fd < 0) {
 		/* php_eio_zval_to_fd reports errors if necessary */
 		RETURN_FALSE;
 	}
@@ -2023,7 +2023,7 @@ PHP_FUNCTION(eio_readahead)
 	}
 	
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
-	if (fd <= 0) {
+	if (fd < 0) {
 		RETURN_FALSE;
 	}
 
@@ -2050,7 +2050,7 @@ PHP_FUNCTION(eio_seek)
 	}
 	
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
-	if (fd <= 0) {
+	if (fd < 0) {
 		RETURN_FALSE;
 	}
 
@@ -2076,7 +2076,7 @@ PHP_FUNCTION(eio_syncfs)
 	}
 
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
-	if (fd <= 0) {
+	if (fd < 0) {
 		RETURN_FALSE;
 	}
 
@@ -2103,7 +2103,7 @@ PHP_FUNCTION(eio_sync_file_range)
 	}
 
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
-	if (fd <= 0) {
+	if (fd < 0) {
 		RETURN_FALSE;
 	}
 
@@ -2140,7 +2140,7 @@ PHP_FUNCTION(eio_fallocate)
 	}
 
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
-	if (fd <= 0) {
+	if (fd < 0) {
 		RETURN_FALSE;
 	}
 

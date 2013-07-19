@@ -22,10 +22,10 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2013-03-06</date>
+  <date>2013-07-19</date>
   <!--{{{ Current version -->
   <version>
-    <release>1.2.2</release>
+    <release>1.2.3</release>
     <api>1.1.0</api>
   </version>
   <stability>
@@ -34,8 +34,7 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-  Fix: 3rd argument of eio_custom callback assigned as a resource instead of mixed
-  Fix: eio_custom used incorrect way of zval-to-zval copying
+  Fix: bug #65293 where eio functions failed to process file descriptor equal to 0
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -58,6 +57,7 @@
       <file role="src" name="libeio/eio.h"/>
       <file role="src" name="libeio/libeio.m4"/>
       <file role="src" name="libeio/xthread.h"/>
+      <file role="test" name="tests/bug65293.phpt"/>
       <file role="test" name="tests/eio001.phpt"/>
       <file role="test" name="tests/eio_cancel_basic.phpt"/>
       <file role="test" name="tests/eio_chmod_basic.phpt"/>
@@ -107,64 +107,80 @@
   </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
-  <!--{{{ 1.2.2 -->
-  <version>
-    <release>1.2.2</release>
-    <api>1.1.0</api>
-  </version>
-  <stability>
-    <release>stable</release>
-    <api>stable</api>
-  </stability>
-  <license uri="http://www.php.net/license">php</license>
-  <notes>
+    <!--{{{ 1.2.3 -->
+    <release>
+      <version>
+        <release>1.2.3</release>
+        <api>1.1.0</api>
+      </version>
+      <stability>
+        <release>stable</release>
+        <api>stable</api>
+      </stability>
+      <license uri="http://www.php.net/license">php</license>
+      <notes>
+  Fix: bug #65293 where eio functions failed to process file descriptor equal to 0
+  </notes>
+    </release>
+    <!--}}}-->
+    <!--{{{ 1.2.2 -->
+    <version>
+      <release>1.2.2</release>
+      <api>1.1.0</api>
+    </version>
+    <stability>
+      <release>stable</release>
+      <api>stable</api>
+    </stability>
+    <license uri="http://www.php.net/license">php</license>
+    <notes>
   Fix: 3rd argument of eio_custom callback assigned as a resource instead of mixed
   Fix: eio_custom used incorrect way of zval-to-zval copying
   </notes>
-  <!--}}}-->
-  <!--{{{ 1.2.1 -->
-  <version>
-    <release>1.2.1</release>
-    <api>1.1.0</api>
-  </version>
-  <stability>
-    <release>stable</release>
-    <api>stable</api>
-  </stability>
-  <license uri="http://www.php.net/license">php</license>
-  <notes>
+    <!--}}}-->
+    <!--{{{ 1.2.1 -->
+    <version>
+      <release>1.2.1</release>
+      <api>1.1.0</api>
+    </version>
+    <stability>
+      <release>stable</release>
+      <api>stable</api>
+    </stability>
+    <license uri="http://www.php.net/license">php</license>
+    <notes>
     Fix: build failed without sockets extension
     Fix: eio_write failed when buffer length was lesser than size + offset
   </notes>
-  <!--}}}-->
-  <!--{{{ 1.2.0 -->
-  <version>
-    <release>1.2.0</release>
-    <api>1.1.0</api>
-  </version>
-  <stability>
-    <release>stable</release>
-    <api>stable</api>
-  </stability>
-  <license uri="http://www.php.net/license">php</license>
-  <notes>
+    <!--}}}-->
+    <!--{{{ 1.2.0 -->
+    <version>
+      <release>1.2.0</release>
+      <api>1.1.0</api>
+    </version>
+    <stability>
+      <release>stable</release>
+      <api>stable</api>
+    </stability>
+    <license uri="http://www.php.net/license">php</license>
+    <notes>
     Add: BSD support
     Change: internal event notification uses pipe() when eventfd() is not available.
     Del: some redundant code
     Fix: use libeio's EIO_FALLOC_FL_KEEP_SIZE instead of the system constant
   </notes>
-  <!--}}}-->
-  <!--{{{ 1.1.0 -->
-  <version>
-    <release>1.1.0</release>
-    <api>1.1.0</api>
-  </version>
-  <stability>
-    <release>stable</release>
-    <api>stable</api>
-  </stability>
-  <license uri="http://www.php.net/license">php</license>
-  <notes>
+    <!--}}}-->
+    <!--{{{ 1.1.0 -->
+    <version>
+      <release>1.1.0</release>
+      <api>1.1.0</api>
+    </version>
+    <stability>
+      <release>stable</release>
+      <api>stable</api>
+    </stability>
+    <license uri="http://www.php.net/license">php</license>
+    <notes>
     Change: eio_init() deprecated. Will be removed in future. We use pthread_atfork() to re-init eio after a fork
     Add: phpt test for the fork support
     Fix: tsrm_ls is not initialized in php_eio_init()
@@ -173,7 +189,7 @@
     Refact: no need to copy zval when passing request resource to eio_grp_*()
     Fix: eio_grp_*() didn't initialize eio automatically
   </notes>
-  <!--}}}-->
+    <!--}}}-->
     <!--{{{ 1.0.0 -->
     <version>
       <release>1.0.0</release>
