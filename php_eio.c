@@ -1952,7 +1952,7 @@ PHP_FUNCTION(eio_readdir)
 {
 	char *path;
 	int path_len;
-	int flags;
+	long flags;
 	PHP_EIO_INIT;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sllf|z!",
