@@ -2382,12 +2382,12 @@ PHP_FUNCTION(eio_set_max_poll_time)
 #define EIO_SET_INT_FUNCTION(eio_func) \
 	PHP_FUNCTION(eio_func) \
 	{ \
-		unsigned int num; \
+		unsigned long num; \
 		\
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &num) == FAILURE) { \
 			return; \
 		} \
-		eio_func(num); \
+		eio_func((unsigned int)num); \
 	}
 
 #define EIO_GET_INT_FUNCTION(eio_func) \
