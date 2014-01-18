@@ -67,6 +67,3 @@ AUTHOR
 
 Ruslan Osmanov <osmanov@php.net>
 <http://megagroup.ru/>
-
-
-vim: tw=80 ft=markdown

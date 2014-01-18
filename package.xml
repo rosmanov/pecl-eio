@@ -22,7 +22,7 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2013-07-19</date>
+  <date>2014-01-18</date>
   <!--{{{ Current version -->
   <version>
     <release>1.2.3</release>
@@ -41,10 +41,9 @@
   <contents>
     <dir name="/">
       <file role="doc" name="CREDITS"/>
-      <file role="doc" name="EXPERIMENTAL"/>
-      <file role="doc" name="INSTALL"/>
+      <file role="doc" name="INSTALL.md"/>
       <file role="doc" name="LICENSE"/>
-      <file role="doc" name="README"/>
+      <file role="doc" name="README.md"/>
       <file role="src" name="config.m4"/>
       <file role="src" name="php_eio.c"/>
       <file role="src" name="eio_fe.c"/>
@@ -287,7 +286,7 @@
         eventfd; the same descriptor exported to userspace to bind with existing
         event loops
         Add: eio_get_eventfd function to get eventfd descriptor
-        Add: header checks in configuration 
+        Add: header checks in configuration
         Change: libeio initialization moved to the MINIT phase, but unfinished
         requests are still handled in the RSHUTDOWN phase
         Change: simplified libeio callbacks
@@ -364,7 +363,7 @@
       </stability>
       <license uri="http://www.php.net/license">PHP</license>
       <notes>
-        Change: Shared memory permissions are set to 0660 by default 
+        Change: Shared memory permissions are set to 0660 by default
         Change: Removed redundant code and comments
         Add: Tests: eio_read_basic.phpt, eio_stat_basic.phpt
         Fix: the package XML
@@ -391,6 +390,6 @@
   </changelog>
   <!--}}}-->
 </package>
-<!-- 
+<!--
 vim: et sts=2 ts=2 sw=2 fdm=marker
 -->
