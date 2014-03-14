@@ -22,10 +22,10 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2014-01-18</date>
+  <date>2014-03-14</date>
   <!--{{{ Current version -->
   <version>
-    <release>1.2.3</release>
+    <release>1.2.4</release>
     <api>1.1.0</api>
   </version>
   <stability>
@@ -34,7 +34,7 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-  Fix: bug #65293 where eio functions failed to process file descriptor equal to 0
+    Fix: Bitbucket issue #1: eio_open fails when file is owned by root
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -106,6 +106,22 @@
   </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
+    <!--{{{ 1.2.4 -->
+    <release>
+      <version>
+        <release>1.2.4</release>
+        <api>1.1.0</api>
+      </version>
+      <stability>
+        <release>stable</release>
+        <api>stable</api>
+      </stability>
+      <license uri="http://www.php.net/license">php</license>
+      <notes>
+    Fix: Bitbucket issue #1: eio_open fails when file is owned by root
+  </notes>
+    </release>
+    <!--}}}-->
     <!--{{{ 1.2.3 -->
     <release>
       <version>

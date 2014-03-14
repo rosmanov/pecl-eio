@@ -235,7 +235,7 @@ static void php_eio_set_readdir_dent_and_names(zval * z, const eio_req * req)
 	char *names = EIO_BUF(req);
 	struct eio_dirent *ents = (struct eio_dirent *) req->ptr1;
 
-	/* $names_array = array(); 
+	/* $names_array = array();
 	 * $dents_array = array(); */
 	MAKE_STD_ZVAL(names_array);
 	MAKE_STD_ZVAL(dents_array);
@@ -270,7 +270,7 @@ static void php_eio_set_readdir_dent_and_names(zval * z, const eio_req * req)
 }
 /* }}} */
 
-/* {{{ php_eio_free_eio_cb 
+/* {{{ php_eio_free_eio_cb
  * Free an instance of php_eio_cb_t */
 static inline void php_eio_free_eio_cb(php_eio_cb_t * eio_cb)
 {
@@ -350,8 +350,8 @@ static inline void php_eio_free_eio_cb_custom(php_eio_cb_custom_t *eio_cb)
 }
 /* }}} */
 
-/* {{{ php_eio_new_eio_cb 
- * Allocates memory for a new instance of php_eio_cb_t. 
+/* {{{ php_eio_new_eio_cb
+ * Allocates memory for a new instance of php_eio_cb_t.
  * Returns pointer to the new instance */
 static inline php_eio_cb_t * php_eio_new_eio_cb(zend_fcall_info * fci_ptr, zend_fcall_info_cache * fcc_ptr, zval * data TSRMLS_DC)
 {
@@ -370,7 +370,7 @@ static inline php_eio_cb_t * php_eio_new_eio_cb(zend_fcall_info * fci_ptr, zend_
 			Z_ADDREF_P(eio_cb->fci->object_ptr);
 		}
 #endif
-	} 
+	}
 
 	EIO_CB_SET_FIELD(arg, data);
 
@@ -380,7 +380,7 @@ static inline php_eio_cb_t * php_eio_new_eio_cb(zend_fcall_info * fci_ptr, zend_
 }
 /* }}} */
 
-/* {{{ php_eio_new_eio_cb_custom 
+/* {{{ php_eio_new_eio_cb_custom
  * Allocates memory for a new instance of php_eio_cb_custom_t
  * Returns pointer to the new instance */
 static inline php_eio_cb_custom_t * php_eio_new_eio_cb_custom(zend_fcall_info * fci_ptr, zend_fcall_info_cache * fcc_ptr, zend_fcall_info * fci_exec_ptr, zend_fcall_info_cache * fcc_exec_ptr, zval * data TSRMLS_DC)
@@ -404,7 +404,7 @@ static inline php_eio_cb_custom_t * php_eio_new_eio_cb_custom(zend_fcall_info * 
 			Z_ADDREF_P(eio_cb->fci->object_ptr);
 		}
 #endif
-	} 
+	}
 
 	if (ZEND_FCI_INITIALIZED(*eio_cb->fci_exec)) {
 		/* Prevent auto-destruction of the zvals within */
@@ -414,7 +414,7 @@ static inline php_eio_cb_custom_t * php_eio_new_eio_cb_custom(zend_fcall_info * 
 			Z_ADDREF_P(eio_cb->fci_exec->object_ptr);
 		}
 #endif
-	} 
+	}
 
 	EIO_CB_SET_FIELD(arg, data);
 
@@ -426,7 +426,7 @@ static inline php_eio_cb_custom_t * php_eio_new_eio_cb_custom(zend_fcall_info * 
 }
 /* }}} */
 
-/* {{{ php_eio_custom_execute 
+/* {{{ php_eio_custom_execute
  * Is called by eio_custom(). Calls userspace function. */
 static void php_eio_custom_execute(eio_req * req)
 {
@@ -536,7 +536,7 @@ static int php_eio_res_cb_custom(eio_req * req)
 	zval_ptr_dtor(&key1);
 	zval_ptr_dtor(&key2);
 	zval_ptr_dtor(&key3);
-	
+
 	if (EIO_BUF_ZVAL_P(req)) {
 		{
 			zval *tmp = EIO_BUF_ZVAL_P(req);
@@ -559,9 +559,9 @@ static int php_eio_res_cb_custom(eio_req * req)
  * Returns non-zero value on failure.
  *
  * The userspace callback should match proto:
- * void callback($data, $result); 
+ * void callback($data, $result);
  * $data is user custom data passed in eio_*() call
- * $result contains eio_* function specific value. E.g. for eio_open() it contains file descriptor 
+ * $result contains eio_* function specific value. E.g. for eio_open() it contains file descriptor
  */
 static int php_eio_res_cb(eio_req *req)
 {
@@ -581,8 +581,8 @@ static int php_eio_res_cb(eio_req *req)
 	}
 
 	/* req->data should be of type (php_eio_cb_t *)
-	 * eio_cb->func = user callback as zval pointer 
-	 * eio_cb->arg = user variable to be passed to callback 
+	 * eio_cb->func = user callback as zval pointer
+	 * eio_cb->arg = user variable to be passed to callback
 	 * EIO_RESULT(req), i.e. req->result, = return value of corresponding
 	 * system call(mkdir, rmdir etc.)
 	 */
@@ -615,7 +615,7 @@ static int php_eio_res_cb(eio_req *req)
 				ZVAL_LONG(key2, EIO_RESULT(req));
 				break;
 			case EIO_READ:
-				/* EIO_BUF(req) is the buffer with read contents 
+				/* EIO_BUF(req) is the buffer with read contents
 				 * (size_t) req->size = length parameter value passed to eio_read()
 				 * Since req is destroyed later, data stored in req should be
 				 * duplicated */
@@ -689,14 +689,14 @@ static int php_eio_res_cb(eio_req *req)
 				/* }}} */
 
 			case EIO_READDIR:
-				/* EIO_READDIR_* flags are in req->int1 
+				/* EIO_READDIR_* flags are in req->int1
 				 *
-				 * EIO_BUF(req), which is req->ptr2, contains null-terminated names 
+				 * EIO_BUF(req), which is req->ptr2, contains null-terminated names
 				 * These will be stored in $result['names'] as a vector */
 				array_init(key2);
 
 				if (req->int1 & (EIO_READDIR_DENTS | EIO_READDIR_DIRS_FIRST)) {
-					/* fill $result['dents'] with array of struct eio_dirent like arrays 
+					/* fill $result['dents'] with array of struct eio_dirent like arrays
 					 * fill $result['names'] with dir names */
 					php_eio_set_readdir_dent_and_names(key2, req);
 				} else {
@@ -751,7 +751,7 @@ static int php_eio_res_cb(eio_req *req)
  * Is called when eio wants attention(ready to process further requests) */
 static void php_eio_want_poll_callback(void)
 {
-#if HAVE_EVENTFD 
+#if HAVE_EVENTFD
 	static uint64_t counter = 1;
 #else
 	static char counter[8];
@@ -764,7 +764,7 @@ static void php_eio_want_poll_callback(void)
 }
 /* }}} */
 
-/* {{{ php_eio_done_poll_callback 
+/* {{{ php_eio_done_poll_callback
  * Is invoked when eio detects that all pending requests have been handled */
 static void php_eio_done_poll_callback(void)
 {
@@ -773,7 +773,7 @@ static void php_eio_done_poll_callback(void)
 }
 /* }}} */
 
-/* {{{ php_eio_zval_to_fd 
+/* {{{ php_eio_zval_to_fd
  * Get numeric file descriptor from PHP stream or Socket resource */
 static php_socket_t php_eio_zval_to_fd(zval **ppfd TSRMLS_DC)
 {
@@ -846,7 +846,7 @@ static inline void php_eio_init(TSRMLS_D)
 }
 /* }}} */
 
-/* {{{ php_eio_atfork_child() 
+/* {{{ php_eio_atfork_child()
  * Re-initialize eio and internal pipe at fork */
 static void php_eio_atfork_child(void)
 {
@@ -1014,7 +1014,7 @@ PHP_MINFO_FUNCTION(eio)
 
 /* {{{ API */
 
-/* {{{ proto void eio_init(void) 
+/* {{{ proto void eio_init(void)
  * Deprecated. We use X_THREAD_ATFORK() to re-initialize eio on fork, and call php_eio_init() silently.
  * So user doesn't need to call eio_init() anymore.
  * TODO Remove in future
@@ -1026,7 +1026,7 @@ PHP_FUNCTION(eio_init)
 }
 /* }}} */
 
-/* {{{ proto string eio_get_last_error(resource req) 
+/* {{{ proto string eio_get_last_error(resource req)
  * Get last error associated with the request resource */
 PHP_FUNCTION(eio_get_last_error)
 {
@@ -1048,7 +1048,7 @@ PHP_FUNCTION(eio_get_last_error)
 /* {{{ POSIX API wrappers */
 
 /* {{{ proto bool eio_event_loop(void);
- * Polls eio until all requests proceeded. 
+ * Polls eio until all requests proceeded.
  * Returns TRUE on success, FALSE otherwise. */
 PHP_FUNCTION(eio_event_loop)
 {
@@ -1059,9 +1059,9 @@ PHP_FUNCTION(eio_event_loop)
 
 /* }}} */
 
-/* {{{ proto int eio_poll(void); 
+/* {{{ proto int eio_poll(void);
  * Has to be called whenever there are pending requests that need finishing.
- * Applicable only when implementing userspace event loop. 
+ * Applicable only when implementing userspace event loop.
  * If any request invocation returns a non-zero value, returns that value.
  * Otherwise, it returns 0. */
 PHP_FUNCTION(eio_poll)
@@ -1071,7 +1071,7 @@ PHP_FUNCTION(eio_poll)
 
 /* }}} */
 
-/* {{{ proto resource eio_open(string path, int flags, int mode, int pri, callback callback = NULL[, mixed data = NULL]); 
+/* {{{ proto resource eio_open(string path, int flags, int mode, int pri, callback callback = NULL[, mixed data = NULL]);
  * Open a file. The file descriptor is passed as the second argument of the
  * event completion callback.
  *
@@ -1081,7 +1081,7 @@ PHP_FUNCTION(eio_poll)
  *
  * mode		One of EIO_S_I* constants or their combination. The constants have the
  * same meaning as their S_I* counterparts defined in sys/stat.h C header file.
- * Required, if a file is created. Ignored otherwise. 
+ * Required, if a file is created. Ignored otherwise.
  *
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_open)
@@ -1104,9 +1104,6 @@ PHP_FUNCTION(eio_open)
 	if (!mode) {
 		mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 	}
-	if (!flags) {
-		flags = O_RDWR /*| O_CREAT */ ;
-	}
 
 	req = eio_open(path, flags, (mode_t) mode, pri, php_eio_res_cb, eio_cb);
 
@@ -1115,8 +1112,8 @@ PHP_FUNCTION(eio_open)
 
 /* }}} */
 
-/* {{{ proto resource eio_truncate(string path[, int offset = 0[, int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]); 
- * Truncate a file. 
+/* {{{ proto resource eio_truncate(string path[, int offset = 0[, int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]);
+ * Truncate a file.
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_truncate)
 {
@@ -1142,7 +1139,7 @@ PHP_FUNCTION(eio_truncate)
 
 /* }}} */
 
-/* {{{ proto resource eio_chown(string path, int uid[, int gid = -1 [,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]); 
+/* {{{ proto resource eio_chown(string path, int uid[, int gid = -1 [,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]);
  * Change file/direcrory permissions. uid is user ID. gid is group ID. uid/gid
  * is ignored when it's value is -1. Returns request resource on success, otherwise FALSE */
 PHP_FUNCTION(eio_chown)
@@ -1182,7 +1179,7 @@ PHP_FUNCTION(eio_chown)
 
 /* }}} */
 
-/* {{{ proto bool eio_chmod(string path, int mode, [int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto bool eio_chmod(string path, int mode, [int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]);
  * Change file/direcrory permissions system call. Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_chmod)
 {
@@ -1204,7 +1201,7 @@ PHP_FUNCTION(eio_chmod)
 
 /* }}} */
 
-/* {{{ proto resource eio_mkdir (string path, int mode, [int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_mkdir (string path, int mode, [int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]);
  * Creates a directory. Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_mkdir)
 {
@@ -1233,7 +1230,7 @@ PHP_FUNCTION(eio_mkdir)
 }
 /* }}} */
 
-/* {{{ proto resource eio_rmdir (string path[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_rmdir (string path[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]);
  * Removes a directory. Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_rmdir)
 {
@@ -1263,7 +1260,7 @@ PHP_FUNCTION(eio_rmdir)
 }
 /* }}} */
 
-/* {{{ proto resource eio_unlink(string path[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_unlink(string path[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]);
  * Removes a file. Returns TRUE on success, otherwise FALSE. */
 PHP_FUNCTION(eio_unlink)
 {
@@ -1288,8 +1285,8 @@ PHP_FUNCTION(eio_unlink)
 }
 /* }}} */
 
-/* {{{ proto bool eio_utime(string path, double atime, double mtime[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
- * Change file last access and modification times. 
+/* {{{ proto bool eio_utime(string path, double atime, double mtime[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]);
+ * Change file last access and modification times.
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_utime)
 {
@@ -1315,7 +1312,7 @@ PHP_FUNCTION(eio_utime)
 
 /* }}} */
 
-/* {{{ proto resource eio_mknod(string path, int mode, int dev[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_mknod(string path, int mode, int dev[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]);
  * Create a special or ordinary file.
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_mknod)
@@ -1340,7 +1337,7 @@ PHP_FUNCTION(eio_mknod)
 }
 /* }}} */
 
-/* {{{ proto resource eio_link(string path, string new_path[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_link(string path, string new_path[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]);
  * Create a hardlink for file
  * Returns request resource on success, otherwise FALSE. Always returns FALSE for Windows and Netware. */
 PHP_FUNCTION(eio_link)
@@ -1365,7 +1362,7 @@ PHP_FUNCTION(eio_link)
 }
 /* }}} */
 
-/* {{{ proto resource eio_symlink(string path, string new_path[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_symlink(string path, string new_path[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]);
  * Create a symlink for file
  * Returns resource on success, otherwise FALSE. Always returns FALSE for Windows and Netware. */
 PHP_FUNCTION(eio_symlink)
@@ -1390,7 +1387,7 @@ PHP_FUNCTION(eio_symlink)
 }
 /* }}} */
 
-/* {{{ proto resource eio_rename(string path, string new_path[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_rename(string path, string new_path[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]);
  * Change the name or location of a file.
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_rename)
@@ -1415,7 +1412,7 @@ PHP_FUNCTION(eio_rename)
 }
 /* }}} */
 
-/* {{{ proto resource eio_close(mixed fd[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_close(mixed fd[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]);
  * Closes file. Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_close)
 {
@@ -1445,8 +1442,8 @@ PHP_FUNCTION(eio_close)
 
 /* }}} */
 
-/* {{{ proto resource eio_sync([int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
- * Commit buffer cache to disk. 
+/* {{{ proto resource eio_sync([int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]);
+ * Commit buffer cache to disk.
  * Returns request resource on success, otherwise FALSE. Always returns FALSE for Windows and Netware. */
 PHP_FUNCTION(eio_sync)
 {
@@ -1464,8 +1461,8 @@ PHP_FUNCTION(eio_sync)
 }
 /* }}} */
 
-/* {{{ proto resource feio_fsync(mixed fd[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
- * Synchronize a file's in-core state with storage device. 
+/* {{{ proto resource feio_fsync(mixed fd[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]);
+ * Synchronize a file's in-core state with storage device.
  * Returns request resource on success, otherwise FALSE. Always returns FALSE for Windows and Netware. */
 PHP_FUNCTION(eio_fsync)
 {
@@ -1490,8 +1487,8 @@ PHP_FUNCTION(eio_fsync)
 
 /* }}} */
 
-/* {{{ proto resource eio_datafsync(mixed fd[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
- * Synchronize a file's in-core state with storage device. 
+/* {{{ proto resource eio_datafsync(mixed fd[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]);
+ * Synchronize a file's in-core state with storage device.
  * Returns request resource on success, otherwise FALSE. Always returns FALSE for Windows and Netware. */
 PHP_FUNCTION(eio_fdatasync)
 {
@@ -1515,7 +1512,7 @@ PHP_FUNCTION(eio_fdatasync)
 }
 /* }}} */
 
-/* {{{ proto resource eio_futime(mixed fd, double atime, double mtime[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_futime(mixed fd, double atime, double mtime[ ,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]);
  * Change file last access and modification times by file descriptor fd.
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_futime)
@@ -1543,7 +1540,7 @@ PHP_FUNCTION(eio_futime)
 }
 /* }}} */
 
-/* {{{ proto resource eio_ftruncate(mixed fd[, int offset = 0[, int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]); 
+/* {{{ proto resource eio_ftruncate(mixed fd[, int offset = 0[, int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]);
  * Truncate a file. Returns resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_ftruncate)
 {
@@ -1572,9 +1569,9 @@ PHP_FUNCTION(eio_ftruncate)
 }
 /* }}} */
 
-/* {{{ proto resource eio_fchmod(mixed fd, int mode, [int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_fchmod(mixed fd, int mode, [int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]);
  * Change file permissions system call by file descriptor fd.
- * Returns resource on success, otherwise FALSE. 
+ * Returns resource on success, otherwise FALSE.
  * The function always returns FALSE for NETWARE and WINDOWS */
 PHP_FUNCTION(eio_fchmod)
 {
@@ -1600,10 +1597,10 @@ PHP_FUNCTION(eio_fchmod)
 }
 /* }}} */
 
-/* {{{ proto resource eio_fchown(mixed fd, int uid[, int gid = -1 [,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]); 
+/* {{{ proto resource eio_fchown(mixed fd, int uid[, int gid = -1 [,int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]);
  * Change file/direcrory permissions by file descriptor. uid is user ID. gid is group ID. uid/gid
- * is ignored when it's value is -1. 
- * Returns resource on success, otherwise FALSE. 
+ * is ignored when it's value is -1.
+ * Returns resource on success, otherwise FALSE.
  * The function always returns FALSE for NETWARE and WINDOWS */
 PHP_FUNCTION(eio_fchown)
 {
@@ -1623,7 +1620,7 @@ PHP_FUNCTION(eio_fchown)
 #  endif
 		RETURN_FALSE;
 	}
-	
+
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
 	if (fd < 0) {
 		RETURN_FALSE;
@@ -1636,7 +1633,7 @@ PHP_FUNCTION(eio_fchown)
 }
 /* }}} */
 
-/* {{{ proto bool eio_dup2(mixed fd, mixed fd2, [int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]); 
+/* {{{ proto bool eio_dup2(mixed fd, mixed fd2, [int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]);
  * Duplicate a file descriptor.
  * Returns TRUE on success, otherwise FALSE. */
 PHP_FUNCTION(eio_dup2)
@@ -1663,10 +1660,10 @@ PHP_FUNCTION(eio_dup2)
 }
 /* }}} */
 
-/* {{{ proto resource eio_read(mixed fd, int length, int offset, int pri, callback callback[, mixed data = NULL]); 
+/* {{{ proto resource eio_read(mixed fd, int length, int offset, int pri, callback callback[, mixed data = NULL]);
  * Read from a file descriptor, fd, at a given offset.
  *
- * length specifies amount of bytes to read. 
+ * length specifies amount of bytes to read.
  *
  * offset is offset from the beginning of the file. Default: 0.
  *
@@ -1690,8 +1687,8 @@ PHP_FUNCTION(eio_read)
 
 	eio_cb = php_eio_new_eio_cb(&fci, &fcc, data TSRMLS_CC);
 
-	/* Actually, second parameter is buffer for read contents. 
-	 * But eio allocates memory for it's eio_req->ptr2 internally, 
+	/* Actually, second parameter is buffer for read contents.
+	 * But eio allocates memory for it's eio_req->ptr2 internally,
 	 * and passes it to the callback. The buffer with read contents will be
 	 * available in callback as EIO_BUF(req). Thus, we don't need allocate
 	 * memory ourselves here */
@@ -1700,7 +1697,7 @@ PHP_FUNCTION(eio_read)
 }
 /* }}} */
 
-/* {{{ proto resource eio_write(mixed fd, mixed str[, int length = NULL[, int offset = 0[, int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]]); 
+/* {{{ proto resource eio_write(mixed fd, mixed str[, int length = NULL[, int offset = 0[, int pri = 0 [, callback callback = NULL[, mixed data = NULL]]]]]);
  * Writes string to the file specified by file descriptor fd.
  *
  * length	amount of characters to write. If is NULL, entire string is
@@ -1751,7 +1748,7 @@ PHP_FUNCTION(eio_write)
 	req = eio_write(fd, Z_STRVAL_P(zbuf), num_bytes, offset,
 		pri, php_eio_res_cb, eio_cb);
 	if (!Z_ISREF_P(zbuf)) {
-		/* gonna be destructed. Prevent it. 
+		/* gonna be destructed. Prevent it.
 		 * We then have to efree EIO_BUF(req) in php_eio_res_cb */
 		EIO_BUF(req) = estrndup(EIO_BUF(req), num_bytes);
 	}
@@ -1759,10 +1756,10 @@ PHP_FUNCTION(eio_write)
 }
 /* }}} */
 
-/* {{{ proto resource eio_readlink(string path, int pri, callback callback[, mixed data = NULL]); 
+/* {{{ proto resource eio_readlink(string path, int pri, callback callback[, mixed data = NULL]);
  * Read value of a symbolic link.
  *
- * Returns TRUE on success, otherwise FALSE. 
+ * Returns TRUE on success, otherwise FALSE.
  * Always returns FALSE for Netware and Windows. */
 PHP_FUNCTION(eio_readlink)
 {
@@ -1784,7 +1781,7 @@ PHP_FUNCTION(eio_readlink)
 }
 /* }}} */
 
-/* {{{ proto resource eio_realpath(string path, int pri, callback callback[, mixed data = NULL]); 
+/* {{{ proto resource eio_realpath(string path, int pri, callback callback[, mixed data = NULL]);
  * Return the canonicalized absolute pathname in the second argument of the
  * event completion callback.
  *
@@ -1809,7 +1806,7 @@ PHP_FUNCTION(eio_realpath)
 }
 /* }}} */
 
-/* {{{ proto resource eio_stat(string path, int pri, callback callback[, mixed data = NULL]); 
+/* {{{ proto resource eio_stat(string path, int pri, callback callback[, mixed data = NULL]);
  * Get file status
  *
  * Returns request resource on success, otherwise FALSE. */
@@ -1833,7 +1830,7 @@ PHP_FUNCTION(eio_stat)
 }
 /* }}} */
 
-/* {{{ proto resource eio_lstat(string path, int pri, callback callback[, mixed data = NULL]); 
+/* {{{ proto resource eio_lstat(string path, int pri, callback callback[, mixed data = NULL]);
  * Get file status
  *
  * Returns request resource on success, otherwise FALSE. */
@@ -1857,7 +1854,7 @@ PHP_FUNCTION(eio_lstat)
 }
 /* }}} */
 
-/* {{{ proto resource eio_fstat(mixed fd, int pri, callback callback[, mixed data = NULL]); 
+/* {{{ proto resource eio_fstat(mixed fd, int pri, callback callback[, mixed data = NULL]);
  * Get file status
 
  * fd	file descriptor
@@ -1885,7 +1882,7 @@ PHP_FUNCTION(eio_fstat)
 }
 /* }}} */
 
-/* {{{ proto resource eio_statvfs(string path, int pri, callback callback[, mixed data = NULL]); 
+/* {{{ proto resource eio_statvfs(string path, int pri, callback callback[, mixed data = NULL]);
  * Get file system statistics
  *
  * Returns request resource on success, otherwise FALSE. */
@@ -1909,7 +1906,7 @@ PHP_FUNCTION(eio_statvfs)
 }
 /* }}} */
 
-/* {{{ proto resource eio_fstatvfs(mixed fd, int pri, callback callback[, mixed data = NULL]); 
+/* {{{ proto resource eio_fstatvfs(mixed fd, int pri, callback callback[, mixed data = NULL]);
  * Get file system statistics
  *
  * fd	file descriptor
@@ -1940,7 +1937,7 @@ PHP_FUNCTION(eio_fstatvfs)
 /* }}} */
 
 
-/* {{{ proto resource eio_readdir(string path, int flags, int pri, callback callback[, mixed data = NULL]); 
+/* {{{ proto resource eio_readdir(string path, int flags, int pri, callback callback[, mixed data = NULL]);
  * Reads through a whole directory(via the opendir, readdir and closedir system
  * calls) and returns either the names or an array,
  * depending on the flags argument.
@@ -1975,13 +1972,13 @@ PHP_FUNCTION(eio_readdir)
 
 /* {{{ OS-SPECIFIC CALL WRAPPERS */
 
-/* {{{ proto resource eio_sendfile(mixed out_fd, mixed in_fd, int offset, int length[, int pri[, callback callback[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_sendfile(mixed out_fd, mixed in_fd, int offset, int length[, int pri[, callback callback[, mixed data = NULL]]]);
  *
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_sendfile)
 {
 	zval *zout_fd, *zin_fd;
-	
+
 	php_socket_t out_fd, in_fd;
 	long offset, length;
 	PHP_EIO_INIT;
@@ -2007,7 +2004,7 @@ PHP_FUNCTION(eio_sendfile)
 }
 /* }}} */
 
-/* {{{ proto resource eio_readahead(mixed fd, int offset, int length[, int pri[, callback callback[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_readahead(mixed fd, int offset, int length[, int pri[, callback callback[, mixed data = NULL]]]);
  *
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_readahead)
@@ -2021,7 +2018,7 @@ PHP_FUNCTION(eio_readahead)
 			&zfd, &offset, &length, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
 	}
-	
+
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
 	if (fd < 0) {
 		RETURN_FALSE;
@@ -2035,7 +2032,7 @@ PHP_FUNCTION(eio_readahead)
 /* }}} */
 
 
-/* {{{ proto resource eio_seek(mixed fd, int offset, int whence[, int pri[, callback callback[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_seek(mixed fd, int offset, int whence[, int pri[, callback callback[, mixed data = NULL]]]);
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_seek)
 {
@@ -2048,7 +2045,7 @@ PHP_FUNCTION(eio_seek)
 			&zfd, &offset, &whence, &pri, &fci, &fcc, &data) == FAILURE) {
 		return;
 	}
-	
+
 	fd = php_eio_zval_to_fd(&zfd TSRMLS_CC);
 	if (fd < 0) {
 		RETURN_FALSE;
@@ -2061,7 +2058,7 @@ PHP_FUNCTION(eio_seek)
 }
 /* }}} */
 
-/* {{{ proto resource eio_syncfs(mixed fd[, int pri[, callback callback[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_syncfs(mixed fd[, int pri[, callback callback[, mixed data = NULL]]]);
  *
  * Returns resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_syncfs)
@@ -2087,7 +2084,7 @@ PHP_FUNCTION(eio_syncfs)
 }
 /* }}} */
 
-/* {{{ proto resource eio_sync_file_range(mixed fd, int offset, int nbytes, int flags[, int pri[, callback callback[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_sync_file_range(mixed fd, int offset, int nbytes, int flags[, int pri[, callback callback[, mixed data = NULL]]]);
  *
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_sync_file_range)
@@ -2115,7 +2112,7 @@ PHP_FUNCTION(eio_sync_file_range)
 }
 /* }}} */
 
-/* {{{ proto resource eio_fallocate(mixed fd, int mode, int offset, int length[, int pri[, callback callback[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_fallocate(mixed fd, int mode, int offset, int length[, int pri[, callback callback[, mixed data = NULL]]]);
  * Allows the caller to directly manipulate the allocated disk space for the
  * file referred to by fd for the byte range starting at offset and continuing
  * for length bytes.
@@ -2156,8 +2153,8 @@ PHP_FUNCTION(eio_fallocate)
 
 /* {{{ EIO-SPECIFIC REQUESTS */
 
-/* {{{ proto resource eio_custom(callback execute, int pri, callback callback[, mixed data = NULL]); 
- * Execute custom user function specified by execute argument just like other eio_* calls. 
+/* {{{ proto resource eio_custom(callback execute, int pri, callback callback[, mixed data = NULL]);
+ * Execute custom user function specified by execute argument just like other eio_* calls.
  *
  * execute	User function that should match the following prototype:
  * callback execute(mixed data);
@@ -2170,7 +2167,7 @@ PHP_FUNCTION(eio_fallocate)
  *
  * data		Optional argument passed to execute
  *
- * Returns request resource on success, otherwise FALSE. 
+ * Returns request resource on success, otherwise FALSE.
  */
 PHP_FUNCTION(eio_custom)
 {
@@ -2197,8 +2194,8 @@ PHP_FUNCTION(eio_custom)
 }
 /* }}} */
 
-/* {{{ proto resource eio_busy(int delay[, int pri=EIO_PRI_DEFAULT[, callback callback=NULL[, mixed data=NULL]]]); 
- * Artificially increase load. Could be useful in tests, benchmarking. 
+/* {{{ proto resource eio_busy(int delay[, int pri=EIO_PRI_DEFAULT[, callback callback=NULL[, mixed data=NULL]]]);
+ * Artificially increase load. Could be useful in tests, benchmarking.
  *
  * Returns request resource on success, otherwise FALSE. */
 PHP_FUNCTION(eio_busy)
@@ -2218,7 +2215,7 @@ PHP_FUNCTION(eio_busy)
 }
 /* }}} */
 
-/* {{{ proto resource eio_nop([int pri[, callback callback[, mixed data = NULL]]]); 
+/* {{{ proto resource eio_nop([int pri[, callback callback[, mixed data = NULL]]]);
  * Does nothing, except go through the whole request cycle.
  *
  * Returns request resource on success, otherwise FALSE. */
@@ -2240,7 +2237,7 @@ PHP_FUNCTION(eio_nop)
 
 /* }}} */
 
-/* {{{ proto void eio_cancel(resource req); 
+/* {{{ proto void eio_cancel(resource req);
  * Cancels a request */
 PHP_FUNCTION(eio_cancel)
 {
@@ -2267,7 +2264,7 @@ PHP_FUNCTION(eio_cancel)
 
 /* {{{ GROUPING AND LIMITING REQUESTS */
 
-/* {{{ proto resource eio_grp(callback callback[, mixed data = NULL]); 
+/* {{{ proto resource eio_grp(callback callback[, mixed data = NULL]);
  * Creates, submits and returns a group request resource.
  *
  * Returns group request resource on success, otherwise FALSE. */
@@ -2294,7 +2291,7 @@ PHP_FUNCTION(eio_grp)
 }
 /* }}} */
 
-/* {{{ proto void eio_grp_add(resource grp, resource req); 
+/* {{{ proto void eio_grp_add(resource grp, resource req);
  * Adds a request to the request group. */
 PHP_FUNCTION(eio_grp_add)
 {
@@ -2317,7 +2314,7 @@ PHP_FUNCTION(eio_grp_add)
 }
 /* }}} */
 
-/* {{{ proto void eio_grp_limit(resource grp, int limit); 
+/* {{{ proto void eio_grp_limit(resource grp, int limit);
  * Set group limit */
 PHP_FUNCTION(eio_grp_limit)
 {
@@ -2338,7 +2335,7 @@ PHP_FUNCTION(eio_grp_limit)
 }
 /* }}} */
 
-/* {{{ proto void eio_grp_cancel(resource grp); 
+/* {{{ proto void eio_grp_cancel(resource grp);
  * Cancels request group */
 PHP_FUNCTION(eio_grp_cancel)
 {
@@ -2362,7 +2359,7 @@ PHP_FUNCTION(eio_grp_cancel)
 
 /* {{{ CONFIGURATION */
 
-/* {{{ proto void eio_set_max_poll_time(float nseconds); 
+/* {{{ proto void eio_set_max_poll_time(float nseconds);
  * Limits the amount of time spent handling eio requests in eio_poll() */
 PHP_FUNCTION(eio_set_max_poll_time)
 {
