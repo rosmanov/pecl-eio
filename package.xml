@@ -50,7 +50,7 @@
       <file role="src" name="eio_fe.h"/>
       <file role="src" name="eio_priv.h"/>
       <file role="src" name="php_eio.h"/>
-      <file role="src" name="libeio/LICENSE"/>
+      <file role="doc" name="libeio/LICENSE"/>
       <file role="src" name="libeio/ecb.h"/>
       <file role="src" name="libeio/eio.c"/>
       <file role="src" name="libeio/eio.h"/>
