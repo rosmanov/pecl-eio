@@ -134,6 +134,7 @@ static int php_eio_eventfd(void)
 	/* Save extra calls to fcntl() */
 	return eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
 # else
+	php_eio_pipe_t *ep = &php_eio_pipe;
 	int fd = eventfd(0, 0);
 
 	if (fd >= 0) {

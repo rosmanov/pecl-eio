@@ -32,14 +32,14 @@ dnl }}}
 
 
 
-dnl {{{ eio support 
+dnl {{{ eio support
 if test "$PHP_EIO" != "no"; then
 
 dnl {{{ COMMENTED OUT
 dnl     dnl {{{ Include paths
-dnl 
+dnl
 dnl     SEARCH_PATH="/usr/local /usr /opt"
-dnl     
+dnl
 dnl     dnl {{{ --with-eio
 dnl     SEARCH_FOR="include/eio.h"
 dnl     if test -r $PHP_EIO/$SEARCH_FOR; then # path given as parameter
@@ -59,14 +59,14 @@ dnl         AC_MSG_ERROR([Please reinstall libeio])
 dnl     fi
 dnl     PHP_ADD_INCLUDE($EIO_DIR/include)
 dnl     dnl }}}
-dnl 
+dnl
 dnl     dnl }}}
-dnl 
+dnl
 dnl     dnl {{{ Library checks
 dnl     # --with-eio -> check for lib and symbol presence
 dnl     LIBNAME=eio
 dnl     LIBSYMBOL=eio_init
-dnl 
+dnl
 dnl     PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
 dnl     [
 dnl     PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $EIO_DIR/lib, EIO_SHARED_LIBADD)
@@ -76,7 +76,7 @@ dnl     AC_MSG_ERROR([wrong eio lib version or lib not found])
 dnl     ],[
 dnl     -L$EIO_DIR/lib
 dnl     ])
-dnl 
+dnl
 dnl     PHP_SUBST(EIO_SHARED_LIBADD)
 dnl     dnl }}}
 dnl
@@ -84,13 +84,22 @@ dnl     dnl }}}
 
     dnl AC_CHECK_HEADERS(sys/eventfd.h linux/falloc.h)
     dnl AC_CHECK_FUNCS(eventfd fallocate)
-    
-    PHP_ADD_INCLUDE(.)
-    AC_CONFIG_SRCDIR([libeio/eio.h])
-    dnl AC_CONFIG_HEADERS([config.h])
-    m4_include([libeio/libeio.m4])
 
-    dnl Build extension 
+    if test "$ext_shared" != "yes" && test "$ext_shared" != "shared"; then
+      PHP_EIO_CONFIG_H='\"main/php_config.h\"'
+      AC_DEFINE(EIO_CONFIG_H, "main/php_config.h", [Overide config.h included in libeio/eio.c])
+      CFLAGS="$CFLAGS -DEIO_CONFIG_H="$PHP_EIO_CONFIG_H
+      define('PHP_EIO_STATIC', 1)
+    fi
+
+    dnl PHP_ADD_INCLUDE(.)
+    PHP_ADD_INCLUDE($ext_builddir)
+    dnl AC_CONFIG_SRCDIR([libeio/eio.h])
+    AC_CONFIG_SRCDIR(ifdef('PHP_EIO_STATIC',PHP_EXT_BUILDDIR(eio)[/],)[libeio/eio.h])
+    dnl dnl AC_CONFIG_HEADERS([config.h])
+    m4_include(ifdef('PHP_EIO_STATIC',PHP_EXT_BUILDDIR(eio)[/],)[libeio/libeio.m4])
+
+    dnl Build extension
     eio_src="php_eio.c eio_fe.c"
     PHP_NEW_EXTENSION(eio, $eio_src, $ext_shared,,$CFLAGS)
     PHP_ADD_EXTENSION_DEP(eio, sockets, true)
