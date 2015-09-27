@@ -1615,7 +1615,7 @@ PHP_FUNCTION(eio_fchown)
 		return;
 	}
 
-	if (uid < 0 || gid < 0) {
+	if (uid < 0 && gid < 0) {
 #  ifdef EIO_DEBUG
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid uid and/or gid");
 #  endif
