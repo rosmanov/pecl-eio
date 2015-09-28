@@ -22,10 +22,10 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2014-03-27</date>
+  <date>2015-09-28</date>
   <!--{{{ Current version -->
   <version>
-    <release>1.2.5</release>
+    <release>1.2.6</release>
     <api>1.1.0</api>
   </version>
   <stability>
@@ -34,8 +34,8 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-    Fix: Bitbucket issue #2: Static build fails
-    Fix: build failed when EVENTFD was not available
+    Fix: uid/gid validation in eio_fchown
+    Fix: compilation issue on OS X 10.11
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -107,6 +107,23 @@
   </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
+    <!--{{{ 1.2.6 -->
+    <release>
+      <version>
+        <release>1.2.6</release>
+        <api>1.1.0</api>
+      </version>
+      <stability>
+        <release>stable</release>
+        <api>stable</api>
+      </stability>
+      <license uri="http://www.php.net/license">php</license>
+      <notes>
+    Fix: uid/gid validation in eio_fchown
+    Fix: compilation issue on OS X 10.11
+  </notes>
+    </release>
+    <!--}}}-->
     <!--{{{ 1.2.5 -->
     <release>
       <version>
