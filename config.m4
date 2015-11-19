@@ -1,18 +1,6 @@
-dnl +----------------------------------------------------------------------+
-dnl | PHP Version 5                                                        |
-dnl +----------------------------------------------------------------------+
-dnl | Copyrght (C) 1997-2012 The PHP Group                                 |
-dnl +----------------------------------------------------------------------+
-dnl | This source file is subject to version 3.01 of the PHP license,      |
-dnl | that is bundled with this package in the file LICENSE, and is        |
-dnl | available through the world-wide-web at the following url:           |
-dnl | http://www.php.net/license/3_01.txt                                  |
-dnl | If you did not receive a copy of the PHP license and are unable to   |
-dnl | obtain it through the world-wide-web, please send a note to          |
-dnl | license@php.net so we can mail you a copy immediately.               |
-dnl +----------------------------------------------------------------------+
-dnl | Author: Ruslan Osmanov <osmanov@php.net>                             |
-dnl +----------------------------------------------------------------------+
+dnl
+dnl $Id$
+dnl
 
 PHP_ARG_WITH(eio, for eio support,
 [  --with-eio               Include eio support])
@@ -31,60 +19,8 @@ fi
 dnl }}}
 
 
-
 dnl {{{ eio support
 if test "$PHP_EIO" != "no"; then
-
-dnl {{{ COMMENTED OUT
-dnl     dnl {{{ Include paths
-dnl
-dnl     SEARCH_PATH="/usr/local /usr /opt"
-dnl
-dnl     dnl {{{ --with-eio
-dnl     SEARCH_FOR="include/eio.h"
-dnl     if test -r $PHP_EIO/$SEARCH_FOR; then # path given as parameter
-dnl         EIO_DIR=$PHP_EIO
-dnl     else # search default path list
-dnl         AC_MSG_CHECKING([for eio files in default path])
-dnl         for i in $SEARCH_PATH ; do
-dnl             if test -r $i/$SEARCH_FOR; then
-dnl                 EIO_DIR=$i
-dnl                 AC_MSG_RESULT(found in $i)
-dnl             fi
-dnl         done
-dnl     fi
-dnl     if test -z "$EIO_DIR"; then
-dnl         AC_MSG_RESULT([not found])
-dnl         AC_MSG_ERROR([Please reinstall libeio])
-dnl     fi
-dnl     PHP_ADD_INCLUDE($EIO_DIR/include)
-dnl     dnl }}}
-dnl
-dnl     dnl }}}
-dnl
-dnl     dnl {{{ Library checks
-dnl     # --with-eio -> check for lib and symbol presence
-dnl     LIBNAME=eio
-dnl     LIBSYMBOL=eio_init
-dnl
-dnl     PHP_CHECK_LIBRARY($LIBNAME,$LIBSYMBOL,
-dnl     [
-dnl     PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $EIO_DIR/lib, EIO_SHARED_LIBADD)
-dnl     AC_DEFINE(HAVE_EIOLIB,1,[ ])
-dnl     ],[
-dnl     AC_MSG_ERROR([wrong eio lib version or lib not found])
-dnl     ],[
-dnl     -L$EIO_DIR/lib
-dnl     ])
-dnl
-dnl     PHP_SUBST(EIO_SHARED_LIBADD)
-dnl     dnl }}}
-dnl
-dnl     dnl }}}
-
-    dnl AC_CHECK_HEADERS(sys/eventfd.h linux/falloc.h)
-    dnl AC_CHECK_FUNCS(eventfd fallocate)
-
     if test "$ext_shared" != "yes" && test "$ext_shared" != "shared"; then
       PHP_EIO_CONFIG_H='\"main/php_config.h\"'
       AC_DEFINE(EIO_CONFIG_H, "main/php_config.h", [Overide config.h included in libeio/eio.c])
@@ -92,16 +28,39 @@ dnl     dnl }}}
       define('PHP_EIO_STATIC', 1)
     fi
 
-    dnl PHP_ADD_INCLUDE(.)
+    AC_MSG_CHECKING(PHP version)
+    if test -d $abs_srcdir/php7; then
+        dnl # only for PECL, not for PHP
+        export OLD_CPPFLAGS="$CPPFLAGS"
+        export CPPFLAGS="$CPPFLAGS $INCLUDES"
+        AC_TRY_COMPILE([#include <php_version.h>], [
+            #if PHP_MAJOR_VERSION > 5
+            # error PHP > 5
+            #endif
+        ], [
+            subdir=php5
+            AC_MSG_RESULT([PHP 5.x])
+        ], [
+            subdir=php7
+            AC_MSG_RESULT([PHP 7.x])
+        ])
+        export CPPFLAGS="$OLD_CPPFLAGS"
+        PHP_EIO_SOURCES="$subdir/php_eio.c $subdir/eio_fe.c"
+    else
+        AC_MSG_ERROR([unknown source])
+        PHP_EIO_SOURCES="php_eio.c eio_fe.c"
+    fi
+
+    if test -n "$subdir"; then
+        PHP_ADD_BUILD_DIR($abs_builddir/$subdir, 1)
+        PHP_ADD_INCLUDE([$ext_srcdir/$subdir])
+    fi
+
     PHP_ADD_INCLUDE($ext_builddir)
-    dnl AC_CONFIG_SRCDIR([libeio/eio.h])
     AC_CONFIG_SRCDIR(ifdef('PHP_EIO_STATIC',PHP_EXT_BUILDDIR(eio)[/],)[libeio/eio.h])
-    dnl dnl AC_CONFIG_HEADERS([config.h])
     m4_include(ifdef('PHP_EIO_STATIC',PHP_EXT_BUILDDIR(eio)[/],)[libeio/libeio.m4])
 
-    dnl Build extension
-    eio_src="php_eio.c eio_fe.c"
-    PHP_NEW_EXTENSION(eio, $eio_src, $ext_shared,,$CFLAGS)
+    PHP_NEW_EXTENSION(eio, $PHP_EIO_SOURCES, $ext_shared,,$CFLAGS)
     PHP_ADD_EXTENSION_DEP(eio, sockets, true)
 fi
 dnl }}}

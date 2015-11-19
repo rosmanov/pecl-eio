@@ -22,18 +22,19 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2015-09-28</date>
+  <date>2015-11-19</date>
   <!--{{{ Current version -->
   <version>
-    <release>1.2.6</release>
+    <release>2.0.0RC1</release>
     <api>1.1.0</api>
   </version>
   <stability>
-    <release>stable</release>
+    <release>beta</release>
     <api>stable</api>
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
+    PHP 7 support
     Fix: uid/gid validation in eio_fchown
     Fix: compilation issue on OS X 10.11
   </notes>
@@ -46,45 +47,58 @@
       <file role="doc" name="LICENSE"/>
       <file role="doc" name="README.md"/>
       <file role="src" name="config.m4"/>
-      <file role="src" name="php_eio.c"/>
-      <file role="src" name="eio_fe.c"/>
-      <file role="src" name="eio_fe.h"/>
-      <file role="src" name="eio_priv.h"/>
-      <file role="src" name="php_eio.h"/>
-      <file role="doc" name="libeio/LICENSE"/>
-      <file role="src" name="libeio/ecb.h"/>
-      <file role="src" name="libeio/eio.c"/>
-      <file role="src" name="libeio/eio.h"/>
-      <file role="src" name="libeio/libeio.m4"/>
-      <file role="src" name="libeio/xthread.h"/>
-      <file role="test" name="tests/bug65293.phpt"/>
-      <file role="test" name="tests/eio001.phpt"/>
-      <file role="test" name="tests/eio_cancel_basic.phpt"/>
-      <file role="test" name="tests/eio_chmod_basic.phpt"/>
-      <file role="test" name="tests/eio_chown_variation.phpt"/>
-      <file role="test" name="tests/eio_custom_basic.phpt"/>
-      <file role="test" name="tests/eio_fallocate_basic.phpt"/>
-      <file role="test" name="tests/eio_grp_add.phpt"/>
-      <file role="test" name="tests/eio_link.phpt"/>
-      <file role="test" name="tests/eio_mkdir_basic.phpt"/>
-      <file role="test" name="tests/eio_mknod_basic.phpt"/>
-      <file role="test" name="tests/eio_open_basic.phpt"/>
-      <file role="test" name="tests/eio_open_error.phpt"/>
-      <file role="test" name="tests/eio_read_basic.phpt"/>
-      <file role="test" name="tests/eio_readdir.phpt"/>
-      <file role="test" name="tests/eio_rename_basic.phpt"/>
-      <file role="test" name="tests/eio_rmdir_basic.phpt"/>
-      <file role="test" name="tests/eio_seek.phpt"/>
-      <file role="test" name="tests/eio_sendfile_basic.phpt"/>
-      <file role="test" name="tests/eio_sendfile_sockets.phpt"/>
-      <file role="test" name="tests/eio_stat_basic.phpt"/>
-      <file role="test" name="tests/eio_stat_error.phpt"/>
-      <file role="test" name="tests/eio_sync.phpt"/>
-      <file role="test" name="tests/eio_truncate_basic.phpt"/>
-      <file role="test" name="tests/eio_write_variation.phpt"/>
-      <file role="test" name="tests/eio_unlink_basic.phpt"/>
-      <file role="test" name="tests/eio_utime_basic.phpt"/>
-      <file role="test" name="tests/fork.phpt"/>
+      <dir name="libeio">
+        <file role="doc" name="LICENSE"/>
+        <file role="src" name="ecb.h"/>
+        <file role="src" name="eio.c"/>
+        <file role="src" name="eio.h"/>
+        <file role="src" name="libeio.m4"/>
+        <file role="src" name="xthread.h"/>
+      </dir>
+      <dir name="tests">
+        <file role="test" name="bug65293.phpt"/>
+        <file role="test" name="eio001.phpt"/>
+        <file role="test" name="eio_cancel_basic.phpt"/>
+        <file role="test" name="eio_chmod_basic.phpt"/>
+        <file role="test" name="eio_chown_variation.phpt"/>
+        <file role="test" name="eio_custom_basic.phpt"/>
+        <file role="test" name="eio_fallocate_basic.phpt"/>
+        <file role="test" name="eio_grp_add.phpt"/>
+        <file role="test" name="eio_link.phpt"/>
+        <file role="test" name="eio_mkdir_basic.phpt"/>
+        <file role="test" name="eio_mknod_basic.phpt"/>
+        <file role="test" name="eio_open_basic.phpt"/>
+        <file role="test" name="eio_open_error.phpt"/>
+        <file role="test" name="eio_read_basic.phpt"/>
+        <file role="test" name="eio_readdir.phpt"/>
+        <file role="test" name="eio_rename_basic.phpt"/>
+        <file role="test" name="eio_rmdir_basic.phpt"/>
+        <file role="test" name="eio_seek.phpt"/>
+        <file role="test" name="eio_sendfile_basic.phpt"/>
+        <file role="test" name="eio_sendfile_sockets.phpt"/>
+        <file role="test" name="eio_stat_basic.phpt"/>
+        <file role="test" name="eio_stat_error.phpt"/>
+        <file role="test" name="eio_sync.phpt"/>
+        <file role="test" name="eio_truncate_basic.phpt"/>
+        <file role="test" name="eio_write_variation.phpt"/>
+        <file role="test" name="eio_unlink_basic.phpt"/>
+        <file role="test" name="eio_utime_basic.phpt"/>
+        <file role="test" name="fork.phpt"/>
+      </dir>
+      <dir name="php5">
+        <file role="src" name="php_eio.c"/>
+        <file role="src" name="eio_fe.c"/>
+        <file role="src" name="eio_fe.h"/>
+        <file role="src" name="eio_priv.h"/>
+        <file role="src" name="php_eio.h"/>
+      </dir>
+      <dir name="php7">
+        <file role="src" name="php_eio.c"/>
+        <file role="src" name="eio_fe.c"/>
+        <file role="src" name="eio_fe.h"/>
+        <file role="src" name="eio_priv.h"/>
+        <file role="src" name="php_eio.h"/>
+      </dir>
     </dir>
   </contents>
   <!--}}}-->
@@ -107,6 +121,24 @@
   </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
+    <!--{{{ 2.0.0RC1 -->
+    <release>
+      <version>
+        <release>2.0.0RC1</release>
+        <api>1.1.0</api>
+      </version>
+      <stability>
+        <release>beta</release>
+        <api>stable</api>
+      </stability>
+      <license uri="http://www.php.net/license">php</license>
+      <notes>
+    PHP 7 support
+    Fix: uid/gid validation in eio_fchown
+    Fix: compilation issue on OS X 10.11
+  </notes>
+    </release>
+    <!--}}}-->
     <!--{{{ 1.2.6 -->
     <release>
       <version>
