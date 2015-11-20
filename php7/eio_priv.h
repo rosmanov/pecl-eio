@@ -26,18 +26,10 @@ extern const zend_function_entry eio_functions[];
 
 /* {{{ Macros */
 
-#  ifdef ZTS
-#    define TSRMLS_FETCH_FROM_CTX(ctx) void ***tsrm_ls = (void ***) ctx
-#    define TSRMLS_SET_CTX(ctx) ctx = (void ***) tsrm_ls
-#  else
-#    define TSRMLS_FETCH_FROM_CTX(ctx)
-#    define TSRMLS_SET_CTX(ctx)
-#  endif
-
 #  ifdef EIO_DEBUG
 #    define PHP_EIO_RET_IF_FAILED(req, eio_func) \
     	if (!req || (req->result != 0 && req->errorno)) { \
-			php_error_docref(NULL TSRMLS_CC, \
+			php_error_docref(NULL, \
 				E_WARNING, #eio_func " failed: %s", strerror(req->errorno)); \
 			RETURN_FALSE; \
     	}
@@ -54,14 +46,14 @@ extern const zend_function_entry eio_functions[];
 #  define PHP_EIO_IS_INIT() \
 { \
 	if (php_eio_pid <= 0 || php_eio_pipe.len == 0) { \
-		php_eio_init(TSRMLS_C); \
+		php_eio_init(); \
 	} \
 }
 
 #define PHP_EIO_SETFD_CLOEXEC(fd) \
 { \
 	if (fcntl(fd, F_SETFD, FD_CLOEXEC) < 0) { \
-		php_error_docref(NULL TSRMLS_CC, \
+		php_error_docref(NULL, \
 				E_WARNING, "Failed to set FD_CLOEXEC on descriptor"); \
 	} \
 }
@@ -79,7 +71,7 @@ extern const zend_function_entry eio_functions[];
 #  ifdef EIO_DEBUG
 #    define EIO_CHECK_PATH_LEN(path, path_len) \
     if (strlen(path) != path_len) { \
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, \
+	php_error_docref(NULL, E_WARNING, \
 		"failed calculating path length"); \
 	RETURN_FALSE; \
     }
@@ -108,22 +100,12 @@ typedef struct {
     zend_fcall_info *fci;
     zend_fcall_info_cache *fcc;
     zval arg;					/* Arg for callback */
-#  ifdef ZTS
-    /* Thread context; to get rid of calling TSRMLS_FETCH() which consumes
-     * considerable amount of resources */
-    void ***thread_ctx;
-#  endif
 } php_eio_cb_t;
 
 typedef struct {
     zend_fcall_info *fci;
     zend_fcall_info_cache *fcc;
     zval arg;					/* Arg for callback */
-#  ifdef ZTS
-    /* Thread context; to get rid of calling TSRMLS_FETCH() which consumes
-     * considerable amount of resources */
-    void ***thread_ctx;
-#  endif
     zend_fcall_info *fci_exec;
     zend_fcall_info_cache *fcc_exec;
 	zend_bool locked;
