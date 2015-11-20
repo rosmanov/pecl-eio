@@ -60,7 +60,7 @@ if test "$PHP_EIO" != "no"; then
     AC_CONFIG_SRCDIR(ifdef('PHP_EIO_STATIC',PHP_EXT_BUILDDIR(eio)[/],)[libeio/eio.h])
     m4_include(ifdef('PHP_EIO_STATIC',PHP_EXT_BUILDDIR(eio)[/],)[libeio/libeio.m4])
 
-    PHP_NEW_EXTENSION(eio, $PHP_EIO_SOURCES, $ext_shared,,$CFLAGS)
+    PHP_NEW_EXTENSION(eio, $PHP_EIO_SOURCES, $ext_shared,,$CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
     PHP_ADD_EXTENSION_DEP(eio, sockets, true)
 fi
 dnl }}}
