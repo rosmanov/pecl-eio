@@ -562,13 +562,13 @@ static void php_eio_custom_execute(eio_req * req)
 
 	EIO_RESULT(req) = -1;
 
-	if (! Z_ISUNDEF(eio_cb->arg)) {
-		ZVAL_COPY(&zarg, &eio_cb->arg);
-	} else {
-		ZVAL_NULL(&zarg);
-	}
-
 	if (EXPECTED(pf->func_ptr)) {
+		if (! Z_ISUNDEF(eio_cb->arg)) {
+			ZVAL_COPY(&zarg, &eio_cb->arg);
+		} else {
+			ZVAL_NULL(&zarg);
+		}
+
 		php_eio_call_method(Z_ISUNDEF(pf->obj) ? NULL : &pf->obj, pf->ce, &pf->func_ptr,
 				ZSTR_VAL(pf->func_ptr->common.function_name),
 				ZSTR_LEN(pf->func_ptr->common.function_name),

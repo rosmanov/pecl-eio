@@ -117,10 +117,10 @@ typedef struct {
 } php_eio_cb_t;
 
 typedef struct {
-	php_eio_func_info func;
-	php_eio_func_info func_exec;
 	zval              arg;         /* callback argument */
 	zend_bool         locked;
+	php_eio_func_info func_exec;
+	php_eio_func_info func;
 } php_eio_cb_custom_t;
 
 typedef struct {
