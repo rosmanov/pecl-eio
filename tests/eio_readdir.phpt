@@ -2,7 +2,7 @@
 Check for eio_readdir function basic behaviour
 --SKIPIF--
 --FILE--
-<?php 
+<?php
 
 $dir = "./eio-unknown-dir";
 $files = array ("$dir/abc", "$dir/def");
@@ -17,7 +17,7 @@ eio_readdir($dir, EIO_READDIR_STAT_ORDER,0,
 	function ($data, $result) {
 		var_dump($data);
 		var_dump($result);
-	}, $data 
+	}, $data
 );
 eio_event_loop();
 

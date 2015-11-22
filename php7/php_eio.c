@@ -97,9 +97,7 @@ zend_module_entry eio_module_entry = {
 /* }}} */
 
 #ifdef COMPILE_DL_EIO
-#ifdef ZTS
 ZEND_TSRMLS_CACHE_DEFINE();
-#endif
 ZEND_GET_MODULE(eio)
 #endif
 
@@ -128,7 +126,7 @@ Note: copy-pasted from PHP source: Zend/zend_interfaces.c */
 static zval * php_eio_call_method(zval *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval_ptr, int param_count, zval *arg1, zval *arg2, zval *arg3)
 {
 	int result;
-	zend_fcall_info fci;
+	zend_fcall_info fci = empty_fcall_info;
 	zval retval;
 	HashTable *function_table;
 
@@ -231,7 +229,7 @@ static zval * php_eio_call_method(zval *object, zend_class_entry *obj_ce, zend_f
 /**
  * @note `error` must be freed, if not NULL
  */
-static int php_eio_import_func_info(php_eio_func_info *pf, zval *zcb, char *error)/*{{{*/
+int php_eio_import_func_info(php_eio_func_info *pf, zval *zcb, char *error)/*{{{*/
 {
 	if (zcb) {
 		zend_fcall_info_cache  fcc;
@@ -466,8 +464,12 @@ static inline void php_eio_free_eio_cb_custom(php_eio_cb_custom_t *eio_cb)
  * Returns pointer to the new instance */
 static php_eio_cb_t * php_eio_new_eio_cb(zval *cb, zval *data)
 {
-	php_eio_cb_t      *eio_cb = ecalloc(1, sizeof(php_eio_cb_t));
-	char              *error  = NULL;
+	php_eio_cb_t *eio_cb = ecalloc(1, sizeof(php_eio_cb_t));
+	if (UNEXPECTED(eio_cb == NULL)) {
+		return eio_cb;
+	}
+
+	char *error  = NULL;
 
 	if (php_eio_import_func_info(&eio_cb->func, cb, error) == FAILURE) {
 		zend_throw_exception_ex(zend_ce_exception, 0, "Invalid callback: %s", error);
@@ -488,6 +490,8 @@ static php_eio_cb_t * php_eio_new_eio_cb(zval *cb, zval *data)
 		ZVAL_UNDEF(&eio_cb->arg);
 	}
 
+	TSRMLS_SET_CTX(eio_cb->ls);
+
 	return eio_cb;
 }
 /* }}} */
@@ -498,20 +502,11 @@ static php_eio_cb_t * php_eio_new_eio_cb(zval *cb, zval *data)
 static inline php_eio_cb_custom_t * php_eio_new_eio_cb_custom(zval *cb, zval *cb_exec, zval *data)
 {
 	php_eio_cb_custom_t *eio_cb = ecalloc(1, sizeof(php_eio_cb_custom_t));
-	char                *error  = NULL;
+	if (UNEXPECTED(eio_cb == NULL)) {
+		return eio_cb;
+	}
 
-	if (php_eio_import_func_info(&eio_cb->func, cb, error) == FAILURE) {
-		zend_throw_exception_ex(zend_ce_exception, 0, "Invalid callback: %s", error);
-		if (error) {
-			efree(error);
-		}
-		efree(eio_cb);
-		return NULL;
-	}
-	if (error) {
-		efree(error);
-		error = NULL;
-	}
+	char *error  = NULL;
 
 	if (php_eio_import_func_info(&eio_cb->func_exec, cb_exec, error) == FAILURE) {
 		zend_throw_exception_ex(zend_ce_exception, 0, "Invalid exec callback: %s", error);
@@ -526,11 +521,31 @@ static inline php_eio_cb_custom_t * php_eio_new_eio_cb_custom(zval *cb, zval *cb
 		error = NULL;
 	}
 
+	if (php_eio_import_func_info(&eio_cb->func, cb, error) == FAILURE) {
+		zend_throw_exception_ex(zend_ce_exception, 0, "Invalid callback: %s", error);
+		if (error) {
+			efree(error);
+		}
+		php_eio_func_info_free(&eio_cb->func_exec, FALSE);
+		efree(eio_cb);
+		return NULL;
+	}
+	if (error) {
+		efree(error);
+		error = NULL;
+	}
+
 	if (data) {
 		ZVAL_COPY(&eio_cb->arg, data);
 	} else {
 		ZVAL_UNDEF(&eio_cb->arg);
 	}
+
+#if 0
+	eio_cb->ls = tsrm_new_interpreter_context();
+#else
+	TSRMLS_SET_CTX(eio_cb->ls);
+#endif
 
 	return eio_cb;
 }
@@ -538,15 +553,15 @@ static inline php_eio_cb_custom_t * php_eio_new_eio_cb_custom(zval *cb, zval *cb
 
 /* {{{ php_eio_custom_execute
  * Is called by eio_custom(). Calls userspace function. */
-static void php_eio_custom_execute(eio_req * req)
+static void php_eio_custom_execute(eio_req *req)
 {
-	zval *retval = NULL;
+	zval retval;
 	php_eio_cb_custom_t *eio_cb = (php_eio_cb_custom_t *) req->data;
 	php_eio_func_info *pf;
 	zval zarg;
 
 
-	if (!eio_cb) {
+	if (UNEXPECTED(!eio_cb)) {
 		return;
 	}
 
@@ -555,13 +570,19 @@ static void php_eio_custom_execute(eio_req * req)
 		return;
 	}
 
-	pf = &eio_cb->func_exec;
+#ifdef ZTS
+	TSRMLS_FETCH_FROM_CTX(eio_cb->ls);
+	ZEND_TSRMLS_CACHE = tsrm_ls;
+	tsrm_set_interpreter_context(tsrm_ls);
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 
 	/* mutex? */
 	eio_cb->locked = 1;
 
 	EIO_RESULT(req) = -1;
 
+	pf = &eio_cb->func_exec;
 	if (EXPECTED(pf->func_ptr)) {
 		if (! Z_ISUNDEF(eio_cb->arg)) {
 			ZVAL_COPY(&zarg, &eio_cb->arg);
@@ -572,19 +593,18 @@ static void php_eio_custom_execute(eio_req * req)
 		php_eio_call_method(Z_ISUNDEF(pf->obj) ? NULL : &pf->obj, pf->ce, &pf->func_ptr,
 				ZSTR_VAL(pf->func_ptr->common.function_name),
 				ZSTR_LEN(pf->func_ptr->common.function_name),
-				retval, 1, &zarg, NULL, NULL);
+				&retval, 1, &zarg, NULL, NULL);
 		zend_exception_save();
-		if (retval) {
-			EIO_BUF(req) = ecalloc(1, sizeof(zval));
-			ZVAL_ZVAL(EIO_BUF_ZVAL_P(req), retval, 1, 1);
+		if (!Z_ISUNDEF(retval)) {
+			EIO_BUF(req) = safe_emalloc(1, sizeof(zval), 0);
+			ZVAL_ZVAL(EIO_BUF_ZVAL_P(req), &retval, 1, 1);
 
 			/* Required for libeio */
 			EIO_RESULT(req) = 0;
-
-			zval_ptr_dtor(retval);
-			retval = NULL;
 		}
 		zend_exception_restore();
+
+		zval_ptr_dtor(&zarg);
 	}
 }
 /* }}} */
@@ -614,14 +634,14 @@ static int php_eio_res_cb_custom(eio_req * req)
 		if (! Z_ISUNDEF(eio_cb->arg)) {
 			ZVAL_COPY(&zdata, &eio_cb->arg);
 		} else {
-			ZVAL_UNDEF(&zdata);
+			ZVAL_NULL(&zdata);
 		}
 
 		/* $result arg */
 		if (EIO_BUF_ZVAL_P(req)) {
-			ZVAL_COPY(&zresult, EIO_BUF_ZVAL_P(req));
+			ZVAL_ZVAL(&zresult, EIO_BUF_ZVAL_P(req), 0, 0);
 		} else {
-			ZVAL_UNDEF(&zresult);
+			ZVAL_NULL(&zresult);
 		}
 
 		/* $req arg */
@@ -640,7 +660,7 @@ static int php_eio_res_cb_custom(eio_req * req)
 	}
 
 	if (EIO_BUF_ZVAL_P(req)) {
-		zval_ptr_dtor(EIO_BUF_ZVAL_P(req));
+		zval_dtor(EIO_BUF_ZVAL_P(req));
 		efree(EIO_BUF_ZVAL_P(req));
 	}
 
@@ -836,6 +856,10 @@ static int php_eio_res_cb(eio_req *req)
 
 	php_eio_free_eio_cb(eio_cb);
 
+	zval_ptr_dtor(&zdata);
+	zval_ptr_dtor(&zresult);
+	zval_ptr_dtor(&zreq);
+
 	return 0;
 }
 /*}}}*/
@@ -954,11 +978,12 @@ static void php_eio_atfork_child(void)
 
 /* }}} */
 
+
 /* {{{ PHP_MINIT_FUNCTION
 */
 PHP_MINIT_FUNCTION(eio)
 {
-#if defined(COMPILE_DL_EIO) && defined(ZTS)
+#if 0 && defined(COMPILE_DL_EIO) && defined(ZTS)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
@@ -1077,6 +1102,9 @@ PHP_MSHUTDOWN_FUNCTION(eio)
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(eio)
 {
+#if defined(COMPILE_DL_EIO) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -2044,7 +2072,7 @@ PHP_FUNCTION(eio_readdir)
 	zend_long flags;
 	PHP_EIO_INIT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sllf|z!",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sllz!|z!",
 			&path, &path_len, &flags, &pri, &zcb, &data) == FAILURE) {
 		return;
 	}
@@ -2278,8 +2306,7 @@ PHP_FUNCTION(eio_custom)
 
 	eio_cb = php_eio_new_eio_cb_custom(zcb, zcb_exec, data);
 
-	req = eio_custom(php_eio_custom_execute,
-		pri, php_eio_res_cb_custom, eio_cb);
+	req = eio_custom(php_eio_custom_execute, pri, php_eio_res_cb_custom, eio_cb);
 	PHP_EIO_RET_REQ_RESOURCE(req, eio_custom);
 }
 /* }}} */

@@ -1,7 +1,13 @@
 --TEST--
 Check for eio_chown function basic behaviour
+--SKIPIF--
+<?php
+if (!extension_loaded('posix')) {
+	die('SKIP The posix extension is not loaded');
+}
+?>
 --FILE--
-<?php 
+<?php
 ini_set('display_errors', 'On');
 ini_set('log_errors', 'Off');
 $temp_filename = "eio-temp-file.tmp";

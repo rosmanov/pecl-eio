@@ -58,6 +58,7 @@ if test "$PHP_EIO" != "no"; then
 
     PHP_ADD_INCLUDE($ext_builddir)
     AC_CONFIG_SRCDIR(ifdef('PHP_EIO_STATIC',PHP_EXT_BUILDDIR(eio)[/],)[libeio/eio.h])
+    AC_DEFINE(EIO_STACKSIZE, [262144], [ Stack size limit for libeio ])
     m4_include(ifdef('PHP_EIO_STATIC',PHP_EXT_BUILDDIR(eio)[/],)[libeio/libeio.m4])
 
     PHP_NEW_EXTENSION(eio, $PHP_EIO_SOURCES, $ext_shared,,$CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)

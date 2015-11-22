@@ -22,10 +22,10 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2015-11-19</date>
+  <date>2015-11-22</date>
   <!--{{{ Current version -->
   <version>
-    <release>2.0.0RC1</release>
+    <release>2.0.0RC2</release>
     <api>1.1.0</api>
   </version>
   <stability>
@@ -34,9 +34,7 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-    PHP 7 support
-    Fix: uid/gid validation in eio_fchown
-    Fix: compilation issue on OS X 10.11
+    Removed extra memory allocations
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -121,6 +119,22 @@
   </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
+    <!--{{{ 2.0.0RC2 -->
+    <release>
+      <version>
+        <release>2.0.0RC2</release>
+        <api>1.1.0</api>
+      </version>
+      <stability>
+        <release>beta</release>
+        <api>stable</api>
+      </stability>
+      <license uri="http://www.php.net/license">php</license>
+      <notes>
+    Removed extra memory allocations
+  </notes>
+    </release>
+    <!--}}}-->
     <!--{{{ 2.0.0RC1 -->
     <release>
       <version>
