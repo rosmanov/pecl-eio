@@ -1,10 +1,10 @@
 --TEST--
 Check for eio_custom function basic behaviour
 --FILE--
-<?php 
+<?php
 //error_reporting(0);
 
-function my_custom_callback($data, $result) {
+function my_custom_callback($data, $result, $req) {
 	var_dump($data);
 	var_dump(count($result));
 	var_dump($result['data_modified']);
@@ -15,7 +15,7 @@ function my_custom($data) {
 	var_dump($data);
 
 	$result  = array(
-		'result'	=> 1001, 
+		'result'	=> 1001,
 		'data_modified' => "my custom data",
 	);
 	return $result;

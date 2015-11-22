@@ -22,13 +22,13 @@
 extern zend_module_entry eio_module_entry;
 #  define phpext_eio_ptr &eio_module_entry
 
-#  ifndef PHP_EIO_VERSION
-#    define PHP_EIO_VERSION "2.0.0RC1"
-#  endif
+#ifndef PHP_EIO_VERSION
+# define PHP_EIO_VERSION "2.0.0RC2"
+#endif
 
-#  ifdef ZTS
-#    include "TSRM.h"
-#  endif
+#ifdef ZTS
+# include "TSRM.h"
+#endif
 
 PHP_MINIT_FUNCTION(eio);
 PHP_MSHUTDOWN_FUNCTION(eio);
@@ -36,7 +36,11 @@ PHP_RINIT_FUNCTION(eio);
 PHP_RSHUTDOWN_FUNCTION(eio);
 PHP_MINFO_FUNCTION(eio);
 
-#endif	/* PHP_EIO_H */
+#if defined(COMPILE_DL_EIO)
+ZEND_TSRMLS_CACHE_EXTERN();
+#endif
+
+#endif /* PHP_EIO_H */
 /*
  * vim600: fdm=marker
  * vim: noet sts=4 sw=4 ts=4
