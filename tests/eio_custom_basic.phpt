@@ -1,5 +1,11 @@
 --TEST--
 Check for eio_custom function basic behaviour
+--SKIPIF--
+<?php
+if (PHP_ZTS) {
+	die("skip doesn't support ZTS");
+}
+?>
 --FILE--
 <?php
 //error_reporting(0);

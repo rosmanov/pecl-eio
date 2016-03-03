@@ -369,7 +369,8 @@ static void php_eio_event_loop(void)
 /* {{{ php_eio_set_readdir_names */
 static void php_eio_set_readdir_names(zval * z, const eio_req * req)
 {
-	int i, len;
+	int i;
+	size_t len;
 	zval names_array;
 	char *names = EIO_BUF(req);
 
@@ -555,6 +556,10 @@ static inline php_eio_cb_custom_t * php_eio_new_eio_cb_custom(zval *cb, zval *cb
  * Is called by eio_custom(). Calls userspace function. */
 static void php_eio_custom_execute(eio_req *req)
 {
+#ifdef ZTS
+	zend_throw_exception_ex(zend_ce_exception, 0, "eio_custom doesn't support ZTS, "
+			"because Zend API is inaccessible from a custom thread in ZTS builds");
+#else
 	zval retval;
 	php_eio_cb_custom_t *eio_cb = (php_eio_cb_custom_t *) req->data;
 	php_eio_func_info *pf;
@@ -569,13 +574,6 @@ static void php_eio_custom_execute(eio_req *req)
 		php_eio_free_eio_cb_custom(eio_cb);
 		return;
 	}
-
-#ifdef ZTS
-	TSRMLS_FETCH_FROM_CTX(eio_cb->ls);
-	ZEND_TSRMLS_CACHE = tsrm_ls;
-	tsrm_set_interpreter_context(tsrm_ls);
-	ZEND_TSRMLS_CACHE_UPDATE();
-#endif
 
 	/* mutex? */
 	eio_cb->locked = 1;
@@ -606,6 +604,7 @@ static void php_eio_custom_execute(eio_req *req)
 
 		zval_ptr_dtor(&zarg);
 	}
+#endif /* ZTS */
 }
 /* }}} */
 

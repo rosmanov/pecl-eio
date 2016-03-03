@@ -22,19 +22,22 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2015-11-22</date>
+  <date>2016-03-03</date>
   <!--{{{ Current version -->
   <version>
     <release>2.0.0RC2</release>
-    <api>1.1.0</api>
+    <api>2.0.0</api>
   </version>
   <stability>
     <release>beta</release>
-    <api>stable</api>
+    <api>beta</api>
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-    Removed extra memory allocations
+    - Fix: removed extra memory allocations
+    - PHP7: eio_custom now throws Exception in ZTS builds, because Zend API is inaccessible from a custom thread in ZTS PHP7 builds
+    (there is a lack of Zend API to access TSRM thread-local data from a user thread). Some extensions(particularly, pthreads)
+    invent their own(rather hacky) ways to overcome the problem. However, IMHO, this should be implemented within Zend API itself.
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -123,15 +126,18 @@
     <release>
       <version>
         <release>2.0.0RC2</release>
-        <api>1.1.0</api>
+        <api>2.0.0</api>
       </version>
       <stability>
         <release>beta</release>
-        <api>stable</api>
+        <api>beta</api>
       </stability>
       <license uri="http://www.php.net/license">php</license>
       <notes>
-    Removed extra memory allocations
+    - Fix: removed extra memory allocations
+    - PHP7: eio_custom now throws Exception in ZTS builds, because Zend API is inaccessible from a custom thread in ZTS PHP7 builds
+    (there is a lack of Zend API to access TSRM thread-local data from a user thread). Some extensions(particularly, pthreads)
+    invent their own(rather hacky) ways to overcome the problem. However, IMHO, this should be implemented within Zend API itself.
   </notes>
     </release>
     <!--}}}-->

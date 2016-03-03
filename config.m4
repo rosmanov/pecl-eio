@@ -13,7 +13,8 @@ AC_CHECK_FUNCS(eventfd)
 
 dnl {{{ Debug support
 if test "$PHP_EIO_DEBUG" != "no"; then
-    CFLAGS="$CFLAGS -Wall -g -ggdb -O0"
+    EXTRA_CFLAGS="$EXTRA_CFLAGS -Wall -g -ggdb -O0 -fsanitize=address -fno-omit-frame-pointer"
+    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lasan"
     AC_DEFINE(EIO_DEBUG,1,[Enable eio debug support])
 fi
 dnl }}}
@@ -24,7 +25,7 @@ if test "$PHP_EIO" != "no"; then
     if test "$ext_shared" != "yes" && test "$ext_shared" != "shared"; then
       PHP_EIO_CONFIG_H='\"main/php_config.h\"'
       AC_DEFINE(EIO_CONFIG_H, "main/php_config.h", [Overide config.h included in libeio/eio.c])
-      CFLAGS="$CFLAGS -DEIO_CONFIG_H="$PHP_EIO_CONFIG_H
+      EXTRA_CFLAGS="$EXTRA_CFLAGS -DEIO_CONFIG_H="$PHP_EIO_CONFIG_H
       define('PHP_EIO_STATIC', 1)
     fi
 
@@ -61,8 +62,12 @@ if test "$PHP_EIO" != "no"; then
     AC_DEFINE(EIO_STACKSIZE, [262144], [ Stack size limit for libeio ])
     m4_include(ifdef('PHP_EIO_STATIC',PHP_EXT_BUILDDIR(eio)[/],)[libeio/libeio.m4])
 
-    PHP_NEW_EXTENSION(eio, $PHP_EIO_SOURCES, $ext_shared,,$CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+    PHP_NEW_EXTENSION(eio, $PHP_EIO_SOURCES, $ext_shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
     PHP_ADD_EXTENSION_DEP(eio, sockets, true)
+
+    PHP_SUBST(EXTRA_LDFLAGS)
+    PHP_SUBST(EXTRA_CFLAGS)
+	PHP_ADD_MAKEFILE_FRAGMENT
 fi
 dnl }}}
 
