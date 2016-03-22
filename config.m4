@@ -65,6 +65,9 @@ if test "$PHP_EIO" != "no"; then
     PHP_NEW_EXTENSION(eio, $PHP_EIO_SOURCES, $ext_shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
     PHP_ADD_EXTENSION_DEP(eio, sockets, true)
 
+    dnl Bug #4(linking issue on aarch64)
+    EXTRA_LDFLAGS="$EXTRA_CFLAGS -pthread"
+
     PHP_SUBST(EXTRA_LDFLAGS)
     PHP_SUBST(EXTRA_CFLAGS)
 	PHP_ADD_MAKEFILE_FRAGMENT
