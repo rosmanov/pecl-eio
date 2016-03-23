@@ -22,10 +22,10 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2016-03-04</date>
+  <date>2016-03-23</date>
   <!--{{{ Current version -->
   <version>
-    <release>2.0.0RC2</release>
+    <release>2.0.0RC3</release>
     <api>2.0.0</api>
   </version>
   <stability>
@@ -34,10 +34,7 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-    - Fix: removed extra memory allocations
-    - PHP7: eio_custom now throws Exception in ZTS builds, because Zend API is inaccessible from a custom thread in ZTS PHP7 builds
-    (there is a lack of Zend API to access TSRM thread-local data from a user thread). Some extensions(particularly, pthreads)
-    invent their own(rather hacky) ways to overcome the problem. However, IMHO, this should be implemented within Zend API itself.
+    Fixed #4: linker issue on aarch64
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -122,6 +119,22 @@
   </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
+    <!--{{{ 2.0.0RC3 -->
+    <release>
+      <version>
+        <release>2.0.0RC3</release>
+        <api>2.0.0</api>
+      </version>
+      <stability>
+        <release>beta</release>
+        <api>beta</api>
+      </stability>
+      <license uri="http://www.php.net/license">php</license>
+      <notes>
+    Fixed #4: linker issue on aarch64
+  </notes>
+    </release>
+    <!--}}}-->
     <!--{{{ 2.0.0RC2 -->
     <release>
       <version>
