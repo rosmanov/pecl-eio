@@ -66,7 +66,7 @@ if test "$PHP_EIO" != "no"; then
     PHP_ADD_EXTENSION_DEP(eio, sockets, true)
 
     dnl Bug #4(linking issue on aarch64)
-    EXTRA_LDFLAGS="$EXTRA_CFLAGS -pthread"
+    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -pthread"
 
     PHP_SUBST(EXTRA_LDFLAGS)
     PHP_SUBST(EXTRA_CFLAGS)
