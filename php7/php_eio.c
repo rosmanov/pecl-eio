@@ -150,12 +150,11 @@ static zval * php_eio_call_method(zval *object, zend_class_entry *obj_ce, zend_f
 	fci.param_count = param_count;
 	fci.params = params;
 	fci.no_separation = 1;
+#ifdef HAVE_PHP_ZEND_FCALL_INFO_SYMBOL_TABLE
 	fci.symbol_table = NULL;
+#endif
 
 	if (!fn_proxy && !obj_ce) {
-		/* no interest in caching and no information already present that is
-		 * needed later inside zend_call_function. */
-		fci.function_table = !object ? EG(function_table) : NULL;
 		result = zend_call_function(&fci, NULL);
 		zval_ptr_dtor(&fci.function_name);
 	} else {
