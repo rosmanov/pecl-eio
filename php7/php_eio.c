@@ -38,7 +38,8 @@
 # include <sys/eventfd.h>
 #endif
 
-#include <string.h>		/* strerror() */
+#include <time.h>
+#include <string.h> /* strerror() */
 
 /* POSIX/UNIX API */
 #include <fcntl.h>
@@ -1110,7 +1111,23 @@ PHP_RINIT_FUNCTION(eio)
 /* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(eio)
 {
+	/* PHP7 doesn't like libeio threads in shutdown phase.
+	 * And we haven't promised to run the loop at shutdown phase. The docs even don't mention this feature.
+	 * So we'll get rid of this in PHP7. */
+#if 0
 	php_eio_event_loop();
+#endif
+
+	/* Imiplicitly stops eio threads */
+	eio_set_max_parallel(0);
+
+	/* Wait until threads are finished. We've no synchronization with libeio
+	 * threads. So we just have to wait. Fortunately, a negligibly small time
+	 * around 10ms should be enough. */
+	struct timespec tv;
+	tv.tv_sec  = 0;
+	tv.tv_nsec = 1e7;
+	nanosleep(&tv, NULL);
 
 	return SUCCESS;
 }

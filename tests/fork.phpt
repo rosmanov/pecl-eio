@@ -22,12 +22,11 @@ if ($pid == -1) {
 } else if ($pid) {
 	eio_open($filename, EIO_O_RDWR, NULL, EIO_PRI_DEFAULT, function($filename, $fd) use ($str) {
 		eio_write($fd, $str, strlen($str), 0, null, function($fd, $written) use ($str, $filename) {
-			var_dump([
-				'written'  => $written,
-				'strlen'   => strlen($str),
-				'filesize' => filesize($filename),
-				'count'    => substr_count(file_get_contents($filename), '1')
-				]);
+			printf("w: %d l: %d f: %d c: %d\n",
+				$written,
+				strlen($str),
+				filesize($filename),
+				substr_count(file_get_contents($filename), '1'));
 		}, $fd);
 	}, $filename);
 	eio_event_loop();
@@ -39,12 +38,11 @@ if ($pid == -1) {
 	// we are the child
 	eio_open($filename2, EIO_O_RDWR, NULL, EIO_PRI_DEFAULT, function($filename2, $fd) use ($str) {
 		eio_write($fd, $str, strlen($str), 0, null, function($fd, $written) use ($str, $filename2) {
-			var_dump([
-				'written'  => $written,
-				'strlen'   => strlen($str),
-				'filesize' => filesize($filename2),
-				'count'    => substr_count(file_get_contents($filename2), '1')
-				]);
+			printf("w: %d l: %d f: %d c: %d\n",
+				$written,
+				strlen($str),
+				filesize($filename2),
+				substr_count(file_get_contents($filename2), '1'));
 		}, $fd);
 	}, $filename2);
 	eio_event_loop();
@@ -54,23 +52,5 @@ if ($pid == -1) {
 @unlink($filename2);
 ?>
 --EXPECT--
-array(4) {
-  ["written"]=>
-  int(20)
-  ["strlen"]=>
-  int(20)
-  ["filesize"]=>
-  int(20)
-  ["count"]=>
-  int(20)
-}
-array(4) {
-  ["written"]=>
-  int(20)
-  ["strlen"]=>
-  int(20)
-  ["filesize"]=>
-  int(20)
-  ["count"]=>
-  int(20)
-}
+w: 20 l: 20 f: 20 c: 20
+w: 20 l: 20 f: 20 c: 20

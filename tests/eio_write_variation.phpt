@@ -18,6 +18,7 @@ eio_open($filename, EIO_O_RDWR, NULL, EIO_PRI_DEFAULT, function($filename, $fd) 
 			]);
 	}, $fd);
 }, $filename);
+eio_event_loop();
 ?>
 --EXPECT--
 array(4) {
