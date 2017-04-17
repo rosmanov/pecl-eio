@@ -23,7 +23,7 @@ extern zend_module_entry eio_module_entry;
 #  define phpext_eio_ptr &eio_module_entry
 
 #  ifndef PHP_EIO_VERSION
-#    define PHP_EIO_VERSION "2.0.1"
+#    define PHP_EIO_VERSION "2.0.2"
 #  endif
 
 #  ifdef ZTS
