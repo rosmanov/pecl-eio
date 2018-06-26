@@ -11,16 +11,15 @@ PHP_ARG_ENABLE(eio-debug, for eio debug support,
 AC_CHECK_HEADERS(sys/eventfd.h linux/falloc.h)
 AC_CHECK_FUNCS(eventfd)
 
-dnl {{{ Debug support
+ Debug support
 if test "$PHP_EIO_DEBUG" != "no"; then
-    EXTRA_CFLAGS="$EXTRA_CFLAGS -Wall -g -ggdb -O0 -fsanitize=address -fno-omit-frame-pointer"
-    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lasan"
+    EXTRA_CFLAGS="$EXTRA_CFLAGS -Wall -g -ggdb -O0 -fno-omit-frame-pointer"
     AC_DEFINE(EIO_DEBUG,1,[Enable eio debug support])
 fi
-dnl }}}
 
 
-dnl {{{ eio support
+
+ eio support
 if test "$PHP_EIO" != "no"; then
     if test "$ext_shared" != "yes" && test "$ext_shared" != "shared"; then
       PHP_EIO_CONFIG_H='\"main/php_config.h\"'
@@ -72,6 +71,6 @@ if test "$PHP_EIO" != "no"; then
     PHP_SUBST(EXTRA_CFLAGS)
 	PHP_ADD_MAKEFILE_FRAGMENT
 fi
-dnl }}}
+
 
 dnl vim: ft=m4.sh et fdm=marker cms=dnl\ %s
