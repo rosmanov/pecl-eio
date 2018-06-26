@@ -161,7 +161,9 @@ static zval * php_eio_call_method(zval *object, zend_class_entry *obj_ce, zend_f
 	} else {
 		zend_fcall_info_cache fcic;
 
+#if PHP_VERSION_ID < 70300
 		fcic.initialized = 1;
+#endif
 		if (!obj_ce) {
 			obj_ce = object ? Z_OBJCE_P(object) : NULL;
 		}
