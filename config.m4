@@ -1,7 +1,3 @@
-dnl
-dnl $Id$
-dnl
-
 PHP_ARG_WITH(eio, for eio support,
 [  --with-eio               Include eio support])
 
