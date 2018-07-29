@@ -768,13 +768,13 @@ static int php_eio_res_cb(eio_req *req)
 				add_assoc_long(&zresult, "uid", EIO_STAT_BUF(req)->st_uid);
 				add_assoc_long(&zresult, "size", EIO_STAT_BUF(req)->st_size);
 				add_assoc_long(&zresult, "gid", EIO_STAT_BUF(req)->st_gid);
-#ifdef HAVE_ST_RDEV
+#if defined(HAVE_ST_RDEV) || defined(HAVE_STRUCT_STAT_ST_RDEV)
 				add_assoc_long(&zresult, "rdev", EIO_STAT_BUF(req)->st_rdev);
 #else
 				add_assoc_long(&zresult, "rdev", -1);
 #endif
 
-#ifdef HAVE_ST_BLKSIZE
+#if defined(HAVE_ST_BLKSIZE) || defined(HAVE_STRUCT_STAT_ST_BLKSIZE)
 				add_assoc_long(&zresult, "blksize", EIO_STAT_BUF(req)->st_blksize);
 #else
 				add_assoc_long(&zresult, "blksize", -1);
