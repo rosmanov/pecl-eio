@@ -1,12 +1,12 @@
 --TEST--
-Check for eio_sendfile function work with sockets in PHP version less than 8
+Check for eio_sendfile function work with sockets in PHP version 8 and greater
 --SKIPIF--
 <?php
 if (!extension_loaded('sockets')) {
 	die('SKIP The sockets extension is not loaded');
 }
-if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
-    die('skip target is PHP version >= 8');
+if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+    die('skip target PHP version is less than 8');
 }
 ?>
 --FILE--
@@ -15,7 +15,7 @@ ini_set('display_errors', 'On');
 ini_set('log_errors', 'Off');
 
 function my_cb($socket, $result) {
-	var_dump($socket);
+	var_dump(is_object($socket) ? get_class($socket) : null);
 	var_dump($result);
 
 	if ($result <= 0) {
@@ -76,6 +76,6 @@ socket_close($server);
 ?>
 --EXPECT--
 string(9) "ABCdef123"
-resource(8) of type (Socket)
+string(6) "Socket"
 int(8)
 string(8) "ABCdef12"

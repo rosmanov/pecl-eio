@@ -75,6 +75,7 @@
         <file role="test" name="eio_seek.phpt"/>
         <file role="test" name="eio_sendfile_basic.phpt"/>
         <file role="test" name="eio_sendfile_sockets.phpt"/>
+        <file role="test" name="eio_sendfile_sockets_php8.phpt"/>
         <file role="test" name="eio_stat_basic.phpt"/>
         <file role="test" name="eio_stat_error.phpt"/>
         <file role="test" name="eio_sync.phpt"/>
