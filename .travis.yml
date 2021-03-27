@@ -15,13 +15,14 @@ before_install:
   - sudo add-apt-repository -y ppa:ondrej/php
   - sudo apt-get -q update
   - sudo apt-get -y install php8.0 php8.0-cli php8.0-sockets
+  - php -i | grep \.ini
 
 script:
     - phpize
     - ./configure --with-eio --enable-eio-debug
     - make -j3
     - make install
-    - ini_dir=$(php -i | perl -ne '/additional .ini files \=\> (.*)$/ and print $1)'
+    - ini_dir=$(php -i | perl -ne '/additional .ini files \=\> (.*)$/ and print $1')
     - mkdir -p "${ini_dir}"
     - echo 'extension=event.so' > "${ini_dir}/z-event.ini"
     - NO_INTERACTION=1 TEST_PHP_EXECUTABLE=$(which php) php run-tests.php
