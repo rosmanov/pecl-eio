@@ -6,14 +6,15 @@ language: c
 os: linux
 addons:
   apt:
-    sources:
-      - ppa:ondrej/php
-    packages:
-      - php8.0
-      - php8.0-cli
-      - php8.0-sockets
+
 cache:
     apt: true
+
+before_install:
+  - sudo apt install software-properties-common
+  - sudo add-apt-repository -y ppa:ondrej/php
+  - sudo apt-get -q update
+  - sudo apt-get -y install php8.0 php8.0-cli php8.0-sockets
 
 script:
     - sockets_ini=$(php -i | grep -m 1 -o -E '/.*sockets\.ini') && test -z "$sockets_ini" || mv -v "$sockets_ini" "$(echo "$sockets_ini" | sed -e 's/sockets.ini/0-sockets.ini/')"
