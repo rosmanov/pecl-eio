@@ -1,69 +1,43 @@
-INSTALLATION OF EIO PECL EXTENSION
-==================================
-
-Currently this extension supports GNU/Linux and BSD platforms only. But you can
-try it on any UNIX OS.
-
+Installation process is the same as for any PECL extension. There is a [special section on php.net](https://www.php.net/manual/en/install.pecl.php) describing the process. But just in case if you get lost, the following may clear up some points.
 
 AUTOMATIC INSTALLATION
 ----------------------
 
-To download and install eio automatically you need the following commands
-for stable release:
+In most cases, it should be enough to install the PEAR base system package (for `pecl` command) and then run:
 
-	# pecl install eio
+	pecl install eio
 
-, and the following for beta release:
+The command above installs the latest stable release of `eio` uploaded to the PECL repository. In order to install a beta version, add `-beta` to the package name:
 
-	# pecl install eio-beta
+	pecl install eio-beta
 
-If you have the package archive, unpack it and run: 
+If you have the package archive, you can unpack it and then run:
 
-	# pecl install package.xml
+	pecl install package.xml
 
-Note, these commands(started with '#') most likely need root priveleges.
+Note, the commands above require root privileges.
 
-Since version 0.4.0 beta libeio is embedded. So you don't need to install the
-library separately.
-
+Since version 0.4.0 beta libeio is embedded so you don't need to install the library separately.
 
 MANUAL INSTALLATION
 -------------------
 
-Easy way, if you want just install it as root:
+	phpize
+	./configure --with-eio --enable-eio-sockets --enable-eio-debug
+	make 
 
-	# pecl install eio
+Running tests:
 
-If you want to tweak or debug it, checkout the project or download it as
-archive. In the package directory run: 
+	make test
+	make install # (requires root privileges)
 
-	$ phpize
-	$ ./configure --with-eio --enable-eio-sockets --enable-eio-debug
-	$ make 
-
-Optionally test the extension in CLI:
-
-	$ make test
-
-Do install with root priveleges:
-
-	# make install
-
-In php.ini, or some other configuration like
-</usr/local/etc/php/conf.d/eio.ini> write:
+In a PHP `.ini` configuration file, add the following directive:
 
 	extension=eio.so
 
-NOTES
------
+Note that `eio.so` should be loaded **after** `sockets.so`, so the `.ini` file for `eio.so` should go after the file with `extension=sockets.so` in alphabetical order. E.g.
 
-Since version 0.5.0 beta you're able to pass PHP streams, sockets(`socket_create`,
-`socket_accept`), or numeric file descriptors to functions like `eio_sendfile`,
-`eio_readahead`, `eio_read` etc.
-
-
-AUTHOR
-------
-
-Ruslan Osmanov <osmanov@php.net>
-<http://megagroup.ru/>
+```
+20-sockets.ini
+90-eio.ini
+```
