@@ -17,10 +17,11 @@ before_install:
   - sudo apt-get -y install php8.0 php8.0-cli php8.0-sockets
 
 script:
-    - sockets_ini=$(php -i | grep -m 1 -o -E '/.*sockets\.ini') && test -z "$sockets_ini" || mv -v "$sockets_ini" "$(echo "$sockets_ini" | sed -e 's/sockets.ini/0-sockets.ini/')"
     - phpize
     - ./configure --with-eio --enable-eio-debug
     - make -j3
     - make install
-    - echo 'extension=event.so' > /usr/local/etc/php/conf.d/z-event.ini
+    - ini_dir=$(php -i | perl -ne '/additional .ini files \=\> (.*)$/ and print $1)'
+    - mkdir -p "${ini_dir}"
+    - echo 'extension=event.so' > "${ini_dir}/z-event.ini"
     - NO_INTERACTION=1 TEST_PHP_EXECUTABLE=$(which php) php run-tests.php
