@@ -1,0 +1,25 @@
+git:
+  quiet: true
+
+dist: bionic
+language: c
+os: linux
+addons:
+  apt:
+    sources:
+      - ppa:ondrej/php
+    packages:
+      - php8.0
+      - php8.0-cli
+      - php8.0-sockets
+cache:
+    apt: true
+
+script:
+    - sockets_ini=$(php -i | grep -m 1 -o -E '/.*sockets\.ini') && test -z "$sockets_ini" || mv -v "$sockets_ini" "$(echo "$sockets_ini" | sed -e 's/sockets.ini/0-sockets.ini/')"
+    - phpize
+    - ./configure --with-eio --enable-eio-debug
+    - make -j3
+    - make install
+    - echo 'extension=event.so' > /usr/local/etc/php/conf.d/z-event.ini
+    - NO_INTERACTION=1 TEST_PHP_EXECUTABLE=$(which php) php run-tests.php
