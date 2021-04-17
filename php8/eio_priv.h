@@ -19,8 +19,6 @@
 #ifndef EIO_PRIV_H
 #  define EIO_PRIV_H
 
-extern const zend_function_entry eio_functions[];
-
 #ifndef TRUE
 # define TRUE 1
 #endif
@@ -34,14 +32,6 @@ extern const zend_function_entry eio_functions[];
 #define PHP_EIO_REQ_DESCRIPTOR_NAME "EIO Request Descriptor"
 
 /* {{{ Macros */
-
-#  ifdef ZTS
-#    define TSRMLS_FETCH_FROM_CTX(ctx) void ***tsrm_ls = (void ***) ctx
-#    define TSRMLS_SET_CTX(ctx) ctx = (void ***) tsrm_ls
-#  else
-#    define TSRMLS_FETCH_FROM_CTX(ctx)
-#    define TSRMLS_SET_CTX(ctx)
-#  endif
 
 #ifdef EIO_DEBUG
 # define PHP_EIO_RET_IF_FAILED(req, eio_func) \

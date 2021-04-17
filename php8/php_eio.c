@@ -384,8 +384,6 @@ static php_eio_cb_t * php_eio_new_eio_cb(zval *cb, zval *data)
 		ZVAL_UNDEF(&eio_cb->arg);
 	}
 
-	TSRMLS_SET_CTX(eio_cb->ls);
-
 	return eio_cb;
 }
 /* }}} */
@@ -435,12 +433,6 @@ static inline php_eio_cb_custom_t * php_eio_new_eio_cb_custom(zval *cb, zval *cb
 		ZVAL_UNDEF(&eio_cb->arg);
 	}
 
-#if 0
-	eio_cb->ls = tsrm_new_interpreter_context();
-#else
-	TSRMLS_SET_CTX(eio_cb->ls);
-#endif
-
 	return eio_cb;
 }
 /* }}} */
@@ -449,7 +441,7 @@ static inline php_eio_cb_custom_t * php_eio_new_eio_cb_custom(zval *cb, zval *cb
  * Is called by eio_custom(). Calls userspace function. */
 static void php_eio_custom_execute(eio_req *req)
 {
-#ifdef ZTS
+#if defined(ZTS)
 	zend_throw_exception_ex(zend_ce_exception, 0, "eio_custom doesn't support ZTS, "
 			"because Zend API is inaccessible from a custom thread in ZTS builds");
 #else
@@ -506,6 +498,7 @@ static int php_eio_res_cb_custom(eio_req * req)
 {
 	php_eio_cb_custom_t *eio_cb = (php_eio_cb_custom_t *) req->data;
 	php_eio_func_info *pf;
+	zval params[3] = {0};
 
 	if (!EIO_CB_CUSTOM_IS_LOCKED(eio_cb) && EIO_CANCELLED(req)) {
 		php_eio_free_eio_cb_custom(eio_cb);
@@ -519,8 +512,6 @@ static int php_eio_res_cb_custom(eio_req * req)
 	pf = &eio_cb->func;
 
 	if (EXPECTED(pf->func_ptr)) {
-		zval params[3];
-
 		/* set $data arg value */
 		if (! Z_ISUNDEF(eio_cb->arg)) {
 			ZVAL_COPY(&params[0], &eio_cb->arg);
@@ -546,6 +537,10 @@ static int php_eio_res_cb_custom(eio_req * req)
 				3,
 				params,
 				NULL);
+
+		zval_ptr_dtor(&params[0]);
+		zval_ptr_dtor(&params[1]);
+		zval_ptr_dtor(&params[2]);
 	}
 
 	if (EIO_BUF_ZVAL_P(req)) {
@@ -742,11 +737,9 @@ static int php_eio_res_cb(eio_req *req)
 
 	php_eio_free_eio_cb(eio_cb);
 
-#if 0
 	zval_ptr_dtor(&params[0]);
 	zval_ptr_dtor(&params[1]);
 	zval_ptr_dtor(&params[2]);
-#endif
 
 	return 0;
 }
@@ -901,10 +894,6 @@ static void php_eio_atfork_child(void)
 */
 PHP_MINIT_FUNCTION(eio)
 {
-#if 0 && defined(COMPILE_DL_EIO) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE();
-#endif
-
 	/* Re-initialize eio and internal pipe at fork */
 	X_THREAD_ATFORK(NULL, NULL, php_eio_atfork_child);
 
@@ -1073,18 +1062,6 @@ PHP_MINFO_FUNCTION(eio)
 /* }}} */
 
 /* {{{ API */
-
-/* {{{ proto void eio_init(void)
- * Deprecated. We use X_THREAD_ATFORK() to re-initialize eio on fork, and call php_eio_init() silently.
- * So user doesn't need to call eio_init() anymore.
- * TODO Remove in future
- * Create eio pipe for current process and eio_init().
- * Should be called from userspace within child process if forked. */
-PHP_FUNCTION(eio_init)
-{
-	php_eio_init();
-}
-/* }}} */
 
 /* {{{ eio_get_last_error(resource req): string;
  * Get last error associated with the request resource */
