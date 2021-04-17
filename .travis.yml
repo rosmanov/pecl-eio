@@ -16,9 +16,9 @@ before_script:
 
 script:
     - phpize
-    - ./configure --with-eio --enable-eio-debug
-    - make
-    - make install
+    - ./configure --with-eio
+    - make || exit 2
+    - make install || exit 2
     - echo 'extension=eio.so' > z-eio.ini
     - phpenv config-add z-eio.ini
     - NO_INTERACTION=1 TEST_PHP_EXECUTABLE=$(which php) php run-tests.php
