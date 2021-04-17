@@ -22,7 +22,7 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2021-03-28</date>
+  <date>2021-04-17</date>
   <!--{{{ Current version -->
   <version>
     <release>3.0.0RC1</release>
