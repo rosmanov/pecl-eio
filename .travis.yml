@@ -1,22 +1,15 @@
-git:
-  quiet: true
-
 dist: bionic
 language: php
 php:
     - '8.0'
 os: linux
-addons:
-  apt:
 
-cache:
-    apt: true
+services:
+    - docker
 
-before_script:
+before_install:
+    - docker pull php
+    - docker build -t rosmanov/pecl-eio .
 
 script:
-    - phpize
-    - ./configure --with-eio
-    - make || exit 2
-    - make install || exit 2
-    - make test
+    - docker run -v $(pwd):/usr/local/src/pecl-eio/ rosmanov/pecl-eio /bin/sh -c 'cd /usr/local/src/pecl-eio/ && ./rebuild.sh && make test'
