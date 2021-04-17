@@ -1,7 +1,7 @@
 --TEST--
 Check for eio_sendfile function basic behaviour
 --FILE--
-<?php 
+<?php
 
 function my_cb($data, $result) {
 	var_dump($data);

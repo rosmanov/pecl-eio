@@ -1,8 +1,8 @@
 --TEST--
 Check for eio_cancel function basic behaviour
 --FILE--
-<?php 
-error_reporting(0);
+<?php
+//error_reporting(0);
 
 function my_nop_cb($data, $result) {
 	echo "my_nop";

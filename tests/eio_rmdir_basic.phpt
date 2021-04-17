@@ -1,10 +1,12 @@
 --TEST--
 Check for eio_rmdir function basic behaviour
 --FILE--
-<?php 
+<?php
 $temp_dirname = "eio-temp-dir";
 
-mkdir($temp_dirname);
+if (!is_dir($temp_dirname)) {
+    mkdir($temp_dirname);
+}
 
 function my_rmdir_callback($data, $result) {
 	global $temp_dirname;

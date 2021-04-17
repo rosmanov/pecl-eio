@@ -16,6 +16,8 @@ foreach ($files as $f) {
 eio_readdir($dir, EIO_READDIR_STAT_ORDER,0,
 	function ($data, $result) {
 		var_dump($data);
+        usort($result['names'], function ($a, $b) { return strcmp($a, $b); });
+        usort($result['dents'], function ($a, $b) { return strcmp($a['name'], $b['name']); });
 		var_dump($result);
 	}, $data
 );

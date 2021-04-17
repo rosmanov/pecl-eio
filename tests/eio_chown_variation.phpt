@@ -20,7 +20,18 @@ function my_eio_chown_cb($data, $result) {
 	var_dump($result);
 }
 
-eio_chown($temp_filename);
+if (class_exists('ArgumentCountError')) { // PHP 8+
+    try {
+        eio_chown($temp_filename);
+    } catch (ArgumentCountError $e) {
+        trigger_error($e->getMessage(), E_USER_WARNING);
+    }
+} else {
+    eio_chown($temp_filename);
+}
+
+
+//Fatal error: Uncaught ArgumentCountError: eio_chown() expects at least 2 arguments, 1 given in /home/ruslan/projects/pecl/pecl-eio/tests/eio_chown_variation.phpt:23
 eio_event_loop();
 eio_chown($temp_filename, -1, -1);
 eio_event_loop();
@@ -33,7 +44,7 @@ eio_event_loop();
 ?>
 --EXPECTF--
 
-Warning: eio_chown() expects at least 2 parameters, 1 given %a
+%Aeio_chown() expects at least 2 %s, 1 given%A
 
 Warning: eio_chown(): invalid uid and/or gid in %a
 int(0)

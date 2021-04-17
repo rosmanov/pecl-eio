@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
+   | PHP Version 8                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2021 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,12 +28,6 @@ extern zend_module_entry eio_module_entry;
 
 #ifdef ZTS
 # include "TSRM.h"
-#endif
-
-/* zend_fcall_info.symbol_table removed from PHP 7.1.x */
-#if PHP_VERSION_ID < 70100
-# define HAVE_PHP_ZEND_FCALL_INFO_SYMBOL_TABLE 1
-# define HAVE_PHP_ZEND_FCALL_INFO_FUNCTION_TABLE 1
 #endif
 
 PHP_MINIT_FUNCTION(eio);

@@ -1,10 +1,10 @@
 --TEST--
-Check for libeio presence
+Check for eio presence
 --SKIPIF--
 <?php if (!extension_loaded("eio")) print "skip"; ?>
 --FILE--
-<?php 
-echo "libeio extension is available";
+<?php
+echo "eio extension is available";
 ?>
 --EXPECT--
-libeio extension is available
+eio extension is available
