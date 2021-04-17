@@ -25,7 +25,7 @@
   <date>2021-04-17</date>
   <!--{{{ Current version -->
   <version>
-    <release>3.0.0RC1</release>
+    <release>3.0.0RC2</release>
     <api>3.0.0RC1</api>
   </version>
   <stability>
@@ -34,7 +34,7 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-    Ported to PHP 8
+    Fixed: the PECL package was broken for PHP 8
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -98,6 +98,13 @@
         <file role="src" name="eio_priv.h"/>
         <file role="src" name="php_eio.h"/>
       </dir>
+      <dir name="php8">
+        <file role="src" name="eio_priv.h"/>
+        <file role="src" name="php_eio.c"/>
+        <file role="src" name="php_eio.h"/>
+        <file role="src" name="php_eio.stub.php"/>
+        <file role="src" name="php_eio_arginfo.h"/>
+      </dir>
     </dir>
   </contents>
   <!--}}}-->
@@ -120,6 +127,38 @@
   </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
+    <!--{{{ 3.0.0RC2 -->
+    <release>
+      <version>
+        <release>3.0.0RC2</release>
+        <api>3.0.0RC1</api>
+      </version>
+      <stability>
+        <release>beta</release>
+        <api>beta</api>
+      </stability>
+      <license uri="http://www.php.net/license">php</license>
+      <notes>
+    Fixed: the PECL package was broken for PHP 8
+  </notes>
+    </release>
+    <!--}}}-->
+    <!--{{{ 3.0.0RC1 -->
+    <release>
+      <version>
+        <release>3.0.0RC1</release>
+        <api>3.0.0RC1</api>
+      </version>
+      <stability>
+        <release>beta</release>
+        <api>beta</api>
+      </stability>
+      <license uri="http://www.php.net/license">php</license>
+      <notes>
+        Ported to PHP 8
+  </notes>
+    </release>
+    <!--}}}-->
     <!--{{{ 2.0.3 -->
     <release>
       <version>
