@@ -991,6 +991,7 @@ PHP_MINIT_FUNCTION(eio)
 
 	/* }}} */
 
+	PHP_EIO_IS_INIT();
 
 	return SUCCESS;
 }
