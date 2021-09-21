@@ -36,7 +36,7 @@ function my_grp_file_read_callback($data, $result) {
 
 
 $grp = eio_grp("my_grp_done", "my_grp_data");
-$req = eio_open($temp_filename, EIO_O_RDWR | EIO_O_APPEND , NULL, 0, "my_grp_file_opened_callback", NULL);
+$req = eio_open($temp_filename, EIO_O_RDWR | EIO_O_APPEND , 0, 0, "my_grp_file_opened_callback", NULL);
 eio_grp_add($grp, $req);
 
 var_dump($grp);

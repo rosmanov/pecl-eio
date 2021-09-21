@@ -4,7 +4,7 @@ Check for eio_get_last_error function
 <?php 
 $temp_filename = "eio-temp-file-nonexistent.tmp";
 
-eio_open($temp_filename, NULL, NULL, EIO_PRI_DEFAULT, 
+eio_open($temp_filename, 0, 0, EIO_PRI_DEFAULT,
 	function ($data, $result, $req) {
 		if ($result < 0) {
 			var_dump(eio_get_last_error($req));

@@ -31,7 +31,7 @@ function my_open_cb($data, $result) {
 eio_stat($tmp_filename, EIO_PRI_DEFAULT, "my_res_cb", "eio_stat");
 eio_lstat($tmp_filename, EIO_PRI_DEFAULT, "my_res_cb", "eio_lstat");
 eio_event_loop();
-eio_open($tmp_filename, EIO_O_RDONLY, NULL, EIO_PRI_DEFAULT, "my_open_cb", "eio_open");
+eio_open($tmp_filename, EIO_O_RDONLY, 0, EIO_PRI_DEFAULT, "my_open_cb", "eio_open");
 eio_event_loop();
 
 @unlink($tmp_filename);

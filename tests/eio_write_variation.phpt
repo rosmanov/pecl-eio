@@ -8,8 +8,8 @@ $filename = '/tmp/tmp_file' .uniqid();
 touch($filename);
 
 
-eio_open($filename, EIO_O_RDWR, NULL, EIO_PRI_DEFAULT, function($filename, $fd) use ($str) {
-	eio_write($fd, $str, strlen($str), 0, null, function($fd, $written) use ($str, $filename) {
+eio_open($filename, EIO_O_RDWR, 0, EIO_PRI_DEFAULT, function($filename, $fd) use ($str) {
+	eio_write($fd, $str, strlen($str), 0, 0, function($fd, $written) use ($str, $filename) {
 		var_dump([
 			'written'  => $written,
 			'strlen'   => strlen($str),
