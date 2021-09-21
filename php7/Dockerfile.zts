@@ -5,7 +5,7 @@ WORKDIR /usr/src/pecl-eio
 
 COPY . .
 
-RUN sh rebuild.sh
+RUN sh build.sh
 
 ENV NO_INTERACTION=1
 CMD sh run-tests.sh
