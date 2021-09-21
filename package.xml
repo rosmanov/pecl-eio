@@ -34,7 +34,8 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-    Fixed -Wformat-overflow compiliation errors
+    Fixed -Wformat-overflow compiliation errors.
+    Fixed build on s390x arch (thanks to Andy Postnikov).
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -140,6 +141,7 @@
       <license uri="http://www.php.net/license">php</license>
       <notes>
     Fixed -Wformat-overflow compiliation errors
+    Fixed build on s390x arch (thanks to Andy Postnikov).
   </notes>
     </release>
     <!--}}}-->
