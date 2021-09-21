@@ -1,6 +1,4 @@
-FROM php:8.1.0RC2-cli-alpine
-
-RUN apk add autoconf make gcc musl-dev
+FROM php:8.1.0RC2-cli
 
 RUN mkdir -p /usr/src/pecl-eio
 WORKDIR /usr/src/pecl-eio
