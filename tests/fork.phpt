@@ -20,8 +20,8 @@ $pid = pcntl_fork();
 if ($pid == -1) {
 	die('could not fork');
 } else if ($pid) {
-	eio_open($filename, EIO_O_RDWR, NULL, EIO_PRI_DEFAULT, function($filename, $fd) use ($str) {
-		eio_write($fd, $str, strlen($str), 0, null, function($fd, $written) use ($str, $filename) {
+	eio_open($filename, EIO_O_RDWR, 0, EIO_PRI_DEFAULT, function($filename, $fd) use ($str) {
+		eio_write($fd, $str, strlen($str), 0, 0, function($fd, $written) use ($str, $filename) {
 			printf("w: %d l: %d f: %d c: %d\n",
 				$written,
 				strlen($str),
@@ -36,8 +36,8 @@ if ($pid == -1) {
 
 } else {
 	// we are the child
-	eio_open($filename2, EIO_O_RDWR, NULL, EIO_PRI_DEFAULT, function($filename2, $fd) use ($str) {
-		eio_write($fd, $str, strlen($str), 0, null, function($fd, $written) use ($str, $filename2) {
+	eio_open($filename2, EIO_O_RDWR, 0, EIO_PRI_DEFAULT, function($filename2, $fd) use ($str) {
+		eio_write($fd, $str, strlen($str), 0, 0, function($fd, $written) use ($str, $filename2) {
 			printf("w: %d l: %d f: %d c: %d\n",
 				$written,
 				strlen($str),
