@@ -475,9 +475,11 @@ static php_eio_cb_t * php_eio_new_eio_cb(zval *cb, zval *data)
 	char *error  = NULL;
 
 	if (php_eio_import_func_info(&eio_cb->func, cb, error) == FAILURE) {
-		zend_throw_exception_ex(zend_ce_exception, 0, "Invalid callback: %s", error);
 		if (error) {
+			zend_throw_exception_ex(zend_ce_exception, 0, "Invalid callback: %s", error);
 			efree(error);
+		} else {
+			zend_throw_exception_ex(zend_ce_exception, 0, "Invalid callback");
 		}
 		efree(eio_cb);
 		return NULL;
@@ -512,9 +514,11 @@ static inline php_eio_cb_custom_t * php_eio_new_eio_cb_custom(zval *cb, zval *cb
 	char *error  = NULL;
 
 	if (php_eio_import_func_info(&eio_cb->func_exec, cb_exec, error) == FAILURE) {
-		zend_throw_exception_ex(zend_ce_exception, 0, "Invalid exec callback: %s", error);
 		if (error) {
+			zend_throw_exception_ex(zend_ce_exception, 0, "Invalid exec callback: %s", error);
 			efree(error);
+		} else {
+			zend_throw_exception_ex(zend_ce_exception, 0, "Invalid callback");
 		}
 		efree(eio_cb);
 		return NULL;
@@ -525,9 +529,11 @@ static inline php_eio_cb_custom_t * php_eio_new_eio_cb_custom(zval *cb, zval *cb
 	}
 
 	if (php_eio_import_func_info(&eio_cb->func, cb, error) == FAILURE) {
-		zend_throw_exception_ex(zend_ce_exception, 0, "Invalid callback: %s", error);
 		if (error) {
+			zend_throw_exception_ex(zend_ce_exception, 0, "Invalid callback: %s", error);
 			efree(error);
+		} else {
+			zend_throw_exception_ex(zend_ce_exception, 0, "Invalid callback");
 		}
 		php_eio_func_info_free(&eio_cb->func_exec, FALSE);
 		efree(eio_cb);
