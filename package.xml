@@ -25,7 +25,7 @@
   <date>2021-09-21</date>
   <!--{{{ Current version -->
   <version>
-    <release>3.0.0RC4</release>
+    <release>3.0.0RC5</release>
     <api>3.0.0RC1</api>
   </version>
   <stability>
@@ -34,7 +34,7 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-    Fixed deprecated calls on PHP 8.1 (thanks to Remi Collet).
+    Fixed -Wformat-overflow compiliation errors
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -127,6 +127,22 @@
   </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
+    <!--{{{ 3.0.0RC5 -->
+    <release>
+      <version>
+        <release>3.0.0RC5</release>
+        <api>3.0.0RC1</api>
+      </version>
+      <stability>
+        <release>beta</release>
+        <api>beta</api>
+      </stability>
+      <license uri="http://www.php.net/license">php</license>
+      <notes>
+    Fixed -Wformat-overflow compiliation errors
+  </notes>
+    </release>
+    <!--}}}-->
     <!--{{{ 3.0.0RC4 -->
     <release>
       <version>
