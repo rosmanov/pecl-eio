@@ -25,3 +25,15 @@ services:
         build:
             context: .
             dockerfile: php7/Dockerfile.zts
+    php5test:
+        stdin_open: true
+        image: ruslanosmanov/pecl-eio-php5-test
+        build:
+            context: .
+            dockerfile: php5/Dockerfile
+    php5-zts-test:
+        stdin_open: true
+        image: ruslanosmanov/pecl-eio-php5-zts-test
+        build:
+            context: .
+            dockerfile: php5/Dockerfile.zts

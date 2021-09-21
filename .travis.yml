@@ -1,18 +1,9 @@
 dist: bionic
 language: php
-php:
-    - '7.3'
-    - '7.4'
-    - '8.0'
-    - '8.1'
 os: linux
 
 services:
     - docker
 
-before_install:
-    - docker pull php
-    - docker build -t rosmanov/pecl-eio .
-
 script:
-    - docker run -v $(pwd):/usr/local/src/pecl-eio/ rosmanov/pecl-eio /bin/sh -c 'cd /usr/local/src/pecl-eio/ && ./rebuild.sh && make test'
+    - docker-compose up --build
