@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+    php8test:
+        stdin_open: true
+        image: ruslanosmanov/pecl-eio-php8-test
+        build:
+            context: .
+            dockerfile: php8/Dockerfile
+    php8-zts-test:
+        stdin_open: true
+        image: ruslanosmanov/pecl-eio-php8-zts-test
+        build:
+            context: .
+            dockerfile: php8/Dockerfile.zts
+    php7test:
+        stdin_open: true
+        image: ruslanosmanov/pecl-eio-php7-test
+        build:
+            context: .
+            dockerfile: php7/Dockerfile
+    php7-zts-test:
+        stdin_open: true
+        image: ruslanosmanov/pecl-eio-php7-zts-test
+        build:
+            context: .
+            dockerfile: php7/Dockerfile.zts
