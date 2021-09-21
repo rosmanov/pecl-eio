@@ -1,0 +1,15 @@
+FROM php:5.6-cli-alpine
+
+RUN apk add autoconf make gcc musl-dev
+
+RUN mkdir -p /usr/src/pecl-eio
+WORKDIR /usr/src/pecl-eio
+
+COPY . .
+
+RUN sh rebuild.sh
+
+ENV NO_INTERACTION=1
+CMD sh run-tests.sh
+
+# vim: ft=dockerfile
