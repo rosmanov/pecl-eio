@@ -20,6 +20,7 @@ tmp-php.ini
 *.sw[p,o]
 *~
 *.deps
+*.dep
 *.libs
 *.diff
 *.log
