@@ -456,6 +456,21 @@ static void php_eio_custom_execute(eio_req *req)
 	php_eio_func_info *pf;
 	zval zarg;
 
+#ifdef ZEND_CHECK_STACK_LIMIT
+	/* Since this code is executed in a thread with its own stack,
+	 * we need to adjust EG(stack_limit) and EG(stack_base) with
+	 * zend_call_stack_init().
+	 *
+	 * However, since zend_call_stack_init() modifies the stack pointers,
+	 * we need to restore them after invoking the PHP function.
+	 *
+	 * See https://github.com/rosmanov/pecl-eio/issues/19
+	 */
+	void *stack_limit = EG(stack_limit);
+	void *stack_base = EG(stack_base);
+
+	zend_call_stack_init();
+#endif
 
 	if (UNEXPECTED(!eio_cb)) {
 		return;
@@ -495,6 +510,13 @@ static void php_eio_custom_execute(eio_req *req)
 
 		zval_ptr_dtor(&zarg);
 	}
+
+#ifdef ZEND_CHECK_STACK_LIMIT
+	/* Restore stack pointers */
+	EG(stack_limit) = stack_limit;
+	EG(stack_base) = stack_base;
+#endif
+
 #endif /* ZTS */
 }
 /* }}} */
@@ -863,8 +885,11 @@ static inline void php_eio_init()
 	pid_t cur_pid = getpid();
 
 	if (php_eio_pid <= 0 || (php_eio_pid > 0 && cur_pid != php_eio_pid)) {
-		/* Uninitialized or forked a process(which needs it's own eio pipe) */
+#ifdef ZEND_CHECK_STACK_LIMIT
+		zend_call_stack_init();
+#endif
 
+		/* Uninitialized or forked a process(which needs it's own eio pipe) */
 		if (php_eio_pipe_new()) {
 			php_error_docref(NULL, E_ERROR,
 					"Failed creating internal pipe: %s", strerror(errno));
