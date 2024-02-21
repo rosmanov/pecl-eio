@@ -1,9 +1,13 @@
-FROM php:8.1.0RC2-zts
+FROM fedora:40
 
 RUN mkdir -p /usr/src/pecl-eio
 WORKDIR /usr/src/pecl-eio
 
 COPY . .
+
+RUN dnf update -y \
+    && dnf install -y gcc-14'*' php-cli php-devel php-pear make \
+    && dnf clean all
 
 RUN sh rebuild.sh
 

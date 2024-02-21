@@ -13,6 +13,12 @@ services:
         build:
             context: .
             dockerfile: php8/Dockerfile.zts
+    php8-fedora40-gcc14:
+        stdin_open: true
+        image: ruslanosmanov/pecl-eio-php8-fedora40-test
+        build:
+            context: .
+            dockerfile: php8/Dockerfile.fedora40-gcc14
     php7test:
         stdin_open: true
         image: ruslanosmanov/pecl-eio-php7-test
