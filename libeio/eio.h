@@ -1,19 +1,19 @@
 /*
  * libeio API header
  *
- * Copyright (c) 2007,2008,2009,2010,2011,2012 Marc Alexander Lehmann <libeio@schmorp.de>
+ * Copyright (c) 2007,2008,2009,2010,2011,2012,2015,2016,2017 Marc Alexander Lehmann <libeio@schmorp.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modifica-
  * tion, are permitted provided that the following conditions are met:
- * 
+ *
  *   1.  Redistributions of source code must retain the above copyright notice,
  *       this list of conditions and the following disclaimer.
- * 
+ *
  *   2.  Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MER-
  * CHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO
@@ -170,7 +170,22 @@ enum
 /* eio_fallocate flags */
 enum
 {
-  EIO_FALLOC_FL_KEEP_SIZE = 1 /* MUST match the value in linux/falloc.h */
+  /* these MUST match the value in linux/falloc.h */
+  EIO_FALLOC_FL_KEEP_SIZE      = 0x01,
+  EIO_FALLOC_FL_PUNCH_HOLE     = 0x02,
+  EIO_FALLOC_FL_COLLAPSE_RANGE = 0x08,
+  EIO_FALLOC_FL_ZERO_RANGE     = 0x10,
+  EIO_FALLOC_FL_INSERT_RANGE   = 0x20,
+  EIO_FALLOC_FL_UNSHARE_RANGE  = 0x40
+};
+
+/* eio_rename flags */
+enum
+{
+  /* these MUST match the value in linux/fs.h */
+  EIO_RENAME_NOREPLACE = 1 << 0,
+  EIO_RENAME_EXCHANGE  = 1 << 1,
+  EIO_RENAME_WHITEOUT  = 1 << 2
 };
 
 /* timestamps and differences - feel free to use double in your code directly */
@@ -183,7 +198,7 @@ enum
   EIO_WD_OPEN, EIO_WD_CLOSE,
 
   EIO_CLOSE, EIO_DUP2,
-  EIO_SEEK, EIO_READ, EIO_WRITE,
+  EIO_SEEK, EIO_READ, EIO_WRITE, EIO_FCNTL, EIO_IOCTL,
   EIO_READAHEAD, EIO_SENDFILE,
   EIO_FSTAT, EIO_FSTATVFS,
   EIO_FTRUNCATE, EIO_FUTIME, EIO_FCHMOD, EIO_FCHOWN,
@@ -195,12 +210,11 @@ enum
 
   /* these use wd + ptr1, but are emulated */
   EIO_REALPATH,
-  EIO_STATVFS,
   EIO_READDIR,
 
   /* all the following requests use wd + ptr1 as path in xxxat functions */
   EIO_OPEN,
-  EIO_STAT, EIO_LSTAT,
+  EIO_STAT, EIO_LSTAT, EIO_STATVFS,
   EIO_TRUNCATE,
   EIO_UTIME,
   EIO_CHMOD,
@@ -208,6 +222,7 @@ enum
   EIO_UNLINK, EIO_RMDIR, EIO_MKDIR, EIO_RENAME,
   EIO_MKNOD,
   EIO_LINK, EIO_SYMLINK, EIO_READLINK,
+  EIO_SLURP, /* open + read + close */
 
   EIO_REQ_TYPE_NUM
 };
@@ -227,7 +242,8 @@ enum
 enum
 {
   EIO_MCL_CURRENT = 1,
-  EIO_MCL_FUTURE  = 2
+  EIO_MCL_FUTURE  = 2,
+  EIO_MCL_ONFAULT = 4
 };
 
 /* request priorities */
@@ -248,27 +264,27 @@ struct eio_req
   eio_wd wd;       /* all applicable requests: working directory of pathname, old name; wd_open: return wd */
 
   eio_ssize_t result;  /* result of syscall, e.g. result = read (... */
-  off_t offs;      /* read, write, truncate, readahead, sync_file_range, fallocate: file offset, mknod: dev_t */
-  size_t size;     /* read, write, readahead, sendfile, msync, mlock, sync_file_range, fallocate: length */
-  void *ptr1;      /* all applicable requests: pathname, old name; readdir: optional eio_dirents */
+  off_t offs;      /* read, write, truncate, readahead, sync_file_range, fallocate, slurp: file offset, mknod: dev_t */
+  size_t size;     /* read, write, readahead, sendfile, msync, mlock, sync_file_range, fallocate, slurp: length */
+  void *ptr1;      /* all applicable requests: pathname, old name, readdir: optional eio_dirents */
   void *ptr2;      /* all applicable requests: new name or memory buffer; readdir: name strings */
   eio_tstamp nv1;  /* utime, futime: atime; busy: sleep time */
   eio_tstamp nv2;  /* utime, futime: mtime */
 
-  int type;        /* EIO_xxx constant ETP */
   int int1;        /* all applicable requests: file descriptor; sendfile: output fd; open, msync, mlockall, readdir: flags */
-  long int2;       /* chown, fchown: uid; sendfile: input fd; open, chmod, mkdir, mknod: file mode, seek: whence, sync_file_range, fallocate: flags */
+  long int2;       /* chown, fchown: uid; sendfile: input fd; open, chmod, mkdir, mknod: file mode, seek: whence, fcntl, ioctl: request, sync_file_range, fallocate, rename: flags */
   long int3;       /* chown, fchown: gid; rename, link: working directory of new name */
   int errorno;     /* errno value on syscall return */
 
-#if __i386 || __amd64
-  unsigned char cancelled;
-#else
-  sig_atomic_t cancelled;
-#endif
-
   unsigned char flags; /* private */
-  signed char pri;     /* the priority */
+
+  signed char type;/* EIO_xxx constant ETP */
+  signed char pri;     /* the priority ETP */
+#if __i386 || __amd64
+  unsigned char cancelled; /* ETP */
+#else
+  sig_atomic_t  cancelled; /* ETP */
+#endif
 
   void *data;
   eio_cb finish;
@@ -277,14 +293,13 @@ struct eio_req
 
   EIO_REQ_MEMBERS
 
-  eio_req *grp, *grp_prev, *grp_next, *grp_first; /* private */
+  eio_req *grp, *grp_prev, *grp_next, *grp_first; /* private ETP */
 };
 
 /* _private_ request flags */
 enum {
   EIO_FLAG_PTR1_FREE = 0x01, /* need to free(ptr1) */
   EIO_FLAG_PTR2_FREE = 0x02, /* need to free(ptr2) */
-  EIO_FLAG_GROUPADD  = 0x04  /* some request was added to the group */
 };
 
 /* undocumented/unsupported/private helper */
@@ -321,6 +336,7 @@ unsigned int eio_nthreads (void); /* number of worker threads in use currently *
 
 /*****************************************************************************/
 /* convenience wrappers */
+/* these do not expose advanced syscalls and directory fds */
 
 #ifndef EIO_NO_WRAPPERS
 eio_req *eio_wd_open   (const char *path, int pri, eio_cb cb, void *data); /* result=wd */
@@ -342,6 +358,8 @@ eio_req *eio_readahead (int fd, off_t offset, size_t length, int pri, eio_cb cb,
 eio_req *eio_seek      (int fd, off_t offset, int whence, int pri, eio_cb cb, void *data);
 eio_req *eio_read      (int fd, void *buf, size_t length, off_t offset, int pri, eio_cb cb, void *data);
 eio_req *eio_write     (int fd, void *buf, size_t length, off_t offset, int pri, eio_cb cb, void *data);
+eio_req *eio_fcntl     (int fd, int cmd, void *arg, int pri, eio_cb cb, void *data);
+eio_req *eio_ioctl     (int fd, unsigned long request, void *buf, int pri, eio_cb cb, void *data);
 eio_req *eio_fstat     (int fd, int pri, eio_cb cb, void *data); /* stat buffer=ptr2 allocated dynamically */
 eio_req *eio_fstatvfs  (int fd, int pri, eio_cb cb, void *data); /* stat buffer=ptr2 allocated dynamically */
 eio_req *eio_futime    (int fd, eio_tstamp atime, eio_tstamp mtime, int pri, eio_cb cb, void *data);
@@ -368,6 +386,7 @@ eio_req *eio_mknod     (const char *path, mode_t mode, dev_t dev, int pri, eio_c
 eio_req *eio_link      (const char *path, const char *new_path, int pri, eio_cb cb, void *data);
 eio_req *eio_symlink   (const char *path, const char *new_path, int pri, eio_cb cb, void *data);
 eio_req *eio_rename    (const char *path, const char *new_path, int pri, eio_cb cb, void *data);
+eio_req *eio_slurp     (const char *path, void *buf, size_t length, off_t offset, int pri, eio_cb cb, void *data);
 eio_req *eio_custom    (void (*execute)(eio_req *), int pri, eio_cb cb, void *data);
 #endif
 
@@ -402,6 +421,7 @@ void eio_cancel (eio_req *req);
 /* convenience functions */
 
 eio_ssize_t eio_sendfile_sync (int ofd, int ifd, off_t offset, size_t count);
+int eio_mlockall_sync (int flags);
 
 #ifdef __cplusplus
 }

@@ -17,8 +17,10 @@
 
 #ifdef _WIN32
 
-#define NTDDI_VERSION NTDDI_WIN2K // needed to get win2000 api calls
-#define _WIN32_WINNT 0x400
+//#define NTDDI_VERSION NTDDI_WIN2K // needed to get win2000 api calls, fails with mingw
+#if _WIN32_WINNT < 0x400
+# define _WIN32_WINNT 0x400 // maybe working alternative for mingw
+#endif
 #include <stdio.h>//D
 #include <fcntl.h>
 #include <io.h>
@@ -26,12 +28,20 @@
 #include <winsock2.h>
 #include <process.h>
 #include <windows.h>
+
+/* work around some bugs in ptw32 */
+#if defined(__MINGW32__) && defined(_TIMESPEC_DEFINED)
+#define HAVE_STRUCT_TIMESPEC 1
+#endif
+
 #include <pthread.h>
-#define sigset_t int
-#define sigfillset(a)
-#define pthread_sigmask(a,b,c)
-#define sigaddset(a,b)
-#define sigemptyset(s)
+#ifndef pthread_sigmask
+# define sigset_t int
+# define sigfillset(a)
+# define pthread_sigmask(a,b,c)
+# define sigaddset(a,b)
+# define sigemptyset(s)
+#endif
 
 typedef pthread_mutex_t xmutex_t;
 #define X_MUTEX_INIT           PTHREAD_MUTEX_INITIALIZER
@@ -51,9 +61,10 @@ typedef pthread_t xthread_t;
 #define X_THREAD_ATFORK(a,b,c)
 
 static int
-thread_create (xthread_t *tid, void *(*proc)(void *), void *arg)
+xthread_create (xthread_t *tid, void *(*proc)(void *), void *arg)
 {
   int retval;
+#if 0
   pthread_attr_t attr;
 
   pthread_attr_init (&attr);
@@ -62,6 +73,12 @@ thread_create (xthread_t *tid, void *(*proc)(void *), void *arg)
   retval = pthread_create (tid, &attr, proc, arg) == 0;
 
   pthread_attr_destroy (&attr);
+#else
+  retval = pthread_create (tid, 0, proc, arg) == 0;
+
+  if (retval)
+    pthread_detach (*tid);
+#endif
 
   return retval;
 }
@@ -132,7 +149,7 @@ typedef pthread_t xthread_t;
 #endif
 
 static int
-thread_create (xthread_t *tid, void *(*proc)(void *), void *arg)
+xthread_create (xthread_t *tid, void *(*proc)(void *), void *arg)
 {
   int retval;
   sigset_t fullsigset, oldsigset;
@@ -160,6 +177,19 @@ thread_create (xthread_t *tid, void *(*proc)(void *), void *arg)
 #define respipe_write(a,b,c) write ((a), (b), (c))
 #define respipe_close(a)     close ((a))
 
+#endif
+
+#if __linux && __GNUC__ >= 4 && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 3 && 0 /* also check arch */
+/* __thread has little to no advantage over pthread_* in most configurations, so this is not used */
+# define X_TLS_DECLARE(varname)   __thread void *varname
+# define X_TLS_INIT(varname)      
+# define X_TLS_SET(varname,value) varname = (value)
+# define X_TLS_GET(varname)       varname
+#else
+# define X_TLS_DECLARE(varname)   pthread_key_t varname
+# define X_TLS_INIT(varname)      do { if (pthread_key_create (&(varname), 0)) abort (); } while (0)
+# define X_TLS_SET(varname,value) pthread_setspecific (varname, (value))
+# define X_TLS_GET(varname)       pthread_getspecific (varname)
 #endif
 
 #endif
