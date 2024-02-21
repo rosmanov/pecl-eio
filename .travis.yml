@@ -1,9 +1,0 @@
-dist: bionic
-language: php
-os: linux
-
-services:
-    - docker
-
-script:
-    - docker-compose up --build
