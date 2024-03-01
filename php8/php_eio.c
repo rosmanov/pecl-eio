@@ -681,12 +681,12 @@ static int php_eio_res_cb(eio_req *req)
 				add_assoc_long(&params[1], "rdev", -1);
 #endif
 
-#if defined(HAVE_ST_BLKSIZE) || defined(HAVE_STRUCT_STAT_ST_BLKSIZE)
+#ifdef HAVE_STRUCT_STAT_ST_BLKSIZE
 				add_assoc_long(&params[1], "blksize", EIO_STAT_BUF(req)->st_blksize);
 #else
 				add_assoc_long(&params[1], "blksize", -1);
 #endif
-#ifdef HAVE_ST_BLOCKS
+#ifdef HAVE_STRUCT_STAT_ST_BLOCKS
 				add_assoc_long(&params[1], "blocks", EIO_STAT_BUF(req)->st_blocks);
 #else
 				add_assoc_long(&params[1], "blocks", -1);
