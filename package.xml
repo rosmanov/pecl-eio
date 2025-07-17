@@ -22,10 +22,10 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2024-03-02</date>
+  <date>2025-07-17</date>
   <!--{{{ Current version -->
   <version>
-    <release>3.1.3</release>
+    <release>3.1.4</release>
     <api>3.1.0</api>
   </version>
   <stability>
@@ -34,7 +34,7 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-    - Fixed #23: Replace struct stat symbols (thanks to Peter Kokot).
+    - Fixed #25: use zend_ce_exception instead of zend_exception_get_default() for 8.5 (by Remi Collet)
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -129,6 +129,22 @@
   </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
+    <!-- {{{ 3.1.4 -->
+    <release>
+      <version>
+        <release>3.1.4</release>
+        <api>3.1.0</api>
+      </version>
+      <stability>
+        <release>stable</release>
+        <api>stable</api>
+      </stability>
+      <license uri="http://www.php.net/license">php</license>
+      <notes>
+    - Fixed #25: use zend_ce_exception instead of zend_exception_get_default() for 8.5 (by Remi Collet)
+  </notes>
+    </release>
+    <!-- }}} -->
     <!--{{{ 3.1.3 -->
     <release>
       <version>
