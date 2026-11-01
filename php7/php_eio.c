@@ -67,7 +67,7 @@
 
 /* libeio */
 #include "libeio/eio.h"
-#include "libeio/eio.c"
+#include "libeio/xthread.h"
 
 static int le_eio_grp;
 static int le_eio_req;

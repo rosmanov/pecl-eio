@@ -84,9 +84,9 @@ if test "$PHP_EIO" != "no"; then
     fi
     dnl }}}
     if test "$PHP_EIO_SUBDIR" = "php8"; then
-        PHP_EIO_SOURCES="$PHP_EIO_SUBDIR/php_eio.c"
+        PHP_EIO_SOURCES="$PHP_EIO_SUBDIR/php_eio.c libeio_embed.c"
     else
-        PHP_EIO_SOURCES="$PHP_EIO_SUBDIR/php_eio.c $PHP_EIO_SUBDIR/eio_fe.c"
+        PHP_EIO_SOURCES="$PHP_EIO_SUBDIR/php_eio.c $PHP_EIO_SUBDIR/eio_fe.c libeio_embed.c"
     fi
 
     if test -n "$PHP_EIO_SUBDIR"; then
