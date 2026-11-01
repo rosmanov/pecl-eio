@@ -1,13 +1,16 @@
 FROM php:5.6-zts
 
-RUN mkdir -p /usr/src/pecl-eio
-WORKDIR /usr/src/pecl-eio
+ARG SANITIZER=""
+ENV SANITIZER="${SANITIZER}"
 
+WORKDIR /usr/src/pecl-eio
 COPY . .
 
-RUN sh rebuild.sh
+RUN ./ci/setup-php-docker.sh
+RUN ./ci/build.sh
+RUN docker-php-ext-enable --ini-name z-eio.ini eio
 
 ENV NO_INTERACTION=1
-CMD sh run-tests.sh
+CMD ["./ci/test.sh"]
 
 # vim: ft=dockerfile

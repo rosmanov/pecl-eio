@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }} (${{ matrix.sanitizer }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php:
+          # 8.6 has no final release yet, this tag follows its latest pre-release
+          - "8.6-rc"
+          - "8.5"
+          - "8.4"
+          - "8.3"
+        sanitizer:
+          - none
+        include:
+          - php: "8.5" # latest stable version for ASAN builds
+            sanitizer: asan
+
+    container:
+      image: php:${{ matrix.php }}-cli
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build and run tests
+        env:
+          SANITIZER: ${{ matrix.sanitizer }}
+        shell: bash
+        run: |
+          ./ci/setup-php-docker.sh
+          ./ci/build.sh
+          docker-php-ext-enable --ini-name z-eio.ini eio
+          docker-php-ext-enable pcntl
+          ./ci/test.sh
+
+  ci:
+    name: CI
+    if: always()
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check matrix result
+        run: |
+          test '${{ needs.test.result }}' = 'success'

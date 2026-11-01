@@ -1,17 +1,20 @@
 FROM fedora:40
 
-RUN mkdir -p /usr/src/pecl-eio
-WORKDIR /usr/src/pecl-eio
+ARG SANITIZER=""
+ENV SANITIZER="${SANITIZER}"
 
+WORKDIR /usr/src/pecl-eio
 COPY . .
 
 RUN dnf update -y \
     && dnf install -y gcc-14'*' php-cli php-devel php-pear make \
     && dnf clean all
 
-RUN sh rebuild.sh
+RUN ./ci/build.sh
+# `docker-php-ext-enable --ini-name z-eio.ini eio` is not available on this image
+RUN echo 'extension=eio.so' > /etc/php.d/z-eio.ini
 
 ENV NO_INTERACTION=1
-CMD sh run-tests.sh
+CMD ["./ci/test.sh"]
 
 # vim: ft=dockerfile
