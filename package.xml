@@ -60,6 +60,7 @@
         <file role="test" name="bug65293.phpt"/>
         <file role="test" name="eio001.phpt"/>
         <file role="test" name="eio_cancel_basic.phpt"/>
+        <file role="test" name="eio_cancel_twice.phpt"/>
         <file role="test" name="eio_chmod_basic.phpt"/>
         <file role="test" name="eio_chown_variation.phpt"/>
         <file role="test" name="eio_custom_basic.phpt"/>

@@ -2316,9 +2316,11 @@ PHP_FUNCTION(eio_cancel)
 	if (req->type != EIO_CUSTOM) {
 		eio_cancel(req);
 		php_eio_free_eio_cb(req->data);
+		req->data = NULL;
 	} else if (!EIO_CB_CUSTOM_IS_LOCKED((php_eio_cb_custom_t *) req->data)) {
 		eio_cancel(req);
 		php_eio_free_eio_cb_custom(req->data);
+		req->data = NULL;
 	}
 }
 /* }}} */
