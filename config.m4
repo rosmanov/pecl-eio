@@ -38,6 +38,16 @@ if test "$PHP_EIO" != "no"; then
       define('PHP_EIO_STATIC', 1)
     fi
 
+    dnl Enable optional sockets integration when the development headers are available.
+    AC_MSG_CHECKING([for PHP sockets headers])
+    AS_IF([test -f "$phpincludedir/ext/sockets/php_sockets.h"], [
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([HAVE_SOCKETS], [1],
+            [Define to 1 if PHP sockets headers are available])
+    ], [
+        AC_MSG_RESULT([no])
+    ])
+
     dnl {{{ Check for PHP version
     AC_MSG_CHECKING(PHP version)
     if test -d $abs_srcdir/php7; then
@@ -100,4 +110,5 @@ if test "$PHP_EIO" != "no"; then
 	PHP_ADD_MAKEFILE_FRAGMENT
 fi
 
-dnl vim: ft=m4.sh et fdm=marker cms=dnl\ %s
+dnl vim: fdm=marker cms=dnl\ %s
+dnl vim: et ts=2 sts=2 sw=2
