@@ -5,18 +5,21 @@
 dir="$(cd "$(dirname "$0")" && pwd)"
 local_libs_dir="${dir}/.libs"
 
-
-if [ ! -e "${local_libs_dir}/sockets.so" ]; then
-    sockets_so_path="$(php-config --extension-dir)/sockets.so"
-    cp "$sockets_so_path" "${local_libs_dir}"
-fi
-
-if [ ! -e "${local_libs_dir}/pcntl.so" ]; then
-    pcntl_so_path="$(php-config --extension-dir)/pcntl.so"
-    if [ -f "$pcntl_so_path" ]; then
-        cp "$pcntl_so_path" "${local_libs_dir}"
+# Optional extensions used by the tests. They can be built into PHP (no .so), or not installed at all.
+for ext in sockets pcntl; do
+    ext_so_path="$(php-config --extension-dir)/${ext}.so"
+    if [ ! -e "${local_libs_dir}/${ext}.so" ] && [ -f "$ext_so_path" ]; then
+        cp "$ext_so_path" "${local_libs_dir}"
     fi
-fi
+done
+
+# The order matters: eio depends on sockets. The loop below prepends, so sockets ends up first.
+set -- -d extension=eio.so -d extension_dir="${local_libs_dir}" "$@"
+for ext in pcntl sockets; do
+    if [ -e "${local_libs_dir}/${ext}.so" ]; then
+        set -- -d "extension=${ext}.so" "$@"
+    fi
+done
 
 if [ "${SANITIZER:-none}" = "asan" ]; then
     libasan="$(gcc -print-file-name=libasan.so)"
@@ -24,17 +27,7 @@ if [ "${SANITIZER:-none}" = "asan" ]; then
     exec env \
         LD_PRELOAD="$libasan" \
         ASAN_OPTIONS="${ASAN_OPTIONS:-detect_leaks=0:abort_on_error=1}" \
-        php -n \
-            -d extension=sockets.so \
-            -d extension=pcntl.so \
-            -d extension=eio.so \
-            -d extension_dir="${local_libs_dir}" \
-            "$@"
+        php -n "$@"
 else
-    exec php -n \
-        -d extension=sockets.so \
-        -d extension=pcntl.so \
-        -d extension=eio.so \
-        -d extension_dir="${local_libs_dir}" \
-        "$@"
+    exec php -n "$@"
 fi
