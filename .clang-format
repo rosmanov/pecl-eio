@@ -1,7 +1,9 @@
 BasedOnStyle: LLVM
 IndentWidth: 4
 UseTab: Never
-ColumnLimit: 0          # don't rewrap existing code
+ColumnLimit: 0 # don't rewrap existing code
 BreakBeforeBraces: Linux
 IndentPPDirectives: AfterHash
-PPIndentWidth: 2        # gives `#  include`
+PPIndentWidth: 2 # gives `#  include`
+SortIncludes:
+  Enabled: false
