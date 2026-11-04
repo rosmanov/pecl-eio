@@ -1,6 +1,4 @@
 #!/bin/bash -
-set -x
-
 phpize --clean
 phpize
 #aclocal && libtoolize --force && autoreconf
