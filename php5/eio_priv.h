@@ -33,17 +33,20 @@ extern const zend_function_entry eio_functions[];
 #    define TSRMLS_FETCH_FROM_CTX(ctx)
 #    define TSRMLS_SET_CTX(ctx)
 #  endif
+/* The request is already submitted to the worker threads, when the macro is used,
+ * so req->result and req->errorno are being written concurrently, and they don't tell
+ * whether the request was created. libeio returns NULL, if it failed to create one. */
 
 #  ifdef EIO_DEBUG
 #    define PHP_EIO_RET_IF_FAILED(req, eio_func) \
-    	if (!req || (req->result != 0 && req->errorno)) { \
+	if (!req) { \
 			php_error_docref(NULL TSRMLS_CC, \
-				E_WARNING, #eio_func " failed: %s", strerror(req->errorno)); \
+				E_WARNING, #eio_func " failed: %s", strerror(errno)); \
 			RETURN_FALSE; \
     	}
 #  else
 #    define PHP_EIO_RET_IF_FAILED(req, eio_func) \
-    	if (!req || req->result != 0) RETURN_FALSE;
+    	if (!req) RETURN_FALSE;
 #  endif
 
 #  define PHP_EIO_RET_REQ_RESOURCE(req, eio_func) \
