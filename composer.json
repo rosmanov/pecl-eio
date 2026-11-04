@@ -1,0 +1,28 @@
+{
+  "name": "osmanov/pecl-eio",
+  "type": "php-ext",
+  "license": "PHP-3.01",
+  "description": "Provides interface to libeio library.",
+  "require": {
+    "php": ">= 8.2.0"
+  },
+  "support": {
+    "issues": "https://github.com/rosmanov/pecl-eio/issues",
+    "source": "https://github.com/rosmanov/pecl-eio"
+  },
+  "php-ext": {
+    "extension-name": "eio",
+    "configure-options": [
+      {
+        "name": "with-eio",
+        "description": "Include eio support",
+        "needs-value": false
+      },
+      {
+        "name": "enable-eio-debug",
+        "description": "Enable eio debug support",
+        "needs-value": false
+      }
+    ]
+  }
+}
