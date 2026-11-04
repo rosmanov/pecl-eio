@@ -18,6 +18,7 @@ jobs:
           - "8.5"
           - "8.4"
           - "8.3"
+          - "8.2"
         sanitizer:
           - none
         include:

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 8                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2021 The PHP Group                                |
+   | Copyright (c) 1997-2026 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -55,7 +55,7 @@
 #include "php_network.h"
 #include "php_streams.h"
 
-#if PHP_VERSION_ID >= 50301 && (HAVE_SOCKETS || defined(COMPILE_DL_SOCKETS))
+#if HAVE_SOCKETS || defined(COMPILE_DL_SOCKETS)
 # include "ext/sockets/php_sockets.h"
 # define EIO_USE_SOCKETS
 #endif

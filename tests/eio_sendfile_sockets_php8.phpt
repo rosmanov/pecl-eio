@@ -5,9 +5,6 @@ Check for eio_sendfile function work with sockets in PHP version 8 and greater
 if (!extension_loaded('sockets')) {
 	die('SKIP The sockets extension is not loaded');
 }
-if (version_compare(PHP_VERSION, '8.0.0', '<')) {
-    die('skip target PHP version is less than 8');
-}
 ?>
 --FILE--
 <?php

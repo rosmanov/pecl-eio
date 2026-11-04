@@ -22,11 +22,11 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2025-07-17</date>
+  <date>2026-11-04</date>
   <!--{{{ Current version -->
   <version>
-    <release>3.1.4</release>
-    <api>3.1.0</api>
+    <release>4.0.0</release>
+    <api>3.2.0</api>
   </version>
   <stability>
     <release>stable</release>
@@ -34,7 +34,9 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-    - Fixed #25: use zend_ce_exception instead of zend_exception_get_default() for 8.5 (by Remi Collet)
+  <![CDATA[
+      - Dropped support for PHP versions older than 8.2
+    ]]>
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -77,7 +79,6 @@
         <file role="test" name="eio_rmdir_basic.phpt"/>
         <file role="test" name="eio_seek.phpt"/>
         <file role="test" name="eio_sendfile_basic.phpt"/>
-        <file role="test" name="eio_sendfile_sockets.phpt"/>
         <file role="test" name="eio_sendfile_sockets_php8.phpt"/>
         <file role="test" name="eio_stat_basic.phpt"/>
         <file role="test" name="eio_stat_error.phpt"/>
@@ -87,20 +88,6 @@
         <file role="test" name="eio_unlink_basic.phpt"/>
         <file role="test" name="eio_utime_basic.phpt"/>
         <file role="test" name="fork.phpt"/>
-      </dir>
-      <dir name="php5">
-        <file role="src" name="php_eio.c"/>
-        <file role="src" name="eio_fe.c"/>
-        <file role="src" name="eio_fe.h"/>
-        <file role="src" name="eio_priv.h"/>
-        <file role="src" name="php_eio.h"/>
-      </dir>
-      <dir name="php7">
-        <file role="src" name="php_eio.c"/>
-        <file role="src" name="eio_fe.c"/>
-        <file role="src" name="eio_fe.h"/>
-        <file role="src" name="eio_priv.h"/>
-        <file role="src" name="php_eio.h"/>
       </dir>
       <dir name="php8">
         <file role="src" name="eio_priv.h"/>
@@ -115,7 +102,7 @@
   <dependencies>
     <required>
       <php>
-        <min>5.3.0</min>
+        <min>8.2.0</min>
       </php>
       <pearinstaller>
         <min>1.4.0b1</min>
@@ -131,6 +118,24 @@
   </extsrcrelease>
   <!--{{{ Changelog-->
   <changelog>
+    <!--{{{ 4.0.0 -->
+    <release>
+      <version>
+        <release>4.0.0</release>
+        <api>3.2.0</api>
+      </version>
+      <stability>
+        <release>stable</release>
+        <api>stable</api>
+      </stability>
+      <license uri="http://www.php.net/license">php</license>
+      <notes>
+      <![CDATA[
+          - Dropped support for PHP versions older than 8.2
+        ]]>
+      </notes>
+    </release>
+    <!--}}}-->
     <!-- {{{ 3.1.4 -->
     <release>
       <version>

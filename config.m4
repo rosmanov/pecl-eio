@@ -1,7 +1,7 @@
 dnl +----------------------------------------------------------------------+
 dnl | PHP Version 8                                                        |
 dnl +----------------------------------------------------------------------+
-dnl | Copyright (C) 1997-2021 The PHP Group                                |
+dnl | Copyright (C) 1997-2026 The PHP Group                                |
 dnl +----------------------------------------------------------------------+
 dnl | This source file is subject to version 3.01 of the PHP license,      |
 dnl | that is bundled with this package in the file LICENSE, and is        |
@@ -49,50 +49,24 @@ if test "$PHP_EIO" != "no"; then
     ])
 
     dnl {{{ Check for PHP version
-    AC_MSG_CHECKING(PHP version)
-    if test -d $abs_srcdir/php7; then
-        dnl # only for PECL, not for PHP
-        export OLD_CPPFLAGS="$CPPFLAGS"
-        export CPPFLAGS="$CPPFLAGS $INCLUDES"
-        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <php_version.h>]], [[
-            #if PHP_MAJOR_VERSION > 5
-            # error PHP > 5
-            #endif
-        ]])],[
-            PHP_EIO_SUBDIR=php5
-            AC_MSG_RESULT([PHP 5.x])
-        ],[
-            AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <php_version.h>]], [[
-                #if PHP_MAJOR_VERSION > 7
-                # error PHP > 7
-                #endif
-            ]])],[
-                PHP_EIO_SUBDIR=php7
-                AC_MSG_RESULT([PHP 7.x])
-            ],[
-                PHP_EIO_SUBDIR=php8
-                AC_MSG_RESULT([PHP 8.x])
-            ])
-        ])
-        export CPPFLAGS="$OLD_CPPFLAGS"
-
-        PHP_ADD_BUILD_DIR($abs_builddir/$PHP_EIO_SUBDIR, 1)
-        PHP_ADD_INCLUDE([$ext_srcdir/$PHP_EIO_SUBDIR])
-    else
-        AC_MSG_ERROR([unknown source])
-        PHP_EIO_SUBDIR="."
-    fi
+    AC_MSG_CHECKING(PHP >= 8.2)
+    export OLD_CPPFLAGS="$CPPFLAGS"
+    export CPPFLAGS="$CPPFLAGS $INCLUDES"
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <php_version.h>]], [[
+        #if PHP_VERSION_ID < 80200
+        # error PHP < 8.2
+        #endif
+    ]])],
+        [AC_MSG_RESULT([yes])],
+        [AC_MSG_ERROR([PHP 8.2 or newer is required])])
+    export CPPFLAGS="$OLD_CPPFLAGS"
     dnl }}}
-    if test "$PHP_EIO_SUBDIR" = "php8"; then
-        PHP_EIO_SOURCES="$PHP_EIO_SUBDIR/php_eio.c libeio_embed.c"
-    else
-        PHP_EIO_SOURCES="$PHP_EIO_SUBDIR/php_eio.c $PHP_EIO_SUBDIR/eio_fe.c libeio_embed.c"
-    fi
 
-    if test -n "$PHP_EIO_SUBDIR"; then
-        PHP_ADD_BUILD_DIR($abs_builddir/$PHP_EIO_SUBDIR, 1)
-        PHP_ADD_INCLUDE([$ext_srcdir/$PHP_EIO_SUBDIR])
-    fi
+    PHP_EIO_SUBDIR=php8
+    PHP_EIO_SOURCES="$PHP_EIO_SUBDIR/php_eio.c libeio_embed.c"
+
+    PHP_ADD_BUILD_DIR($abs_builddir/$PHP_EIO_SUBDIR, 1)
+    PHP_ADD_INCLUDE([$ext_srcdir/$PHP_EIO_SUBDIR])
 
     PHP_ADD_INCLUDE($ext_builddir)
     AC_CONFIG_SRCDIR(ifdef('PHP_EIO_STATIC',PHP_EXT_BUILDDIR(eio)[/],)[libeio/eio.h])

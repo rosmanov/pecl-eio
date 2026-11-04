@@ -25,27 +25,3 @@ services:
     build:
       context: .
       dockerfile: php8/Dockerfile.fedora40-gcc14
-  php7test:
-    stdin_open: true
-    image: ruslanosmanov/pecl-eio-php7-test
-    build:
-      context: .
-      dockerfile: php7/Dockerfile
-  php7-zts-test:
-    stdin_open: true
-    image: ruslanosmanov/pecl-eio-php7-zts-test
-    build:
-      context: .
-      dockerfile: php7/Dockerfile.zts
-  php5test:
-    stdin_open: true
-    image: ruslanosmanov/pecl-eio-php5-test
-    build:
-      context: .
-      dockerfile: php5/Dockerfile
-  php5-zts-test:
-    stdin_open: true
-    image: ruslanosmanov/pecl-eio-php5-zts-test
-    build:
-      context: .
-      dockerfile: php5/Dockerfile.zts
