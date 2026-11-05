@@ -606,7 +606,9 @@ static void php_eio_custom_execute(eio_req *req)
 				ZSTR_VAL(pf->func_ptr->common.function_name),
 				ZSTR_LEN(pf->func_ptr->common.function_name),
 				&retval, 1, &zarg, NULL);
+#if PHP_VERSION_ID < 80600
 		zend_exception_save();
+#endif
 		if (!Z_ISUNDEF(retval)) {
 			EIO_BUF(req) = safe_emalloc(1, sizeof(zval), 0);
 			ZVAL_ZVAL(EIO_BUF_ZVAL_P(req), &retval, 1, 1);
@@ -614,7 +616,9 @@ static void php_eio_custom_execute(eio_req *req)
 			/* Required for libeio */
 			EIO_RESULT(req) = 0;
 		}
+#if PHP_VERSION_ID < 80600
 		zend_exception_restore();
+#endif
 
 		zval_ptr_dtor(&zarg);
 	}
