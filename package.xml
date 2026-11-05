@@ -42,6 +42,7 @@
       - Fixed a double free in eio_cancel() when it is called twice on the same request.
       - Detect PHP sockets headers at configure time.
       - Added composer.json for https://github.com/php/pie support.
+      - Fixed PHP 8.6-rc build: replace the deleted zval_dtor with zval_ptr_dtor_nogc.
     ]]>
   </notes>
   <!--}}}-->
@@ -146,6 +147,7 @@
           - Fixed a double free in eio_cancel() when it is called twice on the same request.
           - Detect PHP sockets headers at configure time.
           - Added composer.json for https://github.com/php/pie support.
+          - Fixed PHP 8.6-rc build: replace the deleted zval_dtor with zval_ptr_dtor_nogc.
         ]]>
       </notes>
     </release>

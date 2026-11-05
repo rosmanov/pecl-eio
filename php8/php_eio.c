@@ -680,7 +680,7 @@ static int php_eio_res_cb_custom(eio_req * req)
 	}
 
 	if (EIO_BUF_ZVAL_P(req)) {
-		zval_dtor(EIO_BUF_ZVAL_P(req));
+		zval_ptr_dtor_nogc(EIO_BUF_ZVAL_P(req));
 		efree(EIO_BUF_ZVAL_P(req));
 	}
 

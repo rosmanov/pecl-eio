@@ -31,7 +31,7 @@ jobs:
             sanitizer: none
             variant: zts
           - php: "8.2" # oldest supported version
-            sanitizer: noneo
+            sanitizer: none
             variant: zts
 
     container:

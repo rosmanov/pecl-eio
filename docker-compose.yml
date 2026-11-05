@@ -19,6 +19,22 @@ services:
     build:
       context: .
       dockerfile: php8/Dockerfile.zts
+  php82test:
+    stdin_open: true
+    image: ruslanosmanov/pecl-eio-php82-test
+    build:
+      context: .
+      dockerfile: php8/Dockerfile
+      args:
+        PHP_VERSION: "8.2"
+  php86rctest:
+    stdin_open: true
+    image: ruslanosmanov/pecl-eio-php86rc-test
+    build:
+      context: .
+      dockerfile: php8/Dockerfile
+      args:
+        PHP_VERSION: "8.6-rc"
   php8-fedora40-gcc14:
     stdin_open: true
     image: ruslanosmanov/pecl-eio-php8-fedora40-test
