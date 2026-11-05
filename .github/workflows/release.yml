@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "[0-9]*"
+
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release tag (e.g. 4.0.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: ${{ github.event_name == 'workflow_dispatch' || !endsWith(github.ref_name, '.x') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Resolve version
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            echo "value=${INPUT_VERSION}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.version.outputs.value }}
+
+      - name: Extract release notes
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        run: python3 ci/changelog.py extract "${GITHUB_REF_NAME}" > release-notes.md
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          args=()
+
+          if [[ "${VERSION}" =~ RC[0-9]+$ ]]; then
+            args+=(--prerelease)
+          fi
+
+          gh release create "$VERSION" \
+            --verify-tag \
+            --title "$VERSION" \
+            --notes-file release-notes.md \
+            "${args[@]}"
