@@ -22,7 +22,7 @@
     <email>osmanov@php.net</email>
     <active>yes</active>
   </lead>
-  <date>2026-11-04</date>
+  <date>2026-11-05</date>
   <!--{{{ Current version -->
   <version>
     <release>4.0.0</release>
@@ -35,7 +35,13 @@
   <license uri="http://www.php.net/license">php</license>
   <notes>
   <![CDATA[
-      - Dropped support for PHP versions older than 8.2
+      - Dropped support for PHP versions older than 8.2.
+      - Fixed use-after-free of eio_req in PHP resources. Using a request or group resource
+        after libeio destroyed the request is now a no-op, and eio_get_last_error() returns false.
+      - Fixed the macOS (Homebrew) build: libeio is now compiled as a separate unit.
+      - Fixed a double free in eio_cancel() when it is called twice on the same request.
+      - Detect PHP sockets headers at configure time.
+      - Added composer.json for https://github.com/php/pie support.
     ]]>
   </notes>
   <!--}}}-->
@@ -133,7 +139,13 @@
       <license uri="http://www.php.net/license">php</license>
       <notes>
       <![CDATA[
-          - Dropped support for PHP versions older than 8.2
+          - Dropped support for PHP versions older than 8.2.
+          - Fixed use-after-free of eio_req in PHP resources. Using a request or group resource
+            after libeio destroyed the request is now a no-op, and eio_get_last_error() returns false.
+          - Fixed the macOS (Homebrew) build: libeio is now compiled as a separate unit.
+          - Fixed a double free in eio_cancel() when it is called twice on the same request.
+          - Detect PHP sockets headers at configure time.
+          - Added composer.json for https://github.com/php/pie support.
         ]]>
       </notes>
     </release>
