@@ -77,6 +77,114 @@ static int le_eio_req;
 static pid_t php_eio_pid = 0;
 static php_eio_pipe_t php_eio_pipe;
 
+/* {{{ Request handles
+ * libeio destroys a request as soon as it is finished or cancelled, but PHP
+ * variables may outlive it. So the resources don't hold eio_req pointers, but
+ * handles instead. libeio's destroy hook resets handle->req, which makes the
+ * stale resources harmless. */
+typedef struct _php_eio_handle {
+	eio_req  *req;  /* NULL once libeio destroyed the request */
+	unsigned  refs; /* libeio's reference (until destroyed) + resources */
+	void    (*orig_destroy)(eio_req *); /* the destroy callback libeio set for the request */
+} php_eio_handle;
+
+static HashTable php_eio_handles; /* eio_req * => php_eio_handle *, live requests only */
+static zend_bool php_eio_handles_ready = 0;
+
+#define PHP_EIO_HANDLE_KEY(req) ((zend_ulong) (uintptr_t) (req))
+
+static void php_eio_handle_release(php_eio_handle *h)
+{
+	if (--h->refs == 0) {
+		pefree(h, 1);
+	}
+}
+
+/* Called by libeio when the request is no longer needed
+ * (we replace the original req->destroy with this function) */
+static void php_eio_req_destroy_hook(eio_req *req)
+{
+	void (*orig_destroy)(eio_req *) = NULL;
+
+	if (php_eio_handles_ready) {
+		php_eio_handle *h = zend_hash_index_find_ptr(&php_eio_handles, PHP_EIO_HANDLE_KEY(req));
+
+		if (h) {
+			orig_destroy = h->orig_destroy;
+			h->req = NULL;
+			zend_hash_index_del(&php_eio_handles, PHP_EIO_HANDLE_KEY(req));
+			php_eio_handle_release(h);
+		}
+	}
+
+	if (orig_destroy && orig_destroy != php_eio_req_destroy_hook) {
+		orig_destroy(req);
+	}
+}
+
+/* Returns the handle of the request, creating it if needed.
+ * The caller owns one reference to it and must release it with php_eio_handle_release() */
+static php_eio_handle *php_eio_handle_ref(eio_req *req)
+{
+    php_eio_handle *h = zend_hash_index_find_ptr(&php_eio_handles, PHP_EIO_HANDLE_KEY(req));
+
+    if (!h) {
+        h = pemalloc(sizeof(php_eio_handle), 1);
+        h->req = req;
+        h->refs = 1;
+        zend_hash_index_add_ptr(&php_eio_handles, PHP_EIO_HANDLE_KEY(req), h);
+
+        h->orig_destroy = req->destroy;
+
+        req->destroy = php_eio_req_destroy_hook;
+    }
+
+    h->refs++;
+
+    return h;
+}
+
+static zend_resource *php_eio_register_resource(eio_req *req, int le)
+{
+	return zend_register_resource(php_eio_handle_ref(req), le);
+}
+
+/* Returns NULL, if the request was destroyed by libeio */
+static eio_req *php_eio_fetch_req(zval *zres, const char *name, int le)
+{
+	php_eio_handle *h = (php_eio_handle *) zend_fetch_resource(Z_RES_P(zres), name, le);
+
+	return h ? h->req : NULL;
+}
+
+static void php_eio_handle_dtor(zend_resource *res)
+{
+	if (res->ptr) {
+		php_eio_handle_release((php_eio_handle *) res->ptr);
+		res->ptr = NULL;
+	}
+}
+
+/* Invalidates all handles, e.g. at fork: the child doesn't inherit the pending requests */
+static void php_eio_handles_reset(void)
+{
+	php_eio_handle *h;
+
+	if (!php_eio_handles_ready) {
+		return;
+	}
+
+	ZEND_HASH_FOREACH_PTR(&php_eio_handles, h) {
+		if (h->req) {
+			h->req->destroy = h->orig_destroy;
+		}
+		h->req = NULL;
+		php_eio_handle_release(h);
+	} ZEND_HASH_FOREACH_END();
+	zend_hash_clean(&php_eio_handles);
+}
+/* }}} */
+
 static const zend_module_dep eio_deps[] = {
 	ZEND_MOD_OPTIONAL("sockets")
 	ZEND_MOD_END
@@ -555,7 +663,7 @@ static int php_eio_res_cb_custom(eio_req * req)
 		}
 
 		/* $req arg */
-		ZVAL_RES(&params[2], zend_register_resource(req, le_eio_req));
+		ZVAL_RES(&params[2], php_eio_register_resource(req, le_eio_req));
 
 		zend_call_known_function(
 				pf->func_ptr,
@@ -752,7 +860,7 @@ static int php_eio_res_cb(eio_req *req)
 	/* }}} */
 
 	/* $req arg */
-	ZVAL_RES(&params[2], zend_register_resource(req, le_eio_req));
+	ZVAL_RES(&params[2], php_eio_register_resource(req, le_eio_req));
 
 	zend_call_known_function(
 			pf->func_ptr,
@@ -911,6 +1019,7 @@ static inline void php_eio_init()
  * Re-initialize eio and internal pipe at fork */
 static void php_eio_atfork_child(void)
 {
+	php_eio_handles_reset();
 	php_eio_init();
 }
 /* }}} */
@@ -928,11 +1037,14 @@ PHP_MINIT_FUNCTION(eio)
 	/* Re-initialize eio and internal pipe at fork */
 	X_THREAD_ATFORK(NULL, NULL, php_eio_atfork_child);
 
+	zend_hash_init(&php_eio_handles, 8, NULL, NULL, 1);
+	php_eio_handles_ready = 1;
+
 	le_eio_grp =
-		zend_register_list_destructors_ex(NULL, NULL,
+		zend_register_list_destructors_ex(php_eio_handle_dtor, NULL,
 		PHP_EIO_GRP_DESCRIPTOR_NAME, module_number);
 	le_eio_req =
-		zend_register_list_destructors_ex(NULL, NULL,
+		zend_register_list_destructors_ex(php_eio_handle_dtor, NULL,
 		PHP_EIO_REQ_DESCRIPTOR_NAME, module_number);
 
 	/* {{{ Constants */
@@ -1036,6 +1148,12 @@ PHP_MSHUTDOWN_FUNCTION(eio)
 		php_eio_pipe_destroy();
 	}
 
+	if (php_eio_handles_ready) {
+		php_eio_handles_reset();
+		php_eio_handles_ready = 0;
+		zend_hash_destroy(&php_eio_handles);
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1106,7 +1224,7 @@ PHP_FUNCTION(eio_get_last_error)
 		return;
 	}
 
-	if ((req = (eio_req *)zend_fetch_resource(Z_RES_P(zreq), PHP_EIO_REQ_DESCRIPTOR_NAME, le_eio_req)) == NULL) {
+	if ((req = php_eio_fetch_req(zreq, PHP_EIO_REQ_DESCRIPTOR_NAME, le_eio_req)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -2309,7 +2427,7 @@ PHP_FUNCTION(eio_cancel)
 		return;
 	}
 
-	if ((req = (eio_req *)zend_fetch_resource(Z_RES_P(zreq), PHP_EIO_REQ_DESCRIPTOR_NAME, le_eio_req)) == NULL) {
+	if ((req = php_eio_fetch_req(zreq, PHP_EIO_REQ_DESCRIPTOR_NAME, le_eio_req)) == NULL) {
 		return;
 	}
 
@@ -2350,7 +2468,7 @@ PHP_FUNCTION(eio_grp)
 	req = eio_grp(php_eio_res_cb, eio_cb);
 	PHP_EIO_RET_IF_FAILED(req, eio_grp);
 
-	RETURN_RES(zend_register_resource(req, le_eio_grp));
+	RETURN_RES(php_eio_register_resource(req, le_eio_grp));
 }
 /* }}} */
 
@@ -2367,10 +2485,10 @@ PHP_FUNCTION(eio_grp_add)
 		return;
 	}
 
-	if ((grp = (eio_req *)zend_fetch_resource(Z_RES_P(zgrp), PHP_EIO_GRP_DESCRIPTOR_NAME, le_eio_grp)) == NULL) {
+	if ((grp = php_eio_fetch_req(zgrp, PHP_EIO_GRP_DESCRIPTOR_NAME, le_eio_grp)) == NULL) {
 		return;
 	}
-	if ((req = (eio_req *)zend_fetch_resource(Z_RES_P(zreq), PHP_EIO_REQ_DESCRIPTOR_NAME, le_eio_req)) == NULL) {
+	if ((req = php_eio_fetch_req(zreq, PHP_EIO_REQ_DESCRIPTOR_NAME, le_eio_req)) == NULL) {
 		return;
 	}
 
@@ -2393,7 +2511,7 @@ PHP_FUNCTION(eio_grp_limit)
 		return;
 	}
 
-	if ((grp = (eio_req *)zend_fetch_resource(Z_RES_P(zgrp), PHP_EIO_GRP_DESCRIPTOR_NAME, le_eio_grp)) == NULL) {
+	if ((grp = php_eio_fetch_req(zgrp, PHP_EIO_GRP_DESCRIPTOR_NAME, le_eio_grp)) == NULL) {
 		return;
 	}
 
@@ -2413,9 +2531,7 @@ PHP_FUNCTION(eio_grp_cancel)
 		return;
 	}
 
-	if ((grp = (eio_req *) zend_fetch_resource(Z_RES_P(zgrp),
-					PHP_EIO_GRP_DESCRIPTOR_NAME, le_eio_grp)) == NULL)
-	{
+	if ((grp = php_eio_fetch_req(zgrp, PHP_EIO_GRP_DESCRIPTOR_NAME, le_eio_grp)) == NULL) {
 		return;
 	}
 

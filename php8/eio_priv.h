@@ -50,7 +50,7 @@
 
 #define PHP_EIO_RET_REQ_RESOURCE(req, eio_func) do { \
 	PHP_EIO_RET_IF_FAILED(req, eio_func); \
-	RETURN_RES(zend_register_resource(req, le_eio_req)); \
+	RETURN_RES(php_eio_register_resource(req, le_eio_req)); \
 } while (0)
 
 #define PHP_EIO_IS_INIT() \

@@ -21,12 +21,21 @@ jobs:
           - "8.2"
         sanitizer:
           - none
+        variant:
+          - cli
         include:
           - php: "8.5" # latest stable version for ASAN builds
             sanitizer: asan
+            variant: cli
+          - php: "8.5"
+            sanitizer: none
+            variant: zts
+          - php: "8.2" # oldest supported version
+            sanitizer: noneo
+            variant: zts
 
     container:
-      image: php:${{ matrix.php }}-cli
+      image: php:${{ matrix.php }}-${{ matrix.variant }}
 
     steps:
       - uses: actions/checkout@v6
