@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.0.1 (2026-11-15)
+
+- Documented PIE installation.
+- Fixed PHP 8.6 compatibility (the `zend_exception_save()` and `zend_exception_restore()` functions were removed in 8.6) (merged PR $26 authored by Remi Collet).
+- Configured automatic GitHub release creation based on `CHANGELOG.md`.
+- Configured automatic sync of `package.xml` and `php_eio.h` from `CHANGELOG.md`.
+
 ## 4.0.0 (2026-11-05)
 
 - Dropped support for PHP versions older than 8.2.
