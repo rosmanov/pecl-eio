@@ -16,7 +16,12 @@ permissions:
   contents: write
 
 jobs:
+  ci:
+    if: ${{ github.event_name == 'workflow_dispatch' || !endsWith(github.ref_name, '.x') }}
+    uses: ./.github/workflows/ci.yml
+
   release:
+    needs: ci
     if: ${{ github.event_name == 'workflow_dispatch' || !endsWith(github.ref_name, '.x') }}
     runs-on: ubuntu-latest
 
