@@ -14,6 +14,8 @@ run-tests.php
 tags
 tmp-php.ini
 
+__pycache__/
+
 *.tgz
 *.in
 *.l[a,o]

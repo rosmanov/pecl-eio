@@ -43,6 +43,9 @@ jobs:
         with:
           ref: master
 
+      - name: Check release metadata
+        run: python3 ci/release.py check --tag "${{ steps.version.outputs.value }}"
+
       - name: Extract release notes
         env:
           VERSION: ${{ steps.version.outputs.value }}

@@ -34,16 +34,13 @@
   </stability>
   <license uri="http://www.php.net/license">php</license>
   <notes>
-  <![CDATA[
       - Dropped support for PHP versions older than 8.2.
-      - Fixed use-after-free of eio_req in PHP resources. Using a request or group resource
-        after libeio destroyed the request is now a no-op, and eio_get_last_error() returns false.
+      - Fixed use-after-free of eio_req in PHP resources. Using a request or group resource after libeio destroyed the request is now a no-op, and eio_get_last_error() returns false.
       - Fixed the macOS (Homebrew) build: libeio is now compiled as a separate unit.
       - Fixed a double free in eio_cancel() when it is called twice on the same request.
       - Detect PHP sockets headers at configure time.
-      - Added composer.json for https://github.com/php/pie support.
+      - Added composer.json for PIE (https://github.com/php/pie) support.
       - Fixed PHP 8.6-rc build: replace the deleted zval_dtor with zval_ptr_dtor_nogc.
-    ]]>
   </notes>
   <!--}}}-->
   <!--{{{ contents -->
@@ -139,16 +136,13 @@
       </stability>
       <license uri="http://www.php.net/license">php</license>
       <notes>
-      <![CDATA[
           - Dropped support for PHP versions older than 8.2.
-          - Fixed use-after-free of eio_req in PHP resources. Using a request or group resource
-            after libeio destroyed the request is now a no-op, and eio_get_last_error() returns false.
+          - Fixed use-after-free of eio_req in PHP resources. Using a request or group resource after libeio destroyed the request is now a no-op, and eio_get_last_error() returns false.
           - Fixed the macOS (Homebrew) build: libeio is now compiled as a separate unit.
           - Fixed a double free in eio_cancel() when it is called twice on the same request.
           - Detect PHP sockets headers at configure time.
-          - Added composer.json for https://github.com/php/pie support.
+          - Added composer.json for PIE (https://github.com/php/pie) support.
           - Fixed PHP 8.6-rc build: replace the deleted zval_dtor with zval_ptr_dtor_nogc.
-        ]]>
       </notes>
     </release>
     <!--}}}-->

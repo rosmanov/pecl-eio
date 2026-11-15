@@ -51,13 +51,24 @@ jobs:
           docker-php-ext-enable pcntl
           ./ci/test.sh
 
+  release-files:
+    name: package.xml, php_eio.h and CHANGELOG.md agree
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check release metadata
+        run: python3 ci/release.py check
+
   ci:
     name: CI
     if: always()
-    needs: test
+    needs: [test, release-files]
     runs-on: ubuntu-latest
 
     steps:
       - name: Check matrix result
         run: |
           test '${{ needs.test.result }}' = 'success'
+          test '${{ needs['release-files'].result }}' = 'success'
